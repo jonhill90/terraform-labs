@@ -1,7 +1,10 @@
+# ----------------------------------------
+# GitHub Repository
+# ----------------------------------------
 module "github_repo" {
   source = "./modules/github/repo"
 
-  repo_name        = "terraform-azure-lab"
+  repo_name        = "terraform-lab"
   description      = "Terraform module for GitHub repo"
   visibility       = "public"
   auto_init        = true
@@ -12,3 +15,5 @@ module "github_repo" {
   allow_squash_merge = true
   allow_rebase_merge = true
 }
+
+
