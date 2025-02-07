@@ -2,7 +2,7 @@
 # GitHub Repository
 # ----------------------------------------
 module "github_repo" {
-  source = "../../../modules/github/repo"
+  source = "../../modules/github/repo"
 
   repo_name        = "terraform-labs"
   description = "Terraform repository for managing cloud infrastructure, security policies, and automation workflows."
