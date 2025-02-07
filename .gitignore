@@ -1,0 +1,20 @@
+# Terraform State Files (Sensitive)
+terraform.tfstate
+terraform.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Terraform Variables (Secrets)
+terraform.tfvars
+*.auto.tfvars
+
+# Ignore Terraform Plan Files
+*.tfplan
+.plan.cache
+
+# Ignore VS Code and MacOS files
+.vscode/
+.DS_Store
+
+# Scratch Files
+.scratch
