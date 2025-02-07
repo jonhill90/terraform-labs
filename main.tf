@@ -4,7 +4,7 @@
 module "github_repo" {
   source = "./modules/github/repo"
 
-  repo_name        = "terraform-lab"
+  repo_name        = "terraform-labs"
   description      = "Terraform module for GitHub repo"
   visibility       = "public"
   auto_init        = true
