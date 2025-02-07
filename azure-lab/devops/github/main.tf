@@ -2,10 +2,10 @@
 # GitHub Repository
 # ----------------------------------------
 module "github_repo" {
-  source = "../modules/github/repo"
+  source = "../../../modules/github/repo"
 
   repo_name        = "terraform-labs"
-  description      = "Terraform module for GitHub repo"
+  description = "Terraform repository for managing cloud infrastructure, security policies, and automation workflows."
   visibility       = "public"
   auto_init        = true
   has_issues       = true
@@ -15,5 +15,3 @@ module "github_repo" {
   allow_squash_merge = true
   allow_rebase_merge = true
 }
-
-
