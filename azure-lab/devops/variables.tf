@@ -45,3 +45,11 @@ variable "admin_object_id" {
   type        = string
   sensitive   = true
 }
+
+# ----------------------------------------
+# Azure DevOps Settings
+# ----------------------------------------
+variable "devops_org_name" {
+  description = "The name of the Azure DevOps Organization"
+  type        = string
+}

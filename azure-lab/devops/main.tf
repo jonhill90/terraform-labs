@@ -142,3 +142,38 @@ module "sp_vault_access" {
     module.devops_service_principal # Ensure SP exists before granting access
   ]
 }
+/*
+# --------------------------------------------------
+# Azure DevOps API Permissions (local)
+# --------------------------------------------------
+module "devops_api_permissions" {
+  source = "../../modules/azuread/api-permissions"
+
+  service_principal_object_id = module.devops_service_principal.service_principal_id
+
+  api_permissions = [
+    {
+      resource_object_id = "499b84ac-1321-427f-aa17-267ca6975798" # Azure DevOps API
+      app_role_id        = "6f911362-37a4-46fc-bb2c-049e57ec707a" # Build.ReadWrite
+    },
+    {
+      resource_object_id = "499b84ac-1321-427f-aa17-267ca6975798" # Azure DevOps API
+      app_role_id        = "1a84c918-91c8-4700-94ea-d4465800fb01" # Release.ReadWrite
+    },
+    {
+      resource_object_id = "499b84ac-1321-427f-aa17-267ca6975798" # Azure DevOps API
+      app_role_id        = "b33be1eb-6b7b-49eb-96b6-2b0c47b81e5e" # ServiceEndpoint.ReadWrite
+    },
+    {
+      resource_object_id = "499b84ac-1321-427f-aa17-267ca6975798" # Azure DevOps API
+      app_role_id        = "cb8682be-02be-48a3-89ec-8c54b1b0c341" # Project.ReadWrite
+    }
+  ]
+
+  providers = {
+    azuread = azuread.impressiveit
+  }
+
+  depends_on = [module.devops_service_principal] # Ensure SP exists before assigning permissions
+}
+*/

@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~> 2.0"
     }
+    azuredevops = {
+      source  = "microsoft/azuredevops"
+      version = "~> 1.6.0" # Use latest stable version
+    }
   }
 }
 
@@ -26,6 +30,14 @@ provider "azurerm" {
 }
 
 provider "azuread" {
-  alias    = "impressiveit"
+  alias     = "impressiveit"
   tenant_id = var.tenant_id
 }
+/*
+provider "azuredevops" {
+  org_service_url    = "https://dev.azure.com/${var.devops_org_name}"
+  client_id          = data.azurerm_key_vault_secret.devops_sp_client_id.value
+  client_secret_path = data.azurerm_key_vault_secret.devops_sp_client_secret.value
+  tenant_id          = var.tenant_id
+}
+*/
