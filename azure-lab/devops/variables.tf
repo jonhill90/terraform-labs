@@ -2,7 +2,7 @@
 # Tags
 # ----------------------------------------
 variable "environment" {
-  description = "Environment Name"
+  description = "Environment Name (e.g., dev, prod)"
   type        = string
 }
 
@@ -15,8 +15,9 @@ variable "project" {
   description = "Project Name"
   type        = string
 }
+
 # ----------------------------------------
-# 
+# GitHub Settings
 # ----------------------------------------
 variable "github_token" {
   description = "GitHub Personal Access Token"
@@ -24,6 +25,9 @@ variable "github_token" {
   sensitive   = true
 }
 
+# ----------------------------------------
+# Azure Settings
+# ----------------------------------------
 variable "management_subscription_id" {
   description = "Azure Subscription ID"
   type        = string
@@ -31,6 +35,12 @@ variable "management_subscription_id" {
 }
 
 variable "tenant_id" {
+  description = "Azure AD Tenant ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "admin_object_id" {
   description = "Azure AD Tenant ID"
   type        = string
   sensitive   = true
