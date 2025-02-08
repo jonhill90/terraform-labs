@@ -48,8 +48,9 @@ module "devops_vault" {
   providers = {
     azurerm = azurerm.management
   }
-}
 
+  depends_on = [azurerm_resource_group.devops] # Ensure Resource Group exists first
+}
 
 # --------------------------------------------------
 # Secure Vault Access (local / Azure Admin Account)
@@ -60,10 +61,10 @@ module "vault_access" {
 
   access_policies = [
     {
-      tenant_id         = var.tenant_id
-      object_id         = var.admin_object_id
-      key_permissions   = ["Get", "List"]
-      secret_permissions = ["Get", "List", "Set", "Delete"]
+      tenant_id               = var.tenant_id
+      object_id               = var.admin_object_id
+      key_permissions         = ["Get", "List"]
+      secret_permissions      = ["Get", "List", "Set", "Delete"]
       certificate_permissions = ["Get", "List"]
     }
   ]
@@ -71,6 +72,8 @@ module "vault_access" {
   providers = {
     azurerm = azurerm.management
   }
+
+  depends_on = [module.devops_vault] # Ensure Vault exists before setting access
 }
 
 # --------------------------------------------------
@@ -93,7 +96,10 @@ module "devops_service_principal" {
     owner       = var.owner
     project     = var.project
   }
+
+  depends_on = [module.devops_vault, module.vault_access] # Ensure Vault and Admin Access exist
 }
+
 # --------------------------------------------------
 # Service Principal Role Assignment - DevOps (local)
 # --------------------------------------------------
@@ -106,6 +112,8 @@ module "devops_sp_role_assignment" {
   providers = {
     azurerm = azurerm.management
   }
+
+  depends_on = [module.devops_service_principal] # Ensure SP exists before assigning roles
 }
 
 # --------------------------------------------------
@@ -117,10 +125,10 @@ module "sp_vault_access" {
 
   access_policies = [
     {
-      tenant_id         = var.tenant_id
-      object_id         = module.devops_service_principal.service_principal_id
-      key_permissions   = ["Get", "List"]
-      secret_permissions = ["Get", "List", "Set", "Delete"]
+      tenant_id               = var.tenant_id
+      object_id               = module.devops_service_principal.service_principal_id
+      key_permissions         = ["Get", "List"]
+      secret_permissions      = ["Get", "List", "Set", "Delete"]
       certificate_permissions = ["Get", "List"]
     }
   ]
@@ -128,5 +136,9 @@ module "sp_vault_access" {
   providers = {
     azurerm = azurerm.management
   }
-}
 
+  depends_on = [
+    module.devops_vault,            # Ensure Vault exists before setting access
+    module.devops_service_principal # Ensure SP exists before granting access
+  ]
+}
