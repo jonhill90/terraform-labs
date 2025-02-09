@@ -29,12 +29,12 @@ variable "admin_username" {
   type        = string
   default     = "azureuser"
 }
-
+/*
 variable "ssh_public_key" {
   description = "SSH Public Key for authentication"
   type        = string
 }
-
+*/
 variable "os_disk_caching" {
   description = "OS Disk caching mode"
   type        = string
@@ -69,6 +69,22 @@ variable "image_version" {
   description = "The version of the OS image"
   type        = string
   default     = "latest"
+}
+
+variable "key_vault_id" {
+  description = "The ID of the Azure Key Vault where SSH keys are stored"
+  type        = string
+}
+
+variable "devops_org_name" {
+  description = "Azure DevOps organization name"
+  type        = string
+}
+
+variable "devops_pat" {
+  description = "Azure DevOps Personal Access Token (PAT)"
+  type        = string
+  sensitive   = true
 }
 
 # ----------------------------

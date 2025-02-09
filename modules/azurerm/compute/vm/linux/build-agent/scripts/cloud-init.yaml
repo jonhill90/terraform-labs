@@ -4,15 +4,21 @@ package_upgrade: true
 packages:
   - curl
   - unzip
-  - jq
-  - git
-  - python3
-  - python3-pip
-  - ansible
 
 runcmd:
-  - mkdir -p /etc/ansible/
-  - echo "localhost" > /etc/ansible/hosts
-  - systemctl restart sshd
-
-final_message: "Cloud-init complete for build agent!"
+  - echo "Installing Azure DevOps Build Agent..."
+  - mkdir -p /agent
+  - cd /agent
+  - curl -O https://vstsagentpackage.azureedge.net/agent/3.225.0/vsts-agent-linux-x64-3.225.0.tar.gz
+  - tar zxvf vsts-agent-linux-x64-3.225.0.tar.gz
+  - chmod -R 777 /agent
+  - ./config.sh --unattended \
+      --url "https://dev.azure.com/__DEVOPS_ORG_NAME__" \
+      --auth pat \
+      --token "__DEVOPS_PAT__" \
+      --pool "Default" \
+      --agent "Linux-VM-Agent" \
+      --replace \
+      --acceptTeeEula
+  - ./svc.sh install
+  - ./svc.sh start

@@ -10,6 +10,39 @@ resource "azurerm_network_interface" "vm_nic" {
   }
 }
 
+resource "tls_private_key" "ssh_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "azurerm_key_vault_secret" "ssh_private_key" {
+  name         = "${var.servername}-ssh-private-key"
+  value        = tls_private_key.ssh_key.private_key_pem
+  key_vault_id = var.key_vault_id
+}
+
+resource "azurerm_key_vault_secret" "ssh_public_key" {
+  name         = "${var.servername}-ssh-public-key"
+  value        = tls_private_key.ssh_key.public_key_openssh
+  key_vault_id = var.key_vault_id
+}
+
+# Fetch SSH public key from Key Vault
+data "azurerm_key_vault_secret" "ssh_public_key" {
+  name         = "${var.servername}-ssh-public-key"
+  key_vault_id = var.key_vault_id
+
+  depends_on = [azurerm_key_vault_secret.ssh_public_key]
+}
+
+# Fetch the SSH private key from Key Vault**
+data "azurerm_key_vault_secret" "ssh_private_key" {
+  name         = "${var.servername}-ssh-private-key"
+  key_vault_id = var.key_vault_id
+
+  depends_on = [azurerm_key_vault_secret.ssh_private_key]
+}
+
 resource "azurerm_linux_virtual_machine" "vm" {
   name                            = var.servername
   resource_group_name             = var.resource_group_name
@@ -33,22 +66,28 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   admin_ssh_key {
     username   = var.admin_username
-    public_key = var.ssh_public_key
+    public_key = data.azurerm_key_vault_secret.ssh_public_key.value
   }
 
-  # Updated path to cloud-init.yaml in scripts folder
-  custom_data = filebase64("${path.module}/scripts/cloud-init.yaml") 
+  # Injects the DevOps org name & PAT into cloud-init dynamically
+  custom_data = base64encode(templatefile("${path.module}/scripts/cloud-init.yaml", {
+    DEVOPS_ORG_NAME = var.devops_org_name,
+    DEVOPS_PAT      = var.devops_pat
+  }))
 
   tags = var.tags
 }
-
+/*
 resource "null_resource" "ansible_provisioner" {
-  depends_on = [azurerm_linux_virtual_machine.vm]
+  depends_on = [azurerm_key_vault_secret.ssh_private_key, azurerm_linux_virtual_machine.vm]
 
   provisioner "local-exec" {
     command = <<EOT
+      echo "${data.azurerm_key_vault_secret.ssh_private_key.value}" > /tmp/ssh_key.pem
+      chmod 600 /tmp/ssh_key.pem
       ansible-playbook -i '${azurerm_linux_virtual_machine.vm.public_ip_address},' \
-        --private-key ~/.ssh/id_rsa -u ${var.admin_username} ${path.module}/scripts/ansible/playbook.yml
+        --private-key /tmp/ssh_key.pem -u ${var.admin_username} ${path.module}/scripts/playbook.yml
     EOT
   }
 }
+*/

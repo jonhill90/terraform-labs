@@ -219,17 +219,46 @@ module "devops_vnet" {
 }
 
 
-# ----------------------------------------
-# Build Agent
-# ----------------------------------------
+# --------------------------------------------------
+# Azure DevOps Build Agent (Linux)
+# --------------------------------------------------
 module "build_agent" {
-  source               = "../../modules/azurerm/compute/vm/linux/build-agent"
-  vm_name              = "build-agent-01"
-  vm_size              = "Standard_D2s_v3"
-  resource_group_name  = azurerm_resource_group.devops.name
-  location             = azurerm_resource_group.devops.location
-  subnet_id            = module.devops_vnet.subnets["agent-subnet"].id
-  ssh_public_key       = file("~/.ssh/id_rsa.pub")
+  source = "../../modules/azurerm/compute/vm/linux/build-agent"
+
+  servername          = "build-agent"
+  location            = azurerm_resource_group.devops.location
+  resource_group_name = azurerm_resource_group.devops.name
+  subnet_id           = module.devops_vnet.subnet_ids["agent-subnet"]
+  vm_size             = "Standard_B1ms"
+  devops_pat          = var.devops_pat
+  devops_org_name     = var.devops_org_name
+
+  # OS Disk Config
+  os_disk_caching      = "ReadWrite"
+  os_disk_storage_type = "Standard_LRS"
+
+  # Image Reference
+  image_publisher = "Canonical"
+  image_offer     = "0001-com-ubuntu-server-jammy"
+  image_sku       = "22_04-lts"
+  image_version   = "latest"
+
+  # SSH and Key Vault
+  admin_username = "azureuser"
+  key_vault_id   = module.devops_vault.key_vault_id # Reference Key Vault module
+  #ssh_public_key  = module.devops_vault.ssh_public_key  # Fetch from Key Vault
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [module.devops_project, module.devops_vault] # Ensure dependencies exist
 }
 
 
