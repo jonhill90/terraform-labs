@@ -165,23 +165,29 @@ module "devops_project" {
   }
 }
 
-# --------------------------------------------------
-# Create a GitHub Service Connection in Azure DevOps
-# --------------------------------------------------
+# ----------------------------------------------------------
+# Create a GitHub Service Connection in Azure DevOps (local)
+# ----------------------------------------------------------
 resource "azuredevops_serviceendpoint_github" "github" {
   project_id            = module.devops_project.devops_project_id
   service_endpoint_name = "GitHub Connection"
   description           = "GitHub service connection for Terraform Labs"
-  
+
   auth_personal {
     # Use a GitHub PAT for authentication
     personal_access_token = var.github_token
   }
 }
+# ----------------------------------------
+# Build Agent
+# ----------------------------------------
 
-# --------------------------------------------------
+
+
+/*
+# ----------------------------------------
 # Azure DevOps Pipeline (local)
-# --------------------------------------------------
+# ----------------------------------------
 module "devops_pipeline" {
   source = "../../modules/azure-devops/pipeline"
 
@@ -194,3 +200,4 @@ module "devops_pipeline" {
   agent_pool_name       = "Azure Pipelines"
   service_connection_id = azuredevops_serviceendpoint_github.github.id 
 }
+*/
