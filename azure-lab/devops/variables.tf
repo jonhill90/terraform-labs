@@ -53,3 +53,16 @@ variable "devops_org_name" {
   description = "The name of the Azure DevOps Organization"
   type        = string
 }
+
+variable "use_msi" {
+  description = "Use Managed Identity for authentication instead of a PAT or Service Principal"
+  type        = bool
+  default     = false
+}
+
+variable "devops_pat" {
+  description = "Azure DevOps Personal Access Token (PAT) for authentication"
+  type        = string
+  sensitive   = true
+  default     = null  # Optional, only needed if not using SP
+}

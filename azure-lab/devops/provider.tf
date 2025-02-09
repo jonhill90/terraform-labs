@@ -33,11 +33,19 @@ provider "azuread" {
   alias     = "impressiveit"
   tenant_id = var.tenant_id
 }
-/*
+
 provider "azuredevops" {
-  org_service_url    = "https://dev.azure.com/${var.devops_org_name}"
-  client_id          = data.azurerm_key_vault_secret.devops_sp_client_id.value
-  client_secret_path = data.azurerm_key_vault_secret.devops_sp_client_secret.value
-  tenant_id          = var.tenant_id
+  org_service_url = "https://dev.azure.com/${var.devops_org_name}"
+
+  use_msi = var.use_msi  # Enable Managed Identity if true
+
+  # Use the Service Principal created in Terraform
+  client_id     = var.use_msi ? null : module.devops_service_principal.client_id
+  client_secret = var.use_msi ? null : data.azurerm_key_vault_secret.devops_client_secret.value
+  tenant_id     = var.use_msi ? null : module.devops_service_principal.tenant_id
+
+  # If neither MSI nor SP authentication is enabled, fallback to PAT
+  personal_access_token = var.use_msi ? null : var.devops_pat
 }
-*/
+
+

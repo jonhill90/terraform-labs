@@ -64,7 +64,7 @@ module "vault_access" {
       tenant_id               = var.tenant_id
       object_id               = var.admin_object_id
       key_permissions         = ["Get", "List"]
-      secret_permissions      = ["Get", "List", "Set", "Delete"]
+      secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
     }
   ]
@@ -85,6 +85,7 @@ module "devops_service_principal" {
   password_lifetime     = "8760h"
   key_vault_id          = module.devops_vault.key_vault_id
   store_secret_in_vault = true
+  tenant_id             = var.tenant_id
 
   providers = {
     azuread = azuread.impressiveit
@@ -128,7 +129,7 @@ module "sp_vault_access" {
       tenant_id               = var.tenant_id
       object_id               = module.devops_service_principal.service_principal_id
       key_permissions         = ["Get", "List"]
-      secret_permissions      = ["Get", "List", "Set", "Delete"]
+      secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
     }
   ]
@@ -142,38 +143,24 @@ module "sp_vault_access" {
     module.devops_service_principal # Ensure SP exists before granting access
   ]
 }
-/*
+
 # --------------------------------------------------
-# Azure DevOps API Permissions (local)
+# Azure DevOps Project (local)
 # --------------------------------------------------
-module "devops_api_permissions" {
-  source = "../../modules/azuread/api-permissions"
+module "devops_project" {
+  source = "../../modules/azure-devops/project"
 
-  service_principal_object_id = module.devops_service_principal.service_principal_id
+  devops_org_name     = var.devops_org_name
+  devops_project_name = "Terraform-Labs"
+  description         = "Managed by Terraform"
+  visibility          = "private"
+  devops_pat          = var.devops_pat
 
-  api_permissions = [
-    {
-      resource_object_id = "499b84ac-1321-427f-aa17-267ca6975798" # Azure DevOps API
-      app_role_id        = "6f911362-37a4-46fc-bb2c-049e57ec707a" # Build.ReadWrite
-    },
-    {
-      resource_object_id = "499b84ac-1321-427f-aa17-267ca6975798" # Azure DevOps API
-      app_role_id        = "1a84c918-91c8-4700-94ea-d4465800fb01" # Release.ReadWrite
-    },
-    {
-      resource_object_id = "499b84ac-1321-427f-aa17-267ca6975798" # Azure DevOps API
-      app_role_id        = "b33be1eb-6b7b-49eb-96b6-2b0c47b81e5e" # ServiceEndpoint.ReadWrite
-    },
-    {
-      resource_object_id = "499b84ac-1321-427f-aa17-267ca6975798" # Azure DevOps API
-      app_role_id        = "cb8682be-02be-48a3-89ec-8c54b1b0c341" # Project.ReadWrite
-    }
-  ]
-
-  providers = {
-    azuread = azuread.impressiveit
+  features = {
+    repositories = "disabled"
+    testplans    = "disabled"
+    artifacts    = "disabled"
+    pipelines    = "enabled"
+    boards       = "disabled"
   }
-
-  depends_on = [module.devops_service_principal] # Ensure SP exists before assigning permissions
 }
-*/

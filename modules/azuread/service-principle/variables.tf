@@ -25,3 +25,9 @@ variable "store_secret_in_vault" {
   type        = bool
   default     = true
 }
+
+variable "tenant_id" {
+  description = "Azure AD Tenant ID"
+  type        = string
+  sensitive   = true
+}
