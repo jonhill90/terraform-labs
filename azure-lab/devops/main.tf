@@ -164,3 +164,19 @@ module "devops_project" {
     boards       = "disabled"
   }
 }
+
+# --------------------------------------------------
+# Azure DevOps Pipeline (local)
+# --------------------------------------------------
+module "devops_pipeline" {
+  source                = "../../modules/azure-devops/pipeline"
+
+  devops_project_id     = module.devops_project.devops_project_id
+  pipeline_name         = "${var.project}-Pipeline"
+  repo_type             = "GitHub"
+  repo_id               = var.github_repo_id
+  default_branch        = "main"
+  pipeline_yaml_path    = "azure-lab/devops/azure-pipelines.yml"
+  agent_pool_name       = "Azure Pipelines"
+  service_connection_id = "none"  # Explicitly set to "none" for public GitHub repos
+}

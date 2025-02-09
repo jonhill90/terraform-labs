@@ -25,6 +25,11 @@ variable "github_token" {
   sensitive   = true
 }
 
+variable "github_repo_id" {
+  description = "GitHub Repository ID"
+  type        = string
+}
+
 # ----------------------------------------
 # Azure Settings
 # ----------------------------------------
