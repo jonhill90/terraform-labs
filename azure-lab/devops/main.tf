@@ -179,9 +179,58 @@ resource "azuredevops_serviceendpoint_github" "github" {
   }
 }
 # ----------------------------------------
+# Network - Watcher
+# ----------------------------------------
+module "network_watcher" {
+  source              = "../../modules/azurerm/network/network-watcher"
+  name                = "network-watcher"
+  resource_group_name = azurerm_resource_group.devops.name
+  location            = azurerm_resource_group.devops.location
+
+  providers = {
+    azurerm = azurerm.management
+  }
+}
+
+# ----------------------------------------
+# Network - DevOps VNet
+# ----------------------------------------
+module "devops_vnet" {
+  source = "../../modules/azurerm/network/vnet"
+
+  vnet_name           = "${var.environment}-vnet"
+  vnet_location       = azurerm_resource_group.devops.location
+  vnet_resource_group = azurerm_resource_group.devops.name
+  vnet_address_space  = ["10.75.0.0/16"]
+
+  subnets = {
+    agent-subnet = { address_prefixes = ["10.75.10.0/24"] }
+  }
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
+
+# ----------------------------------------
 # Build Agent
 # ----------------------------------------
-
+module "build_agent" {
+  source               = "../../modules/azurerm/compute/vm/linux/build-agent"
+  vm_name              = "build-agent-01"
+  vm_size              = "Standard_D2s_v3"
+  resource_group_name  = azurerm_resource_group.devops.name
+  location             = azurerm_resource_group.devops.location
+  subnet_id            = module.devops_vnet.subnets["agent-subnet"].id
+  ssh_public_key       = file("~/.ssh/id_rsa.pub")
+}
 
 
 /*
