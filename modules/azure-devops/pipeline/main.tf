@@ -7,10 +7,11 @@ resource "azuredevops_build_definition" "pipeline" {
   }
 
   repository {
-    repo_type   = var.repo_type
-    repo_id     = var.repo_id
-    branch_name = var.default_branch
-    yml_path    = var.pipeline_yaml_path
+    repo_type             = var.repo_type
+    repo_id               = var.repo_id
+    branch_name           = var.default_branch
+    yml_path              = var.pipeline_yaml_path
+    service_connection_id = var.service_connection_id  # Pass the service connection
   }
 
   variable {

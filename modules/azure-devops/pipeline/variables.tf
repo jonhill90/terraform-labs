@@ -36,3 +36,8 @@ variable "agent_pool_name" {
   type        = string
   default     = "Azure Pipelines"
 }
+
+variable "service_connection_id" {
+  description = "The ID of the GitHub service connection for Azure DevOps"
+  type        = string
+}
