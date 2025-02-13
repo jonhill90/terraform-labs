@@ -71,3 +71,18 @@ variable "devops_pat" {
   sensitive   = true
   default     = null  # Optional, only needed if not using SP
 }
+
+# ----------------------------------------
+# Twingate Settings
+# ----------------------------------------
+variable "twingate_network" {
+  description = "Twingate Network Name"
+  type        = string
+  sensitive   = true
+}
+
+variable "twingate_api_key" {
+  description = "Twingate API Key"
+  type        = string
+  sensitive   = true
+}

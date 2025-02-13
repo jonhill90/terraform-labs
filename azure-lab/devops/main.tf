@@ -193,6 +193,27 @@ module "network_watcher" {
 }
 
 # ----------------------------------------
+# Azure Container Registry (ACR)
+# ----------------------------------------
+module "container_registry" {
+  source             = "../../modules/azurerm/container/registry"
+  acr_name           = substr(lower(replace("${var.environment}-${var.project}", "/[^a-zA-Z0-9]/", "")), 0, 24)
+  acr_resource_group = azurerm_resource_group.devops.name
+  acr_location       = azurerm_resource_group.devops.location
+  acr_sku            = "Basic"
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
+# ----------------------------------------
 # Network - DevOps VNet
 # ----------------------------------------
 module "devops_vnet" {
@@ -218,7 +239,77 @@ module "devops_vnet" {
   }
 }
 
+# ----------------------------------------
+# Twingate
+# ----------------------------------------
+module "twingate_groups" {
+  source = "../../modules/twingate/group"
 
+  groups = {
+    devops = "DevOps Team"
+  }
+}
+
+module "twingate_resource" {
+  source = "../../modules/twingate/network"
+
+  providers = {
+    twingate = twingate
+  }
+
+  remote_network_name = "DevOps"
+  connector_name      = "${var.environment}-connector"
+  subnet_map = {
+    "agent-subnet" = "10.75.10.0/24"
+  }
+  twingate_api_key = var.twingate_api_key
+  twingate_network = var.twingate_network
+
+}
+
+# Twingate Image Push Module (Pushes Docker Image to ACR)
+module "twingate_image_push" {
+  source                = "../../modules/twingate/connector"
+  registry_login_server = module.container_registry.acr_login_server
+  acr_id                = module.container_registry.acr_id
+  connector_id          = module.twingate_resource.connector_id
+  image_name            = "twingate-connector"
+  image_tag             = "latest"
+
+  depends_on = [module.container_registry]
+}
+
+# **Twingate ACG Module (Deploys Azure Container Group)**
+module "twingate_acg" {
+  source                = "../../modules/azurerm/container/group"
+  container_name        = "twingate-connector"
+  location              = azurerm_resource_group.devops.location
+  resource_group        = azurerm_resource_group.devops.name
+  registry_login_server = module.container_registry.acr_login_server
+  registry_username     = module.container_registry.acr_admin_username
+  registry_password     = module.container_registry.acr_admin_password
+  image                 = "twingate-connector"
+  image_tag             = "latest"
+  cpu                   = "1"
+  memory                = "1.5"
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  environment_variables = {
+    TWINGATE_NETWORK = module.twingate_resource.twingate_network
+  }
+
+  secure_environment_variables = {
+    TWINGATE_ACCESS_TOKEN  = module.twingate_resource.connector_tokens.access_token
+    TWINGATE_REFRESH_TOKEN = module.twingate_resource.connector_tokens.refresh_token
+  }
+
+  depends_on = [module.twingate_image_push]
+}
+
+/*
 # --------------------------------------------------
 # Azure DevOps Build Agent (Linux)
 # --------------------------------------------------
@@ -260,7 +351,7 @@ module "build_agent" {
 
   depends_on = [module.devops_project, module.devops_vault] # Ensure dependencies exist
 }
-
+*/
 
 /*
 # ----------------------------------------

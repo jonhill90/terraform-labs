@@ -4,6 +4,8 @@ resource "azurerm_container_group" "acg" {
   resource_group_name = var.resource_group
   os_type             = "Linux"
 
+  provider = azurerm
+
   ip_address_type = "None"
   restart_policy  = "Always"
 

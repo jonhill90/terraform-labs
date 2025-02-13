@@ -14,7 +14,11 @@ terraform {
     }
     azuredevops = {
       source  = "microsoft/azuredevops"
-      version = "~> 1.6.0" # Use latest stable version
+      version = "~> 1.6.0"
+    }
+    twingate = {
+      source  = "twingate/twingate"
+      version = "~> 3.0.15"
     }
   }
 }
@@ -37,7 +41,7 @@ provider "azuread" {
 provider "azuredevops" {
   org_service_url = "https://dev.azure.com/${var.devops_org_name}"
 
-  use_msi = var.use_msi  # Enable Managed Identity if true
+  use_msi = var.use_msi # Enable Managed Identity if true
 
   # Use the Service Principal created in Terraform
   client_id     = var.use_msi ? null : module.devops_service_principal.client_id
@@ -48,4 +52,7 @@ provider "azuredevops" {
   personal_access_token = var.use_msi ? null : var.devops_pat
 }
 
-
+provider "twingate" {
+  api_token = var.twingate_api_key
+  network   = var.twingate_network
+}
