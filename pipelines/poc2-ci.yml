@@ -1,0 +1,48 @@
+name: POC2-CI-$(Build.SourceBranchName)-$(Build.BuildId)  # Unique build name
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - poc2/**  # Only triggers when changes occur in poc/
+
+pool:
+  name: 'Lab'  # Specify the self-hosted agent pool
+
+variables:
+  - name: artifactName
+    value: "poc2-artifacts"
+
+stages:
+  - stage: Build
+    displayName: 'Build Stage'
+    jobs:
+      - job: Build
+        displayName: 'Prepare Terraform Artifacts'
+        steps:
+          - checkout: self
+            fetchDepth: 1 
+
+          # Copy POC2 Files
+          - task: CopyFiles@2
+            displayName: 'Copy POC2 Terraform Files'
+            inputs:
+              SourceFolder: '$(Build.SourcesDirectory)/poc2'
+              Contents: '**'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/poc2'
+
+          # Copy Modules Files
+          - task: CopyFiles@2
+            displayName: 'Copy Shared Modules'
+            inputs:
+              SourceFolder: '$(Build.SourcesDirectory)/modules'
+              Contents: '**'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/modules'
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Terraform Artifacts'
+            inputs:
+              pathToPublish: '$(Build.ArtifactStagingDirectory)/$(artifactName)'
+              artifactName: '$(artifactName)'
