@@ -1,0 +1,496 @@
+trigger: none  # Runs only when the CI pipeline triggers it
+
+resources:
+  pipelines:
+    - pipeline: POC2-CI
+      source: POC2-CI
+      trigger:
+        branches:
+          - main
+
+pool:
+  name: 'Lab'
+
+variables:
+  - name: owner
+    value: "Infrastructure and Operations"
+  - name: artifactName
+    value: "poc2-artifacts"
+  - name: teamFolder
+    value: "poc2"
+
+# 🔹 Dev Plan & Apply
+stages:
+- stage: PlanDev
+  displayName: 'Plan POC - Dev'
+  dependsOn: []
+  variables:
+    - group: POC-Dev
+    - name: environment
+      value: dev
+    - name: tfvarsFile
+      value: "env/dev.tfvars"
+  jobs:
+    - job: PlanTerraform
+      displayName: 'Terraform Plan - Dev'
+      steps:
+        - task: TerraformInstaller@1
+          displayName: 'Ensure Terraform is Installed'
+          inputs:
+            terraformVersion: 'latest'
+
+        - task: PowerShell@2
+          displayName: 'Azure CLI Login'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "🔐 Logging into Azure..."
+              az login --service-principal -u "$(clientid)" -p "$(clientsecret)" --tenant "$(tenantid)"
+              az account set --subscription "$(subscriptionid)"
+              Write-Output "✅ Azure login successful!"
+
+        - task: DownloadBuildArtifacts@0
+          displayName: 'Download Terraform Artifacts for Dev'
+          inputs:
+            buildType: 'specific'
+            project: "$(System.TeamProject)"
+            pipeline: "POC2-CI"
+            artifactName: "$(artifactName)"
+            buildVersionToDownload: "latest"
+            downloadPath: "$(Pipeline.Workspace)"
+
+        - task: PowerShell@2
+          displayName: 'Generate Terraform Backend Config'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "📝 Generating backend.tf for Dev..."
+              $backendConfig = @"
+              terraform {
+                backend "azurerm" {
+                  resource_group_name  = "$(backendResourceGroup)"
+                  storage_account_name = "$(backendStorageAccount)"
+                  container_name       = "$(backendContainer)"
+                  key                  = "$(teamFolder)/$(environment).tfstate"
+                  subscription_id      = "$(subscriptionid)"
+                }
+              }
+              "@
+              Set-Content -Path "$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/backend.tf" -Value $backendConfig
+              Write-Output "✅ backend.tf generated!"
+
+        - task: replacetokens@6
+          displayName: 'Replace Tokens in Terraform tfvars File'
+          inputs:
+            targetFiles: '$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/$(tfvarsFile)'
+            tokenPattern: 'custom'
+            tokenPrefix: '__'
+            tokenSuffix: '__'
+            actionOnMissing: 'warn'
+            keepToken: false
+
+        - task: PowerShell@2
+          displayName: 'Terraform Plan'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "🚀 Running Terraform Plan for Dev..."
+              terraform version
+              terraform init -reconfigure
+              terraform plan -var-file="$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/$(tfvarsFile)" -out=tfplan
+            workingDirectory: '$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)'
+
+- stage: ApplyDev
+  displayName: 'Apply POC - Dev'
+  dependsOn: [PlanDev]
+  variables:
+    - group: POC-Dev
+    - name: environment
+      value: dev
+    - name: tfvarsFile
+      value: "env/dev.tfvars"
+  jobs:
+    - job: ApplyTerraform
+      displayName: 'Terraform Apply - Dev'
+      steps:
+        - task: TerraformInstaller@1
+          displayName: 'Ensure Terraform is Installed'
+          inputs:
+            terraformVersion: 'latest'
+
+        - task: PowerShell@2
+          displayName: 'Azure CLI Login'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "🔐 Logging into Azure..."
+              az login --service-principal -u "$(clientid)" -p "$(clientsecret)" --tenant "$(tenantid)"
+              az account set --subscription "$(subscriptionid)"
+              Write-Output "✅ Azure login successful!"
+
+        - task: DownloadBuildArtifacts@0
+          displayName: 'Download Terraform Artifacts for Dev'
+          inputs:
+            buildType: 'specific'
+            project: "$(System.TeamProject)"
+            pipeline: "POC2-CI"
+            artifactName: "$(artifactName)"
+            buildVersionToDownload: "latest"
+            downloadPath: "$(Pipeline.Workspace)"
+
+        - task: PowerShell@2
+          displayName: 'Generate Terraform Backend Config'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "📝 Generating backend.tf for Dev..."
+              $backendConfig = @"
+              terraform {
+                backend "azurerm" {
+                  resource_group_name  = "$(backendResourceGroup)"
+                  storage_account_name = "$(backendStorageAccount)"
+                  container_name       = "$(backendContainer)"
+                  key                  = "$(teamFolder)/$(environment).tfstate"
+                  subscription_id      = "$(subscriptionid)"
+                }
+              }
+              "@
+              Set-Content -Path "$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/backend.tf" -Value $backendConfig
+              Write-Output "✅ backend.tf generated!"
+
+        - task: replacetokens@6
+          displayName: 'Replace Tokens in Terraform tfvars File'
+          inputs:
+            targetFiles: '$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/$(tfvarsFile)'
+            tokenPattern: 'custom'
+            tokenPrefix: '__'
+            tokenSuffix: '__'
+            actionOnMissing: 'warn'
+            keepToken: false
+
+        - task: PowerShell@2
+          displayName: 'Terraform Apply'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "🚀 Running Terraform Apply for Dev..."
+              terraform version
+              terraform init -reconfigure
+              terraform apply -auto-approve -var-file="$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/$(tfvarsFile)"
+            workingDirectory: '$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)'
+# 🔹 Test Plan & Apply
+- stage: PlanTest
+  displayName: 'Plan POC - Test'
+  dependsOn: [ApplyDev]
+  variables:
+    - group: POC-Test
+    - name: environment
+      value: test
+    - name: tfvarsFile
+      value: "env/test.tfvars"
+  jobs:
+    - job: PlanTerraform
+      displayName: 'Terraform Plan - Test'
+      steps:
+        - task: TerraformInstaller@1
+          displayName: 'Ensure Terraform is Installed'
+          inputs:
+            terraformVersion: 'latest'
+
+        - task: PowerShell@2
+          displayName: 'Azure CLI Login'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "🔐 Logging into Azure..."
+              az login --service-principal -u "$(clientid)" -p "$(clientsecret)" --tenant "$(tenantid)"
+              az account set --subscription "$(subscriptionid)"
+              Write-Output "✅ Azure login successful!"
+
+        - task: DownloadBuildArtifacts@0
+          displayName: 'Download Terraform Artifacts for Test'
+          inputs:
+            buildType: 'specific'
+            project: "$(System.TeamProject)"
+            pipeline: "POC2-CI"
+            artifactName: "$(artifactName)"
+            buildVersionToDownload: "latest"
+            downloadPath: "$(Pipeline.Workspace)"
+
+        - task: PowerShell@2
+          displayName: 'Generate Terraform Backend Config'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "📝 Generating backend.tf for Test..."
+              $backendConfig = @"
+              terraform {
+                backend "azurerm" {
+                  resource_group_name  = "$(backendResourceGroup)"
+                  storage_account_name = "$(backendStorageAccount)"
+                  container_name       = "$(backendContainer)"
+                  key                  = "$(teamFolder)/$(environment).tfstate"
+                  subscription_id      = "$(subscriptionid)"
+                }
+              }
+              "@
+              Set-Content -Path "$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/backend.tf" -Value $backendConfig
+              Write-Output "✅ backend.tf generated!"
+
+        - task: replacetokens@6
+          displayName: 'Replace Tokens in Terraform tfvars File'
+          inputs:
+            targetFiles: '$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/$(tfvarsFile)'
+            tokenPattern: 'custom'
+            tokenPrefix: '__'
+            tokenSuffix: '__'
+            actionOnMissing: 'warn'
+            keepToken: false
+
+        - task: PowerShell@2
+          displayName: 'Terraform Plan'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "🚀 Running Terraform Plan for Test..."
+              terraform version
+              terraform init -reconfigure
+              terraform plan -var-file="$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/$(tfvarsFile)" -out=tfplan
+            workingDirectory: '$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)'
+
+- stage: ApplyTest
+  displayName: 'Apply POC - Test'
+  dependsOn: [PlanTest]
+  variables:
+    - group: POC-Test
+    - name: environment
+      value: test
+    - name: tfvarsFile
+      value: "env/test.tfvars"
+  jobs:
+    - job: ApplyTerraform
+      displayName: 'Terraform Apply - Test'
+      steps:
+        - task: TerraformInstaller@1
+          displayName: 'Ensure Terraform is Installed'
+          inputs:
+            terraformVersion: 'latest'
+
+        - task: PowerShell@2
+          displayName: 'Azure CLI Login'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "🔐 Logging into Azure..."
+              az login --service-principal -u "$(clientid)" -p "$(clientsecret)" --tenant "$(tenantid)"
+              az account set --subscription "$(subscriptionid)"
+              Write-Output "✅ Azure login successful!"
+
+        - task: DownloadBuildArtifacts@0
+          displayName: 'Download Terraform Artifacts for Test'
+          inputs:
+            buildType: 'specific'
+            project: "$(System.TeamProject)"
+            pipeline: "POC2-CI"
+            artifactName: "$(artifactName)"
+            buildVersionToDownload: "latest"
+            downloadPath: "$(Pipeline.Workspace)"
+
+        - task: PowerShell@2
+          displayName: 'Generate Terraform Backend Config'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "📝 Generating backend.tf for Test..."
+              $backendConfig = @"
+              terraform {
+                backend "azurerm" {
+                  resource_group_name  = "$(backendResourceGroup)"
+                  storage_account_name = "$(backendStorageAccount)"
+                  container_name       = "$(backendContainer)"
+                  key                  = "$(teamFolder)/$(environment).tfstate"
+                  subscription_id      = "$(subscriptionid)"
+                }
+              }
+              "@
+              Set-Content -Path "$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/backend.tf" -Value $backendConfig
+              Write-Output "✅ backend.tf generated!"
+
+        - task: replacetokens@6
+          displayName: 'Replace Tokens in Terraform tfvars File'
+          inputs:
+            targetFiles: '$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/$(tfvarsFile)'
+            tokenPattern: 'custom'
+            tokenPrefix: '__'
+            tokenSuffix: '__'
+            actionOnMissing: 'warn'
+            keepToken: false
+
+        - task: PowerShell@2
+          displayName: 'Terraform Apply'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "🚀 Running Terraform Apply for Test..."
+              terraform version
+              terraform init -reconfigure
+              terraform apply -auto-approve -var-file="$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/$(tfvarsFile)"
+            workingDirectory: '$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)'
+# 🔹 Prod Plan & Apply
+- stage: PlanProd
+  displayName: 'Plan POC - Prod'
+  dependsOn: [ApplyTest]
+  variables:
+    - group: POC-Prod
+    - name: environment
+      value: prod
+    - name: tfvarsFile
+      value: "env/prod.tfvars"
+  jobs:
+    - job: PlanTerraform
+      displayName: 'Terraform Plan - Prod'
+      steps:
+        - task: TerraformInstaller@1
+          displayName: 'Ensure Terraform is Installed'
+          inputs:
+            terraformVersion: 'latest'
+
+        - task: PowerShell@2
+          displayName: 'Azure CLI Login'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "🔐 Logging into Azure..."
+              az login --service-principal -u "$(clientid)" -p "$(clientsecret)" --tenant "$(tenantid)"
+              az account set --subscription "$(subscriptionid)"
+              Write-Output "✅ Azure login successful!"
+
+        - task: DownloadBuildArtifacts@0
+          displayName: 'Download Terraform Artifacts for Prod'
+          inputs:
+            buildType: 'specific'
+            project: "$(System.TeamProject)"
+            pipeline: "POC2-CI"
+            artifactName: "$(artifactName)"
+            buildVersionToDownload: "latest"
+            downloadPath: "$(Pipeline.Workspace)"
+
+        - task: PowerShell@2
+          displayName: 'Generate Terraform Backend Config'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "📝 Generating backend.tf for Prod..."
+              $backendConfig = @"
+              terraform {
+                backend "azurerm" {
+                  resource_group_name  = "$(backendResourceGroup)"
+                  storage_account_name = "$(backendStorageAccount)"
+                  container_name       = "$(backendContainer)"
+                  key                  = "$(teamFolder)/$(environment).tfstate"
+                  subscription_id      = "$(subscriptionid)"
+                }
+              }
+              "@
+              Set-Content -Path "$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/backend.tf" -Value $backendConfig
+              Write-Output "✅ backend.tf generated!"
+
+        - task: replacetokens@6
+          displayName: 'Replace Tokens in Terraform tfvars File'
+          inputs:
+            targetFiles: '$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/$(tfvarsFile)'
+            tokenPattern: 'custom'
+            tokenPrefix: '__'
+            tokenSuffix: '__'
+            actionOnMissing: 'warn'
+            keepToken: false
+
+        - task: PowerShell@2
+          displayName: 'Terraform Plan'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "🚀 Running Terraform Plan for Prod..."
+              terraform version
+              terraform init -reconfigure
+              terraform plan -var-file="$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/$(tfvarsFile)" -out=tfplan
+            workingDirectory: '$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)'
+
+- stage: ApplyProd
+  displayName: 'Apply POC - Prod'
+  dependsOn: [PlanProd]
+  variables:
+    - group: POC-Prod
+    - name: environment
+      value: prod
+    - name: tfvarsFile
+      value: "env/prod.tfvars"
+  jobs:
+    - job: ApplyTerraform
+      displayName: 'Terraform Apply - Prod'
+      steps:
+        - task: TerraformInstaller@1
+          displayName: 'Ensure Terraform is Installed'
+          inputs:
+            terraformVersion: 'latest'
+
+        - task: PowerShell@2
+          displayName: 'Azure CLI Login'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "🔐 Logging into Azure..."
+              az login --service-principal -u "$(clientid)" -p "$(clientsecret)" --tenant "$(tenantid)"
+              az account set --subscription "$(subscriptionid)"
+              Write-Output "✅ Azure login successful!"
+
+        - task: DownloadBuildArtifacts@0
+          displayName: 'Download Terraform Artifacts for Prod'
+          inputs:
+            buildType: 'specific'
+            project: "$(System.TeamProject)"
+            pipeline: "POC2-CI"
+            artifactName: "$(artifactName)"
+            buildVersionToDownload: "latest"
+            downloadPath: "$(Pipeline.Workspace)"
+
+        - task: PowerShell@2
+          displayName: 'Generate Terraform Backend Config'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "📝 Generating backend.tf for Prod..."
+              $backendConfig = @"
+              terraform {
+                backend "azurerm" {
+                  resource_group_name  = "$(backendResourceGroup)"
+                  storage_account_name = "$(backendStorageAccount)"
+                  container_name       = "$(backendContainer)"
+                  key                  = "$(teamFolder)/$(environment).tfstate"
+                  subscription_id      = "$(subscriptionid)"
+                }
+              }
+              "@
+              Set-Content -Path "$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/backend.tf" -Value $backendConfig
+              Write-Output "✅ backend.tf generated!"
+
+        - task: replacetokens@6
+          displayName: 'Replace Tokens in Terraform tfvars File'
+          inputs:
+            targetFiles: '$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/$(tfvarsFile)'
+            tokenPattern: 'custom'
+            tokenPrefix: '__'
+            tokenSuffix: '__'
+            actionOnMissing: 'warn'
+            keepToken: false
+
+        - task: PowerShell@2
+          displayName: 'Terraform Apply'
+          inputs:
+            targetType: 'inline'
+            script: |
+              Write-Output "🚀 Running Terraform Apply for Prod..."
+              terraform version
+              terraform init -reconfigure
+              terraform apply -auto-approve -var-file="$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)/$(tfvarsFile)"
+            workingDirectory: '$(Pipeline.Workspace)/$(artifactName)/$(teamFolder)'
