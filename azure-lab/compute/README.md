@@ -73,7 +73,7 @@ variable "servers" {}
 
 # Using the Windows Server module dynamically
 module "windows_servers" {
-  source          = "./modules/windows_server"
+  source          = "./modules/windows_server/${each.value.role}"
   servers        = var.servers
   resource_group = var.resource_group
   location       = var.location
