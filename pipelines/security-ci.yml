@@ -1,13 +1,13 @@
 trigger:
   branches:
     include:
-      - main
+      - main  # Hardcoded branch since parameters are not allowed
   paths:
     include:
-      - azure-lab/security/**
+      - azure-lab/security/**  # Adjusted for correct directory
 
 pool:
-  name: 'Lab'
+  name: 'Lab'  # Hardcoded since pool cannot use parameters
 
 variables:
   - name: artifactName
@@ -20,6 +20,4 @@ extends:
   parameters:
     artifactName: "security-artifacts"
     team: "security"
-    branchFilter: ["main"]
-    pathFilter: "azure-lab/security/**"
-    agentPool: "Lab"
+    agentPool: "Lab"  # Removed `branchFilter` and `pathFilter` from here
