@@ -1,0 +1,119 @@
+parameters:
+  - name: team
+    type: string
+  - name: artifactName
+    type: string
+  - name: environments
+    type: object
+  - name: variableGroup
+    type: string  # Variable Group Name
+
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: ${{ parameters.team }}-CI
+      source: ${{ parameters.team }}-CI
+      trigger:
+        branches:
+          - main
+
+pool:
+  name: 'Lab'
+
+variables:
+  - group: ${{ parameters.variableGroup }}  # 🔹 Attach the variable group that pulls secrets from Key Vault
+  - name: artifactName
+    value: ${{ parameters.artifactName }}
+
+stages:
+  - ${{ each env in parameters.environments }}:
+      - stage: Plan${{ env }}
+        displayName: 'Terraform Plan - ${{ env }}'
+        dependsOn: ${{ 'Apply' + parameters.environments[parameters.environments.index(env) - 1] }}  
+        condition: ${{ env == 'dev' || parameters.environments.index(env) > 0 }}
+        pool:
+          vmImage: 'ubuntu-latest'
+        jobs:
+          - deployment: Terraform_Deploy
+            condition: succeeded()
+            displayName: Terraform Init, Plan & Apply
+            environment: ${{ env }}
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                    - checkout: self
+
+                    - task: TerraformInstaller@1
+                      displayName: 'Install Terraform'
+                      inputs:
+                        terraformVersion: "latest"
+
+                    - task: TerraformCLI@1
+                      displayName: 'Terraform Init - ${{ env }}'
+                      inputs:
+                        command: "init"
+                        backendType: "azurerm"
+                        backendServiceArm: "$(backendServiceArm)"
+                        backendAzureRmResourceGroupName: "$(backendResourceGroup)"
+                        backendAzureRmStorageAccountName: "$(backendStorageAccount)"
+                        backendAzureRmContainerName: "$(backendContainer)"
+                        backendAzureRmKey: "$(team)/${{ env }}.tfstate"
+
+                    - task: TerraformCLI@1
+                      displayName: 'Terraform Validate - ${{ env }}'
+                      inputs:
+                        command: "validate"
+                        provider: "azurerm"
+
+                    - task: TerraformCLI@1
+                      displayName: 'Terraform Plan - ${{ env }}'
+                      inputs:
+                        command: "plan"
+                        provider: "azurerm"
+                        commandOptions: "-var environment=${{ env }} -var tenant_id=$(tenantid) -var subscription_id=$(subscriptionid) -refresh=false -out=${{ env }}-tfplan -input=false -no-color -detailed-exitcode"
+
+                    - task: PublishBuildArtifacts@1
+                      displayName: 'Publish Terraform Plan - ${{ env }}'
+                      inputs:
+                        pathToPublish: '$(System.DefaultWorkingDirectory)/${{ env }}-tfplan'
+                        artifactName: '${{ env }}-tfplan'
+
+      - stage: Apply${{ env }}
+        displayName: 'Terraform Apply - ${{ env }}'
+        dependsOn: Plan${{ env }}
+        condition: succeeded()
+        pool:
+          vmImage: 'ubuntu-latest'
+        jobs:
+          - deployment: Terraform_Deploy
+            condition: succeeded()
+            displayName: Terraform Apply - ${{ env }}
+            environment: ${{ env }}
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                    - checkout: self
+
+                    - task: TerraformCLI@1
+                      displayName: 'Terraform Apply - ${{ env }}'
+                      inputs:
+                        command: "apply"
+                        provider: "azurerm"
+                        commandOptions: "-auto-approve ${{ env }}-tfplan"
+
+                    - task: AzureCLI@2
+                      displayName: 'Release Azure Blob Lock'
+                      condition: canceled()
+                      inputs:
+                        azureSubscription: "$(backendServiceArm)"
+                        scriptType: "pscore"
+                        scriptLocation: "inlineScript"
+                        inlineScript: |
+                          $blob = az storage blob show --account-name "$(backendStorageAccount)" -c "$(backendContainer)" --name "$(team)/${{ env }}.tfstate" | ConvertFrom-Json
+                          if ( (($blob.properties).lease).state -eq 'leased' )
+                          {
+                            az storage blob lease break --account-name "$(backendStorageAccount)" -c "$(backendContainer)" -b "$(team)/${{ env }}.tfstate"
+                          }
