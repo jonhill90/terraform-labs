@@ -17,7 +17,7 @@ stages:
   - stage: Build
     displayName: 'Build Stage'
     pool:
-      name: ${{ parameters.agentPool }}  # ✅ Using parameter instead of variable
+      name: ${{ parameters.agentPool }}
     jobs:
       - job: Build
         displayName: 'Prepare Terraform Artifacts'
@@ -31,6 +31,13 @@ stages:
               SourceFolder: '$(Build.SourcesDirectory)/azure-lab/$(team)'
               Contents: '**'
               TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/$(team)'
+
+          - task: CopyFiles@2
+            displayName: 'Copy Shared Terraform Modules'
+            inputs:
+              SourceFolder: '$(Build.SourcesDirectory)/azure-lab/modules'
+              Contents: '**'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/modules'
 
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Terraform Artifacts'
