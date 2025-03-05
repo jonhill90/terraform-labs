@@ -19,7 +19,7 @@ stages:
   - stage: Build
     displayName: 'Build Stage'
     pool:
-      name: $(agentPool)  # ✅ Now using a variable instead of parameters
+      name: $(agentPool)
     jobs:
       - job: Build
         displayName: 'Prepare Terraform Artifacts'
@@ -27,13 +27,48 @@ stages:
           - checkout: self
             fetchDepth: 1 
 
+          # ✅ Debug: Show all environment variables
+          - script: env | sort
+            displayName: 'Debug: Show Environment Variables'
+
+          # ✅ Debug: Show the directory structure
+          - script: |
+              echo "Checking directory structure..."
+              ls -l $(Build.SourcesDirectory)
+            displayName: 'Debug: List Build Sources Directory'
+
+          # ✅ Debug: Ensure $(team) and $(artifactName) variables are correctly set
+          - script: |
+              echo "DEBUG: team = $(team)"
+              echo "DEBUG: artifactName = $(artifactName)"
+              echo "DEBUG: SourceFolder should be $(Build.SourcesDirectory)/$(team)"
+              echo "DEBUG: TargetFolder should be $(Build.ArtifactStagingDirectory)/$(artifactName)/$(team)"
+            displayName: 'Debug: Check Variable Values'
+
+          # ✅ If the folder is missing, print an error and fail early
+          - script: |
+              if [ ! -d "$(Build.SourcesDirectory)/$(team)" ]; then
+                echo "ERROR: Directory $(Build.SourcesDirectory)/$(team) does not exist!"
+                exit 1
+              fi
+            displayName: 'Debug: Verify Source Folder Exists'
+            continueOnError: false
+
+          # ✅ Copy Terraform Files
           - task: CopyFiles@2
-            displayName: 'Copy Terraform Files for $(team)'  # ✅ Uses a variable instead of parameters
+            displayName: 'Copy Terraform Files for $(team)'
             inputs:
               SourceFolder: '$(Build.SourcesDirectory)/$(team)'
               Contents: '**'
               TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/$(team)'
 
+          # ✅ Debug: Verify that files were copied
+          - script: |
+              echo "Checking target folder structure..."
+              ls -lR $(Build.ArtifactStagingDirectory)/$(artifactName)/$(team)
+            displayName: 'Debug: List Target Directory'
+
+          # ✅ Publish Artifacts
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Terraform Artifacts'
             inputs:
