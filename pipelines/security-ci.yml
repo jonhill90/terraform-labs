@@ -10,7 +10,7 @@ pool:
   name: 'Lab'  # Pool must be hardcoded since parameters don't work here
 
 extends:
-  template: pipelines/templates/template-terraform-ci.yml
+  template: templates/template-terraform-ci.yml
   parameters:
     artifactName: "security-artifacts"
     team: "security"
