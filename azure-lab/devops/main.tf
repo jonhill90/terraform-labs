@@ -30,7 +30,7 @@ resource "azurerm_resource_group" "devops" {
     project     = var.project
   }
 }
-
+/*
 # --------------------------------------------------
 # Secure Vault (local)
 # --------------------------------------------------
@@ -309,7 +309,7 @@ module "twingate_acg" {
   depends_on = [module.twingate_image_push]
 }
 
-/*
+
 # --------------------------------------------------
 # Azure DevOps Build Agent (Linux)
 # --------------------------------------------------
