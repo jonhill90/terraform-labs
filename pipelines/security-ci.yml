@@ -16,7 +16,10 @@ variables:
     value: "security"
 
 extends:
-  template: templates/template-terraform-ci.yml
+  template: pipelines/templates/template-terraform-ci.yml
   parameters:
-    artifactName: "$(artifactName)"
-    team: "$(team)"
+    artifactName: "security-artifacts"
+    team: "security"
+    branchFilter: ["main"]
+    pathFilter: "security/**"
+    agentPool: "Lab"
