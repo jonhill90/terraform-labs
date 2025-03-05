@@ -1,0 +1,56 @@
+parameters:
+  - name: team
+    type: string
+  - name: artifactName
+    type: string
+  - name: pathFilter
+    type: string
+
+name: ${{ parameters.team }}-CI-$(Build.SourceBranchName)-$(Build.BuildId)
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - ${{ parameters.pathFilter }}
+
+pool:
+  name: 'Lab'
+
+variables:
+  - name: artifactName
+    value: ${{ parameters.artifactName }}
+
+stages:
+  - stage: Build
+    displayName: 'Build Stage'
+    jobs:
+      - job: Build
+        displayName: 'Prepare Terraform Artifacts'
+        steps:
+          - checkout: self
+            fetchDepth: 1 
+
+          # Copy Terraform Files
+          - task: CopyFiles@2
+            displayName: 'Copy ${{ parameters.team }} Terraform Files'
+            inputs:
+              SourceFolder: '$(Build.SourcesDirectory)/${{ parameters.team }}'
+              Contents: '**'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/${{ parameters.team }}'
+
+          # Copy Shared Modules
+          - task: CopyFiles@2
+            displayName: 'Copy Shared Modules'
+            inputs:
+              SourceFolder: '$(Build.SourcesDirectory)/modules'
+              Contents: '**'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/modules'
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Terraform Artifacts'
+            inputs:
+              pathToPublish: '$(Build.ArtifactStagingDirectory)/$(artifactName)'
+              artifactName: '$(artifactName)'

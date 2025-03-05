@@ -1,0 +1,31 @@
+trigger:
+  branches:
+    include:
+      - $(branchFilter)
+  paths:
+    include:
+      - $(pathFilter)
+
+pool:
+  name: '$(agentPool)'  # Specify the self-hosted agent pool
+
+variables:
+  - name: branchFilter
+    value: "main"
+  - name: pathFilter
+    value: "security/**"
+  - name: agentPool
+    value: "Lab"
+  - name: artifactName
+    value: "security-artifacts"
+  - name: team
+    value: "security"
+
+extends:
+  template: template-ci-build.yml  # Reference the shared template
+  parameters:
+    branchFilter: ["$(branchFilter)"]
+    pathFilter: "$(pathFilter)"
+    agentPool: "$(agentPool)"
+    artifactName: "$(artifactName)"
+    team: "$(team)"
