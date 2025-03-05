@@ -1,0 +1,7 @@
+- template: templates/terraform-plan.yml
+  parameters:
+    team: "poc"
+    artifactName: "poc-artifacts"
+    environments: ["dev", "test", "prod"]
+    variableGroup: "POC"
+    backendServiceArm: "My-Terraform-Service-Connection"
