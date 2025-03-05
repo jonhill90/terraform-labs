@@ -13,17 +13,20 @@ parameters:
     type: string
     default: "Lab"
 
-name: ${{ parameters.team }}-CI-$(Build.SourceBranchName)-$(Build.BuildId)
+# 🚀 Name field does NOT support parameters
+name: CI-$(Build.SourceBranchName)-$(Build.BuildId)  # Removed parameter reference
 
 trigger:
   branches:
-    include: ${{ parameters.branchFilter }}
+    include:
+      - main  # Hardcoded because parameters are not supported here
   paths:
     include:
-      - ${{ parameters.pathFilter }}
+      - security/**  # Hardcoded for same reason
 
+# 🚀 Pool CANNOT use parameters, so it's set directly
 pool:
-  name: '${{ parameters.agentPool }}'
+  name: "Lab"
 
 variables:
   - name: artifactName
@@ -42,11 +45,11 @@ stages:
             fetchDepth: 1 
 
           - task: CopyFiles@2
-            displayName: 'Copy ${{ parameters.team }} Terraform Files'
+            displayName: 'Copy $(team) Terraform Files'  # Using variables (allowed)
             inputs:
-              SourceFolder: '$(Build.SourcesDirectory)/${{ parameters.team }}'
+              SourceFolder: '$(Build.SourcesDirectory)/$(team)'
               Contents: '**'
-              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/${{ parameters.team }}'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/$(team)'
 
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Terraform Artifacts'
