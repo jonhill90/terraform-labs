@@ -16,7 +16,7 @@ variables:
     value: "security"
 
 extends:
-  template: pipelines/templates/template-terraform-ci.yml
+  template: templates/template-terraform-ci.yml
   parameters:
     artifactName: "security-artifacts"
     team: "security"
