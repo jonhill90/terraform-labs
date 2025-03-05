@@ -1,27 +1,35 @@
 parameters:
-  - name: team
-    type: string
   - name: artifactName
     type: string
+  - name: team
+    type: string
+  - name: branchFilter
+    type: object
+    default: ["main"]
   - name: pathFilter
     type: string
+    default: "security/**"
+  - name: agentPool
+    type: string
+    default: "Lab"
 
 name: ${{ parameters.team }}-CI-$(Build.SourceBranchName)-$(Build.BuildId)
 
 trigger:
   branches:
-    include:
-      - main
+    include: ${{ parameters.branchFilter }}
   paths:
     include:
       - ${{ parameters.pathFilter }}
 
 pool:
-  name: 'Lab'
+  name: '${{ parameters.agentPool }}'
 
 variables:
   - name: artifactName
     value: ${{ parameters.artifactName }}
+  - name: team
+    value: ${{ parameters.team }}
 
 stages:
   - stage: Build
@@ -33,21 +41,12 @@ stages:
           - checkout: self
             fetchDepth: 1 
 
-          # Copy Terraform Files
           - task: CopyFiles@2
             displayName: 'Copy ${{ parameters.team }} Terraform Files'
             inputs:
               SourceFolder: '$(Build.SourcesDirectory)/${{ parameters.team }}'
               Contents: '**'
               TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/${{ parameters.team }}'
-
-          # Copy Shared Modules
-          - task: CopyFiles@2
-            displayName: 'Copy Shared Modules'
-            inputs:
-              SourceFolder: '$(Build.SourcesDirectory)/modules'
-              Contents: '**'
-              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/modules'
 
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Terraform Artifacts'
