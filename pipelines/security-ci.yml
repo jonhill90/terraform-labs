@@ -1,17 +1,25 @@
 trigger:
   branches:
     include:
-      - main  # Hardcoded because parameters are not supported in `trigger`
+      - main
   paths:
     include:
-      - security/**  # Hardcoded because parameters are not supported in `paths`
+      - azure-lab/security/**
 
 pool:
-  name: 'Lab'  # Pool must be hardcoded since parameters don't work here
+  name: 'Lab'
+
+variables:
+  - name: artifactName
+    value: "security-artifacts"
+  - name: team
+    value: "security"
 
 extends:
   template: templates/template-terraform-ci.yml
   parameters:
     artifactName: "security-artifacts"
     team: "security"
+    branchFilter: ["main"]
+    pathFilter: "azure-lab/security/**"
     agentPool: "Lab"
