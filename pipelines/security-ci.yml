@@ -1,31 +1,22 @@
 trigger:
   branches:
     include:
-      - $(branchFilter)
+      - main  # Hardcoded, since parameters/variables cannot be used in `trigger`
   paths:
     include:
-      - $(pathFilter)
+      - security/**  # Hardcoded for the same reason
 
 pool:
-  name: '$(agentPool)'  # Specify the self-hosted agent pool
+  name: 'Lab'  # Pool must be hardcoded since parameters/variables don't work here
 
 variables:
-  - name: branchFilter
-    value: "main"
-  - name: pathFilter
-    value: "security/**"
-  - name: agentPool
-    value: "Lab"
   - name: artifactName
     value: "security-artifacts"
   - name: team
     value: "security"
 
 extends:
-  template: templates/template-terraform-ci.yml  # Reference the shared template
+  template: templates/template-terraform-ci.yml
   parameters:
-    branchFilter: ["$(branchFilter)"]
-    pathFilter: "$(pathFilter)"
-    agentPool: "$(agentPool)"
     artifactName: "$(artifactName)"
     team: "$(team)"
