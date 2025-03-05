@@ -3,34 +3,23 @@ parameters:
     type: string
   - name: team
     type: string
-  - name: branchFilter
-    type: object
-    default: ["main"]
-  - name: pathFilter
-    type: string
-    default: "security/**"
   - name: agentPool
     type: string
     default: "Lab"
-
-trigger:
-  branches:
-    include: ${{ parameters.branchFilter }}
-  paths:
-    include:
-      - ${{ parameters.pathFilter }}
 
 variables:
   - name: artifactName
     value: ${{ parameters.artifactName }}
   - name: team
     value: ${{ parameters.team }}
+  - name: agentPool
+    value: ${{ parameters.agentPool }}
 
 stages:
   - stage: Build
     displayName: 'Build Stage'
     pool:
-      name: ${{ parameters.agentPool }}  # ✅ Pool is now inside `stages`
+      name: $(agentPool)  # ✅ Now using a variable instead of parameters
     jobs:
       - job: Build
         displayName: 'Prepare Terraform Artifacts'
@@ -39,11 +28,11 @@ stages:
             fetchDepth: 1 
 
           - task: CopyFiles@2
-            displayName: 'Copy Terraform Files for ${{ parameters.team }}'
+            displayName: 'Copy Terraform Files for $(team)'  # ✅ Uses a variable instead of parameters
             inputs:
-              SourceFolder: '$(Build.SourcesDirectory)/${{ parameters.team }}'
+              SourceFolder: '$(Build.SourcesDirectory)/$(team)'
               Contents: '**'
-              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/${{ parameters.team }}'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/$(team)'
 
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Terraform Artifacts'
