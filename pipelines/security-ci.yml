@@ -22,7 +22,7 @@ variables:
     value: "security"
 
 extends:
-  template: template-terraform-ci.yml  # Reference the shared template
+  template: templates/template-terraform-ci.yml  # Reference the shared template
   parameters:
     branchFilter: ["$(branchFilter)"]
     pathFilter: "$(pathFilter)"
