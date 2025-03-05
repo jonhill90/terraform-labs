@@ -1,25 +1,17 @@
 trigger:
   branches:
     include:
-      - main  # Hardcoded, since parameters/variables cannot be used in `trigger`
+      - main  # Hardcoded because parameters are not supported in `trigger`
   paths:
     include:
-      - security/**  # Hardcoded for the same reason
+      - security/**  # Hardcoded because parameters are not supported in `paths`
 
 pool:
-  name: 'Lab'  # Pool must be hardcoded since parameters/variables don't work here
-
-variables:
-  - name: artifactName
-    value: "security-artifacts"
-  - name: team
-    value: "security"
+  name: 'Lab'  # Pool must be hardcoded since parameters don't work here
 
 extends:
-  template: templates/template-terraform-ci.yml
+  template: pipelines/templates/template-terraform-ci.yml
   parameters:
     artifactName: "security-artifacts"
     team: "security"
-    branchFilter: ["main"]
-    pathFilter: "security/**"
     agentPool: "Lab"
