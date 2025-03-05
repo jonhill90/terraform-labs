@@ -17,7 +17,7 @@ stages:
   - stage: Build
     displayName: 'Build Stage'
     pool:
-      name: $(agentPool)  # ✅ Now using a variable instead of parameters
+      name: $(agentPool)  
     jobs:
       - job: Build
         displayName: 'Prepare Terraform Artifacts'
@@ -28,7 +28,7 @@ stages:
           - task: CopyFiles@2
             displayName: 'Copy Terraform Files for $(team)'
             inputs:
-              SourceFolder: '$(Build.SourcesDirectory)/azure-lab/$(team)'  # ✅ Fixed path
+              SourceFolder: '$(Build.SourcesDirectory)/azure-lab/$(team)'  
               Contents: '**'
               TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/$(team)'
 
