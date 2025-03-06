@@ -10,18 +10,17 @@ parameters:
   - name: backendServiceArm
     type: string  # Optional backend service connection
 
-variables:
-  - group: ${{ parameters.variableGroup }}  # Pull secrets from Key Vault
-  - name: artifactName
-    value: ${{ parameters.artifactName }}
-  - name: backendServiceArm
-    value: ${{ coalesce(parameters.backendServiceArm, 'Default-Terraform-Service-Connection') }}
-
 stages:
   - ${{ each env in parameters.environments }}:
       - stage: Plan${{ env }}
         displayName: 'Terraform Plan - ${{ env }}'
         dependsOn: []
+        variables:
+          - group: ${{ parameters.variableGroup }}  # Pull secrets from Key Vault
+          - name: artifactName
+            value: ${{ parameters.artifactName }}
+          - name: backendServiceArm
+            value: ${{ coalesce(parameters.backendServiceArm, 'Default-Terraform-Service-Connection') }}
         jobs:
           - deployment: Terraform_Plan
             displayName: 'Terraform Init & Plan - ${{ env }}'
