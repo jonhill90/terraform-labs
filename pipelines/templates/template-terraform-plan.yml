@@ -48,7 +48,7 @@ stages:
                         backendAzureRmStorageAccountName: "$(backendStorageAccount)"
                         backendAzureRmContainerName: "$(backendContainer)"
                         backendAzureRmKey: "$(team)/${{ env }}.tfstate"
-                      workingDirectory: '$(Pipeline.Workspace)/$(artifactName)/$(team)'
+                      cwd: '$(Pipeline.Workspace)/$(artifactName)/$(team)'
 
                     # 🔽 **Terraform Validate**
                     - task: TerraformCLI@1
@@ -56,7 +56,7 @@ stages:
                       inputs:
                         command: "validate"
                         provider: "azurerm"
-                      workingDirectory: '$(Pipeline.Workspace)/$(artifactName)/$(team)'
+                      cwd: '$(Pipeline.Workspace)/$(artifactName)/$(team)'
 
                     # 🔽 **Terraform Plan**
                     - task: TerraformCLI@1
@@ -65,4 +65,4 @@ stages:
                         command: "plan"
                         provider: "azurerm"
                         commandOptions: "-var environment=${{ env }} -var tenant_id=$(tenantid) -var subscription_id=$(subscriptionid) -refresh=false -out=${{ env }}-tfplan -input=false -no-color -detailed-exitcode"
-                      workingDirectory: '$(Pipeline.Workspace)/$(artifactName)/$(team)'
+                      cwd: '$(Pipeline.Workspace)/$(artifactName)/$(team)'
