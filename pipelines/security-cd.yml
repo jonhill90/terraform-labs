@@ -1,7 +1,8 @@
-- template: templates/terraform-plan.yml
-  parameters:
-    team: "security"
-    artifactName: "security-artifacts"
-    environments: ["lab"]
-    variableGroup: "Security"
-    backendServiceArm: "Lab"
+stages:
+  - template: templates/template-terraform-plan.yml
+    parameters:
+      team: "security"
+      artifactName: "security-artifacts"
+      environments: ["lab"]
+      variableGroup: "Security"
+      backendServiceArm: "Lab"
