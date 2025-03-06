@@ -16,7 +16,7 @@ parameters:
   - name: workingDirectory
     type: string
   - name: agentPool
-    type: string  # ✅ Now configurable from the calling pipeline
+    type: string  # ✅ Configurable from the calling pipeline
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -34,6 +34,23 @@ stages:
             deploy:
               steps:
                 - checkout: self
+
+                # ✅ Debug Step: Log system info & Terraform path
+                - script: |
+                    echo "🔍 Debugging Information"
+                    echo "🏗️  Agent Name: $(Agent.Name)"
+                    echo "🔧 Agent Machine Name: $(Agent.MachineName)"
+                    echo "💾 Working Directory: ${{ parameters.workingDirectory }}"
+                    echo "📦 Terraform Version:"
+                    terraform version || echo "⚠️ Terraform not found!"
+                    echo "🛠️ Terraform Path:"
+                    which terraform || echo "⚠️ Terraform binary not found!"
+                    echo "🌎 Environment Variables:"
+                    env | grep -i terraform
+                    echo "🔑 Service Connection: ${{ parameters.backendServiceArm }}"
+                  displayName: "Debug: Log Environment & Terraform Path"
+                  failOnStderr: false
+                  continueOnError: true
 
                 # ✅ Ensure Terraform is installed
                 - task: TerraformInstaller@1
