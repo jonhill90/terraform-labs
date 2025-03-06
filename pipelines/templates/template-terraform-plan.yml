@@ -16,15 +16,15 @@ parameters:
   - name: workingDirectory
     type: string
   - name: agentPool
-    type: string  # ✅ Now configurable from the calling pipeline
+    type: string
 
 stages:
   - stage: ${{ parameters.stageName }}
     displayName: 'Terraform Plan - ${{ parameters.stageDisplayName }}'
     pool:
-      name: ${{ parameters.agentPool }}  # ✅ Uses the passed-in agent pool
+      name: ${{ parameters.agentPool }}
     variables:
-      - group: ${{ parameters.variableGroup }}  # Pull secrets from Key Vault
+      - group: ${{ parameters.variableGroup }}
     jobs:
       - deployment: Terraform_Plan
         displayName: 'Terraform Init & Plan - ${{ parameters.stageDisplayName }}'
@@ -34,7 +34,7 @@ stages:
             deploy:
               steps:
                 - checkout: self
-
+                
                 - task: TerraformInstaller@1
                   displayName: 'Install Terraform'
                   inputs:
@@ -50,14 +50,14 @@ stages:
                     backendAzureRmStorageAccountName: "$(backendStorageAccount)"
                     backendAzureRmContainerName: "$(backendContainer)"
                     backendAzureRmKey: "$(team)/${{ parameters.environmentName }}.tfstate"
-                  workingDirectory: ${{ parameters.workingDirectory }}
+                    workingDirectory: ${{ parameters.workingDirectory }}
 
                 - task: TerraformCLI@1
                   displayName: 'Terraform Validate - ${{ parameters.stageDisplayName }}'
                   inputs:
                     command: "validate"
                     provider: "azurerm"
-                  workingDirectory: ${{ parameters.workingDirectory }}
+                    workingDirectory: ${{ parameters.workingDirectory }}
 
                 - task: TerraformCLI@1
                   displayName: 'Terraform Plan - ${{ parameters.stageDisplayName }}'
@@ -65,4 +65,4 @@ stages:
                     command: "plan"
                     provider: "azurerm"
                     commandOptions: "-var environment=${{ parameters.environmentName }} -var tenant_id=$(tenantid) -var subscription_id=$(subscriptionid) -refresh=false -out=${{ parameters.environmentName }}-tfplan -input=false -no-color -detailed-exitcode"
-                  workingDirectory: ${{ parameters.workingDirectory }}
+                    workingDirectory: ${{ parameters.workingDirectory }}
