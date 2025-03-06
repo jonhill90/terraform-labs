@@ -24,7 +24,7 @@ stages:
     pool:
       name: ${{ parameters.agentPool }}  # ✅ Uses the passed-in agent pool
     variables:
-      - group: ${{ parameters.variableGroup }}  # Pull secrets from Key Vault
+      - group: ${{ parameters.variableGroup }}  # ✅ Pull secrets from Key Vault
     jobs:
       - deployment: Terraform_Plan
         displayName: 'Terraform Init & Plan - ${{ parameters.stageDisplayName }}'
@@ -35,23 +35,26 @@ stages:
               steps:
                 - checkout: self
 
+                # ✅ Ensure Terraform is installed
                 - task: TerraformInstaller@1
                   displayName: 'Install Terraform'
                   inputs:
                     terraformVersion: "latest"
 
+                # ✅ Initialize Terraform backend
                 - task: TerraformTaskV2@2
                   displayName: 'Terraform Init - ${{ parameters.stageDisplayName }}'
                   inputs:
                     command: "init"
                     backendType: "azurerm"
-                    backendServiceArm: "$(backendServiceArm)"
+                    backendServiceArm: ${{ parameters.backendServiceArm }}  # ✅ Fixed!
                     backendAzureRmResourceGroupName: "$(backendResourceGroup)"
                     backendAzureRmStorageAccountName: "$(backendStorageAccount)"
                     backendAzureRmContainerName: "$(backendContainer)"
                     backendAzureRmKey: "$(team)/${{ parameters.environmentName }}.tfstate"
                     workingDirectory: ${{ parameters.workingDirectory }}
 
+                # ✅ Validate Terraform configuration
                 - task: TerraformTaskV2@2
                   displayName: 'Terraform Validate - ${{ parameters.stageDisplayName }}'
                   inputs:
@@ -59,6 +62,7 @@ stages:
                     provider: "azurerm"
                     workingDirectory: ${{ parameters.workingDirectory }}
 
+                # ✅ Run Terraform plan
                 - task: TerraformTaskV2@2
                   displayName: 'Terraform Plan - ${{ parameters.stageDisplayName }}'
                   inputs:
