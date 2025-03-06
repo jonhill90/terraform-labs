@@ -15,6 +15,9 @@ terraform.tfvars.json
 *.tfplan
 .plan.cache
 
+# Terraform Backends
+backend.tf
+
 # Ansible Vault encrypted files (if unencrypted versions exist)
 *.vault.yml
 *.vault.yaml

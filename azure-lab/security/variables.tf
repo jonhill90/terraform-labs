@@ -38,6 +38,33 @@ variable "tenant_id" {
 }
 
 # ----------------------------------------
+# Azure Service Principal
+# ----------------------------------------
+variable "client_id" {
+  description = "Azure Service Principal Client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "client_secret" {
+  description = "Azure Service Principal Client Secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "admin_object_id" {
+  description = "Admin Account"
+  type        = string
+  sensitive   = true
+}
+
+variable "sp_object_id" {
+  description = "Service Principal Object ID"
+  type        = string
+  sensitive   = true
+}
+
+# ----------------------------------------
 # Storage Account
 # ----------------------------------------
 variable "storage_account" {

@@ -33,6 +33,18 @@ resource "azurerm_storage_account" "tfstate" {
   depends_on = [azurerm_resource_group.security]
 }
 
+# ----------------------------------------
+# Storage Account Container
+# ----------------------------------------
+resource "azurerm_storage_container" "tfstate" {
+  name                  = "tfstate"
+  storage_account_name  = azurerm_storage_account.tfstate.name
+  container_access_type = "private"
+  provider = azurerm.lab
+
+  depends_on = [azurerm_storage_account.tfstate]
+}
+
 # --------------------------------------------------
 # Secure Vault
 # --------------------------------------------------
@@ -52,4 +64,52 @@ module "vault" {
   }
 
   depends_on = [azurerm_resource_group.security]
+}
+
+# --------------------------------------------------
+# Secure Vault Access (Azure Admin Account)
+# --------------------------------------------------
+module "vault_access" {
+  source       = "../../modules/azurerm/security/vault-access"
+  key_vault_id = module.vault.key_vault_id
+
+  access_policies = [
+    {
+      tenant_id               = var.tenant_id
+      object_id               = var.admin_object_id
+      key_permissions         = ["Get", "List"]
+      secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
+      certificate_permissions = ["Get", "List"]
+    }
+  ]
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [module.vault]
+}
+
+# --------------------------------------------------
+# Secure Vault Access (Service Principal)
+# --------------------------------------------------
+module "sp_vault_access" {
+  source       = "../../modules/azurerm/security/vault-access"
+  key_vault_id = module.vault.key_vault_id
+
+  access_policies = [
+    {
+      tenant_id               = var.tenant_id
+      object_id               = var.sp_object_id
+      key_permissions         = ["Get", "List"]
+      secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
+      certificate_permissions = ["Get", "List"]
+    }
+  ]
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [module.vault]
 }
