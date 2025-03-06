@@ -6,25 +6,12 @@ parameters:
   - name: environments
     type: object
   - name: variableGroup
-    type: string  # Variable Group Name
+    type: string
   - name: backendServiceArm
     type: string  # Optional backend service connection
 
-trigger: none  # Runs only when explicitly triggered
-
-resources:
-  pipelines:
-    - pipeline: ${{ parameters.team }}-CI
-      source: ${{ parameters.team }}-CI
-      trigger:
-        branches:
-          - main
-
-pool:
-  name: 'Lab'
-
 variables:
-  - group: ${{ parameters.variableGroup }}  # Pulls secrets from Key Vault
+  - group: ${{ parameters.variableGroup }}  # Pull secrets from Key Vault
   - name: artifactName
     value: ${{ parameters.artifactName }}
   - name: backendServiceArm
@@ -35,11 +22,8 @@ stages:
       - stage: Plan${{ env }}
         displayName: 'Terraform Plan - ${{ env }}'
         dependsOn: []
-        pool:
-          vmImage: 'ubuntu-latest'
         jobs:
           - deployment: Terraform_Plan
-            condition: succeeded()
             displayName: 'Terraform Init & Plan - ${{ env }}'
             environment: ${{ env }}
             strategy:
@@ -48,11 +32,13 @@ stages:
                   steps:
                     - checkout: self
 
+                    # 🔽 **Ensure Terraform is Installed**
                     - task: TerraformInstaller@1
                       displayName: 'Install Terraform'
                       inputs:
                         terraformVersion: "latest"
 
+                    # 🔽 **Terraform Init**
                     - task: TerraformCLI@1
                       displayName: 'Terraform Init - ${{ env }}'
                       inputs:
@@ -63,22 +49,21 @@ stages:
                         backendAzureRmStorageAccountName: "$(backendStorageAccount)"
                         backendAzureRmContainerName: "$(backendContainer)"
                         backendAzureRmKey: "$(team)/${{ env }}.tfstate"
+                      workingDirectory: '$(Pipeline.Workspace)/$(artifactName)/$(team)'
 
+                    # 🔽 **Terraform Validate**
                     - task: TerraformCLI@1
                       displayName: 'Terraform Validate - ${{ env }}'
                       inputs:
                         command: "validate"
                         provider: "azurerm"
+                      workingDirectory: '$(Pipeline.Workspace)/$(artifactName)/$(team)'
 
+                    # 🔽 **Terraform Plan**
                     - task: TerraformCLI@1
                       displayName: 'Terraform Plan - ${{ env }}'
                       inputs:
                         command: "plan"
                         provider: "azurerm"
                         commandOptions: "-var environment=${{ env }} -var tenant_id=$(tenantid) -var subscription_id=$(subscriptionid) -refresh=false -out=${{ env }}-tfplan -input=false -no-color -detailed-exitcode"
-
-                    - task: PublishBuildArtifacts@1
-                      displayName: 'Publish Terraform Plan - ${{ env }}'
-                      inputs:
-                        pathToPublish: '$(System.DefaultWorkingDirectory)/${{ env }}-tfplan'
-                        artifactName: '${{ env }}-tfplan'
+                      workingDirectory: '$(Pipeline.Workspace)/$(artifactName)/$(team)'
