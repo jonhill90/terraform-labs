@@ -16,7 +16,7 @@ parameters:
   - name: workingDirectory
     type: string
   - name: agentPool
-    type: string
+    type: string 
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -24,7 +24,7 @@ stages:
     pool:
       name: ${{ parameters.agentPool }}
     variables:
-      - group: ${{ parameters.variableGroup }}
+      - group: ${{ parameters.variableGroup }}  # Pull secrets from Key Vault
     jobs:
       - deployment: Terraform_Plan
         displayName: 'Terraform Init & Plan - ${{ parameters.stageDisplayName }}'
@@ -34,13 +34,13 @@ stages:
             deploy:
               steps:
                 - checkout: self
-                
+
                 - task: TerraformInstaller@1
                   displayName: 'Install Terraform'
                   inputs:
                     terraformVersion: "latest"
 
-                - task: TerraformCLI@1
+                - task: TerraformTaskV2
                   displayName: 'Terraform Init - ${{ parameters.stageDisplayName }}'
                   inputs:
                     command: "init"
@@ -52,14 +52,14 @@ stages:
                     backendAzureRmKey: "$(team)/${{ parameters.environmentName }}.tfstate"
                     workingDirectory: ${{ parameters.workingDirectory }}
 
-                - task: TerraformCLI@1
+                - task: TerraformTaskV2
                   displayName: 'Terraform Validate - ${{ parameters.stageDisplayName }}'
                   inputs:
                     command: "validate"
                     provider: "azurerm"
                     workingDirectory: ${{ parameters.workingDirectory }}
 
-                - task: TerraformCLI@1
+                - task: TerraformTaskV2
                   displayName: 'Terraform Plan - ${{ parameters.stageDisplayName }}'
                   inputs:
                     command: "plan"
