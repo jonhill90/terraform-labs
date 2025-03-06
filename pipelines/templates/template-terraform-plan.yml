@@ -7,8 +7,6 @@ parameters:
     type: object
   - name: variableGroup
     type: string
-  - name: backendServiceArm
-    type: string  # Optional backend service connection
 
 stages:
   - ${{ each env in parameters.environments }}:
@@ -19,8 +17,6 @@ stages:
           - group: ${{ parameters.variableGroup }}  # Pull secrets from Key Vault
           - name: artifactName
             value: ${{ parameters.artifactName }}
-          - name: backendServiceArm
-            value: ${{ coalesce(parameters.backendServiceArm, 'Default-Terraform-Service-Connection') }}
         jobs:
           - deployment: Terraform_Plan
             displayName: 'Terraform Init & Plan - ${{ env }}'
@@ -48,7 +44,7 @@ stages:
                         backendAzureRmStorageAccountName: "$(backendStorageAccount)"
                         backendAzureRmContainerName: "$(backendContainer)"
                         backendAzureRmKey: "$(team)/${{ env }}.tfstate"
-                      cwd: '$(Pipeline.Workspace)/$(artifactName)/$(team)'
+                      workingDirectory: "$(Pipeline.Workspace)/$(artifactName)/$(team)"
 
                     # 🔽 **Terraform Validate**
                     - task: TerraformCLI@1
@@ -56,7 +52,7 @@ stages:
                       inputs:
                         command: "validate"
                         provider: "azurerm"
-                      cwd: '$(Pipeline.Workspace)/$(artifactName)/$(team)'
+                      workingDirectory: "$(Pipeline.Workspace)/$(artifactName)/$(team)"
 
                     # 🔽 **Terraform Plan**
                     - task: TerraformCLI@1
@@ -64,5 +60,12 @@ stages:
                       inputs:
                         command: "plan"
                         provider: "azurerm"
-                        commandOptions: "-var environment=${{ env }} -var tenant_id=$(tenantid) -var subscription_id=$(subscriptionid) -refresh=false -out=${{ env }}-tfplan -input=false -no-color -detailed-exitcode"
-                      cwd: '$(Pipeline.Workspace)/$(artifactName)/$(team)'
+                        commandOptions: "-var environment=${{ env }} -var tenant_id=$(tenantid) -var subscription_id=$(subscriptionid) -refresh=false -out=tfplan -input=false -no-color -detailed-exitcode"
+                      workingDirectory: "$(Pipeline.Workspace)/$(artifactName)/$(team)"
+
+                    # 🔽 **Publish Plan Results**
+                    - task: PublishBuildArtifacts@1
+                      displayName: "Publish Terraform Plan - ${{ env }}"
+                      inputs:
+                        pathToPublish: "$(Pipeline.Workspace)/$(artifactName)/$(team)/tfplan"
+                        artifactName: "${{ env }}-tfplan"

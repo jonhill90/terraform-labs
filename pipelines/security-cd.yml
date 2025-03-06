@@ -5,4 +5,3 @@ stages:
       artifactName: "security-artifacts"
       environments: ["lab"]
       variableGroup: "Security"
-      backendServiceArm: "Lab"
