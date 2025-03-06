@@ -1,7 +1,25 @@
+trigger: none  # Runs only when explicitly triggered
+
+resources:
+  pipelines:
+    - pipeline: Security-CI
+      source: Security-CI
+      trigger:
+        branches:
+          - main
+
+pool:
+  name: 'Lab'
+
 stages:
   - template: templates/template-terraform-plan.yml
     parameters:
       team: "security"
       artifactName: "security-artifacts"
-      environments: ["lab"]
       variableGroup: "Security"
+      backendServiceArm: "Lab"
+      environmentName: "lab"
+      stageName: "lab"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/security-artifacts/security"
+      agentPool: "Lab"
