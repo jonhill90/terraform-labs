@@ -3,72 +3,66 @@ parameters:
     type: string
   - name: artifactName
     type: string
-  - name: environments
-    type: object
   - name: variableGroup
     type: string
   - name: backendServiceArm
-    type: string  # Optional backend service connection
+    type: string
+  - name: environmentName
+    type: string
+  - name: stageName
+    type: string
+  - name: stageDisplayName
+    type: string
+  - name: workingDirectory
+    type: string
+  - name: agentPool
+    type: string  # ✅ Now configurable from the calling pipeline
 
 stages:
-  - ${{ each env in parameters.environments }}:
-      - stage: Plan${{ env }}
-        displayName: 'Terraform Plan - ${{ env }}'
-        dependsOn: []
-        variables:
-          - group: ${{ parameters.variableGroup }}  # Pull secrets from Key Vault
-          - name: artifactName
-            value: ${{ parameters.artifactName }}
-          - name: backendServiceArm
-            value: ${{ coalesce(parameters.backendServiceArm, 'Default-Terraform-Service-Connection') }}
-        jobs:
-          - deployment: Terraform_Plan
-            displayName: 'Terraform Init & Plan - ${{ env }}'
-            environment: ${{ env }}
-            strategy:
-              runOnce:
-                deploy:
-                  steps:
-                    - checkout: self
+  - stage: ${{ parameters.stageName }}
+    displayName: 'Terraform Plan - ${{ parameters.stageDisplayName }}'
+    pool:
+      name: ${{ parameters.agentPool }}  # ✅ Uses the passed-in agent pool
+    variables:
+      - group: ${{ parameters.variableGroup }}  # Pull secrets from Key Vault
+    jobs:
+      - deployment: Terraform_Plan
+        displayName: 'Terraform Init & Plan - ${{ parameters.stageDisplayName }}'
+        environment: ${{ parameters.environmentName }}
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
 
-                    # 🔽 **Ensure Terraform is Installed**
-                    - task: TerraformInstaller@1
-                      displayName: 'Install Terraform'
-                      inputs:
-                        terraformVersion: "latest"
+                - task: TerraformInstaller@1
+                  displayName: 'Install Terraform'
+                  inputs:
+                    terraformVersion: "latest"
 
-                    # 🔽 **Terraform Init**
-                    - task: TerraformCLI@1
-                      displayName: 'Terraform Init - ${{ env }}'
-                      inputs:
-                        command: "init"
-                        backendType: "azurerm"
-                        backendServiceArm: "$(backendServiceArm)"
-                        backendAzureRmResourceGroupName: "$(backendResourceGroup)"
-                        backendAzureRmStorageAccountName: "$(backendStorageAccount)"
-                        backendAzureRmContainerName: "$(backendContainer)"
-                        backendAzureRmKey: "$(team)/${{ env }}.tfstate"
-                        commandOptions: "-chdir=$(Pipeline.Workspace)/$(artifactName)/$(team)"  # ✅ FIXED
+                - task: TerraformCLI@1
+                  displayName: 'Terraform Init - ${{ parameters.stageDisplayName }}'
+                  inputs:
+                    command: "init"
+                    backendType: "azurerm"
+                    backendServiceArm: "$(backendServiceArm)"
+                    backendAzureRmResourceGroupName: "$(backendResourceGroup)"
+                    backendAzureRmStorageAccountName: "$(backendStorageAccount)"
+                    backendAzureRmContainerName: "$(backendContainer)"
+                    backendAzureRmKey: "$(team)/${{ parameters.environmentName }}.tfstate"
+                  workingDirectory: ${{ parameters.workingDirectory }}
 
-                    # 🔽 **Terraform Validate**
-                    - task: TerraformCLI@1
-                      displayName: 'Terraform Validate - ${{ env }}'
-                      inputs:
-                        command: "validate"
-                        provider: "azurerm"
-                        commandOptions: "-chdir=$(Pipeline.Workspace)/$(artifactName)/$(team)"  # ✅ FIXED
+                - task: TerraformCLI@1
+                  displayName: 'Terraform Validate - ${{ parameters.stageDisplayName }}'
+                  inputs:
+                    command: "validate"
+                    provider: "azurerm"
+                  workingDirectory: ${{ parameters.workingDirectory }}
 
-                    # 🔽 **Terraform Plan**
-                    - task: TerraformCLI@1
-                      displayName: 'Terraform Plan - ${{ env }}'
-                      inputs:
-                        command: "plan"
-                        provider: "azurerm"
-                        commandOptions: "-var environment=${{ env }} -var tenant_id=$(tenantid) -var subscription_id=$(subscriptionid) -refresh=false -out=tfplan -input=false -no-color -detailed-exitcode -chdir=$(Pipeline.Workspace)/$(artifactName)/$(team)"  # ✅ FIXED
-
-                    # 🔽 **Publish Plan Results**
-                    - task: PublishBuildArtifacts@1
-                      displayName: "Publish Terraform Plan - ${{ env }}"
-                      inputs:
-                        pathToPublish: "$(Pipeline.Workspace)/$(artifactName)/$(team)/tfplan"
-                        artifactName: "${{ env }}-tfplan"
+                - task: TerraformCLI@1
+                  displayName: 'Terraform Plan - ${{ parameters.stageDisplayName }}'
+                  inputs:
+                    command: "plan"
+                    provider: "azurerm"
+                    commandOptions: "-var environment=${{ parameters.environmentName }} -var tenant_id=$(tenantid) -var subscription_id=$(subscriptionid) -refresh=false -out=${{ parameters.environmentName }}-tfplan -input=false -no-color -detailed-exitcode"
+                  workingDirectory: ${{ parameters.workingDirectory }}
