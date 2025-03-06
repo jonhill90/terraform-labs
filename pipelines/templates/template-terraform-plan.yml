@@ -16,13 +16,13 @@ parameters:
   - name: workingDirectory
     type: string
   - name: agentPool
-    type: string 
+    type: string  # ✅ Now configurable from the calling pipeline
 
 stages:
   - stage: ${{ parameters.stageName }}
     displayName: 'Terraform Plan - ${{ parameters.stageDisplayName }}'
     pool:
-      name: ${{ parameters.agentPool }}
+      name: ${{ parameters.agentPool }}  # ✅ Uses the passed-in agent pool
     variables:
       - group: ${{ parameters.variableGroup }}  # Pull secrets from Key Vault
     jobs:
@@ -40,7 +40,7 @@ stages:
                   inputs:
                     terraformVersion: "latest"
 
-                - task: TerraformTaskV2
+                - task: TerraformTaskV2@2
                   displayName: 'Terraform Init - ${{ parameters.stageDisplayName }}'
                   inputs:
                     command: "init"
@@ -52,14 +52,14 @@ stages:
                     backendAzureRmKey: "$(team)/${{ parameters.environmentName }}.tfstate"
                     workingDirectory: ${{ parameters.workingDirectory }}
 
-                - task: TerraformTaskV2
+                - task: TerraformTaskV2@2
                   displayName: 'Terraform Validate - ${{ parameters.stageDisplayName }}'
                   inputs:
                     command: "validate"
                     provider: "azurerm"
                     workingDirectory: ${{ parameters.workingDirectory }}
 
-                - task: TerraformTaskV2
+                - task: TerraformTaskV2@2
                   displayName: 'Terraform Plan - ${{ parameters.stageDisplayName }}'
                   inputs:
                     command: "plan"
