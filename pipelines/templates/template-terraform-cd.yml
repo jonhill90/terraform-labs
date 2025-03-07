@@ -7,6 +7,8 @@ parameters:
     type: object
   - name: variableGroup
     type: string  # Variable Group Name
+  - name: backendServiceArm
+    type: string  # Backend Service Connection
 
 trigger: none
 
@@ -30,8 +32,7 @@ stages:
   - ${{ each env in parameters.environments }}:
       - stage: Plan${{ env }}
         displayName: 'Terraform Plan - ${{ env }}'
-        dependsOn: ${{ 'Apply' + parameters.environments[parameters.environments.index(env) - 1] }}  
-        condition: ${{ env == 'dev' || parameters.environments.index(env) > 0 }}
+        dependsOn: []
         pool:
           vmImage: 'ubuntu-latest'
         jobs:
@@ -45,29 +46,42 @@ stages:
                   steps:
                     - checkout: self
 
+                    # Debug step to verify Terraform installation
+                    - script: |
+                        echo "🔍 Checking Terraform installation..."
+                        terraform --version || echo "❌ Terraform not found!"
+                        which terraform || echo "❌ Terraform path not found!"
+                      displayName: "Debug: Verify Terraform Installation"
+
                     - task: TerraformInstaller@1
                       displayName: 'Install Terraform'
                       inputs:
                         terraformVersion: "latest"
 
-                    - task: TerraformCLI@1
+                    # Manually ensure Terraform path is correct
+                    - script: |
+                        export PATH=$PATH:/home/azureuser/myagent/_work/_tool/terraform/1.11.1/x64
+                        terraform --version
+                      displayName: "Fix: Manually Add Terraform to PATH"
+
+                    - task: TerraformTaskV2@2
                       displayName: 'Terraform Init - ${{ env }}'
                       inputs:
                         command: "init"
                         backendType: "azurerm"
-                        backendServiceArm: "$(backendServiceArm)"
+                        backendServiceArm: ${{ parameters.backendServiceArm }}
                         backendAzureRmResourceGroupName: "$(backendResourceGroup)"
                         backendAzureRmStorageAccountName: "$(backendStorageAccount)"
                         backendAzureRmContainerName: "$(backendContainer)"
                         backendAzureRmKey: "$(team)/${{ env }}.tfstate"
 
-                    - task: TerraformCLI@1
+                    - task: TerraformTaskV2@2
                       displayName: 'Terraform Validate - ${{ env }}'
                       inputs:
                         command: "validate"
                         provider: "azurerm"
 
-                    - task: TerraformCLI@1
+                    - task: TerraformTaskV2@2
                       displayName: 'Terraform Plan - ${{ env }}'
                       inputs:
                         command: "plan"
@@ -97,7 +111,7 @@ stages:
                   steps:
                     - checkout: self
 
-                    - task: TerraformCLI@1
+                    - task: TerraformTaskV2@2
                       displayName: 'Terraform Apply - ${{ env }}'
                       inputs:
                         command: "apply"
@@ -108,7 +122,7 @@ stages:
                       displayName: 'Release Azure Blob Lock'
                       condition: canceled()
                       inputs:
-                        azureSubscription: "$(backendServiceArm)"
+                        azureSubscription: ${{ parameters.backendServiceArm }}
                         scriptType: "pscore"
                         scriptLocation: "inlineScript"
                         inlineScript: |
