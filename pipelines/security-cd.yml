@@ -23,4 +23,4 @@ stages:
       stageDisplayName: "Development"
       workingDirectory: "$(Pipeline.Workspace)/security-artifacts/azure-lab/security"
       agentPool: "Lab"
-      pipelineSource: "Security-CI"
+      pipeline: "Security-CI"
