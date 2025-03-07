@@ -16,7 +16,7 @@ parameters:
   - name: workingDirectory
     type: string
   - name: agentPool
-    type: string  # ✅ Configurable from the calling pipeline
+    type: string 
 
 stages:
   - stage: ${{ parameters.stageName }}
