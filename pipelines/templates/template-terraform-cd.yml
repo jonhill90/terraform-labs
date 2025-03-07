@@ -3,132 +3,90 @@ parameters:
     type: string
   - name: artifactName
     type: string
-  - name: environments
-    type: object
   - name: variableGroup
-    type: string  # Variable Group Name
+    type: string
   - name: backendServiceArm
-    type: string  # Backend Service Connection
-
-trigger: none
-
-resources:
-  pipelines:
-    - pipeline: ${{ parameters.team }}-CI
-      source: ${{ parameters.team }}-CI
-      trigger:
-        branches:
-          - main
-
-pool:
-  name: 'Lab'
-
-variables:
-  - group: ${{ parameters.variableGroup }}  # 🔹 Attach the variable group that pulls secrets from Key Vault
-  - name: artifactName
-    value: ${{ parameters.artifactName }}
+    type: string
+  - name: environmentName
+    type: string
+  - name: stageName
+    type: string
+  - name: stageDisplayName
+    type: string
+  - name: workingDirectory
+    type: string
+  - name: agentPool
+    type: string  # ✅ Configurable from the calling pipeline
 
 stages:
-  - ${{ each env in parameters.environments }}:
-      - stage: Plan${{ env }}
-        displayName: 'Terraform Plan - ${{ env }}'
-        dependsOn: []
-        pool:
-          vmImage: 'ubuntu-latest'
-        jobs:
-          - deployment: Terraform_Deploy
-            condition: succeeded()
-            displayName: Terraform Init, Plan & Apply
-            environment: ${{ env }}
-            strategy:
-              runOnce:
-                deploy:
-                  steps:
-                    - checkout: self
+  - stage: ${{ parameters.stageName }}
+    displayName: 'Terraform Plan - ${{ parameters.stageDisplayName }}'
+    pool:
+      name: ${{ parameters.agentPool }}  # ✅ Uses the passed-in agent pool
+    variables:
+      - group: ${{ parameters.variableGroup }}  # ✅ Pull secrets from Key Vault
+    jobs:
+      - deployment: Terraform_Plan
+        displayName: 'Terraform Init & Plan - ${{ parameters.stageDisplayName }}'
+        environment: ${{ parameters.environmentName }}
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
 
-                    # Debug step to verify Terraform installation
-                    - script: |
-                        echo "🔍 Checking Terraform installation..."
-                        terraform --version || echo "❌ Terraform not found!"
-                        which terraform || echo "❌ Terraform path not found!"
-                      displayName: "Debug: Verify Terraform Installation"
+                # ✅ Debug Step: Log environment and paths
+                - script: |
+                    echo "🔍 Debugging Terraform PATH"
+                    echo "🔧 Current PATH: $PATH"
+                    echo "📦 Installed Terraform Versions:"
+                    ls -l /home/azureuser/myagent/_work/_tool/terraform/
+                    echo "📌 Terraform Binary Location:"
+                    which terraform || echo "⚠️ Terraform binary not found!"
+                  displayName: "Debug: Verify Terraform PATH"
+                  failOnStderr: false
+                  continueOnError: true
 
-                    - task: TerraformInstaller@1
-                      displayName: 'Install Terraform'
-                      inputs:
-                        terraformVersion: "latest"
+                # ✅ Ensure Terraform is installed
+                - task: TerraformInstaller@1
+                  displayName: 'Install Terraform'
+                  inputs:
+                    terraformVersion: "latest"
 
-                    # Manually ensure Terraform path is correct
-                    - script: |
-                        export PATH=$PATH:/home/azureuser/myagent/_work/_tool/terraform/1.11.1/x64
-                        echo "Updated PATH: $PATH"
-                        terraform --version
-                      displayName: "Fix: Manually Add Terraform to PATH and Verify"
+                # ✅ Manually Update PATH (Fix execution issue)
+                - script: |
+                    echo "🔄 Updating PATH for Terraform..."
+                    export PATH="/home/azureuser/myagent/_work/_tool/terraform/1.11.1/x64:$PATH"
+                    echo "✅ PATH Updated: $PATH"
+                    terraform version
+                  displayName: "Fix: Manually Update Terraform PATH"
 
-                    - task: TerraformTaskV2@2
-                      displayName: 'Terraform Init - ${{ env }}'
-                      inputs:
-                        command: "init"
-                        backendType: "azurerm"
-                        backendServiceArm: ${{ parameters.backendServiceArm }}
-                        backendAzureRmResourceGroupName: "$(backendResourceGroup)"
-                        backendAzureRmStorageAccountName: "$(backendStorageAccount)"
-                        backendAzureRmContainerName: "$(backendContainer)"
-                        backendAzureRmKey: "$(team)/${{ env }}.tfstate"
+                # ✅ Initialize Terraform backend
+                - task: TerraformTaskV4@4
+                  displayName: 'Terraform Init - ${{ parameters.stageDisplayName }}'
+                  inputs:
+                    command: "init"
+                    backendType: "azurerm"
+                    backendServiceArm: ${{ parameters.backendServiceArm }}
+                    backendAzureRmResourceGroupName: "$(backendResourceGroup)"
+                    backendAzureRmStorageAccountName: "$(backendStorageAccount)"
+                    backendAzureRmContainerName: "$(backendContainer)"
+                    backendAzureRmKey: "$(team)/${{ parameters.environmentName }}.tfstate"
+                    workingDirectory: ${{ parameters.workingDirectory }}
 
-                    - task: TerraformTaskV2@2
-                      displayName: 'Terraform Validate - ${{ env }}'
-                      inputs:
-                        command: "validate"
-                        provider: "azurerm"
+                # ✅ Validate Terraform configuration
+                - task: TerraformTaskV4@4
+                  displayName: 'Terraform Validate - ${{ parameters.stageDisplayName }}'
+                  inputs:
+                    command: "validate"
+                    provider: "azurerm"
+                    workingDirectory: ${{ parameters.workingDirectory }}
 
-                    - task: TerraformTaskV2@2
-                      displayName: 'Terraform Plan - ${{ env }}'
-                      inputs:
-                        command: "plan"
-                        provider: "azurerm"
-                        commandOptions: "-var environment=${{ env }} -var tenant_id=$(tenantid) -var subscription_id=$(subscriptionid) -refresh=false -out=${{ env }}-tfplan -input=false -no-color -detailed-exitcode"
-
-                    - task: PublishBuildArtifacts@1
-                      displayName: 'Publish Terraform Plan - ${{ env }}'
-                      inputs:
-                        pathToPublish: '$(System.DefaultWorkingDirectory)/${{ env }}-tfplan'
-                        artifactName: '${{ env }}-tfplan'
-
-      - stage: Apply${{ env }}
-        displayName: 'Terraform Apply - ${{ env }}'
-        dependsOn: Plan${{ env }}
-        condition: succeeded()
-        pool:
-          vmImage: 'ubuntu-latest'
-        jobs:
-          - deployment: Terraform_Deploy
-            condition: succeeded()
-            displayName: Terraform Apply - ${{ env }}
-            environment: ${{ env }}
-            strategy:
-              runOnce:
-                deploy:
-                  steps:
-                    - checkout: self
-
-                    - task: TerraformTaskV2@2
-                      displayName: 'Terraform Apply - ${{ env }}'
-                      inputs:
-                        command: "apply"
-                        provider: "azurerm"
-                        commandOptions: "-auto-approve ${{ env }}-tfplan"
-
-                    - task: AzureCLI@2
-                      displayName: 'Release Azure Blob Lock'
-                      condition: canceled()
-                      inputs:
-                        azureSubscription: ${{ parameters.backendServiceArm }}
-                        scriptType: "pscore"
-                        scriptLocation: "inlineScript"
-                        inlineScript: |
-                          $blob = az storage blob show --account-name "$(backendStorageAccount)" -c "$(backendContainer)" --name "$(team)/${{ env }}.tfstate" | ConvertFrom-Json
-                          if ( (($blob.properties).lease).state -eq 'leased' )
-                          {
-                            az storage blob lease break --account-name "$(backendStorageAccount)" -c "$(backendContainer)" -b "$(team)/${{ env }}.tfstate"
-                          }
+                # ✅ Run Terraform plan
+                - task: TerraformTaskV4@4
+                  displayName: 'Terraform Plan - ${{ parameters.stageDisplayName }}'
+                  inputs:
+                    command: "plan"
+                    provider: "azurerm"
+                    commandOptions: "-var environment=${{ parameters.environmentName }} -var tenant_id=$(tenantid) -var subscription_id=$(subscriptionid) -refresh=false -out=${{ parameters.environmentName }}-tfplan -input=false -no-color -detailed-exitcode"
+                    workingDirectory: ${{ parameters.workingDirectory }}
