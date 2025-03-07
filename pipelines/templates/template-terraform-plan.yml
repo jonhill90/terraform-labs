@@ -35,11 +35,6 @@ stages:
               steps:
                 - checkout: self
 
-                # ✅ Ensure Terraform is installed
-                - task: TerraformInstaller@1
-                  displayName: 'Install Terraform'
-                  inputs:
-                    terraformVersion: "latest"
 
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
