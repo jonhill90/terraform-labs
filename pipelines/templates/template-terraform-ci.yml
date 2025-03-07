@@ -30,7 +30,7 @@ stages:
             inputs:
               SourceFolder: '$(Build.SourcesDirectory)/azure-lab/$(team)'
               Contents: '**'
-              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/$(team)'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/azure-lab/$(team)'
 
           - task: CopyFiles@2
             displayName: 'Copy Shared Terraform Modules'
