@@ -18,7 +18,7 @@ parameters:
   - name: agentPool
     type: string 
   - name: pipeline
-    type: string  # ✅ New parameter to specify which pipeline to fetch artifacts from
+    type: string 
 
 stages:
   - stage: ${{ parameters.stageName }}
