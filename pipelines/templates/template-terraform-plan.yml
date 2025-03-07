@@ -53,13 +53,12 @@ stages:
                   inputs:
                     terraformVersion: "latest"
 
-                # ✅ Manually Update PATH (Fix execution issue)
+                # ✅ Verify Terraform installation
                 - script: |
-                    echo "🔄 Updating PATH for Terraform..."
-                    export PATH="/home/azureuser/myagent/_work/_tool/terraform/1.11.1/x64:$PATH"
-                    echo "✅ PATH Updated: $PATH"
-                    terraform version
-                  displayName: "Fix: Manually Update Terraform PATH"
+                    echo "🔍 Checking PATH after Terraform Install..."
+                    echo "🔧 PATH: $PATH"
+                    which terraform || echo "⚠️ Terraform binary not found!"
+                  displayName: "Verify Terraform PATH"
 
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
