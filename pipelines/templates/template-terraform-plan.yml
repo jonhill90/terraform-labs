@@ -35,12 +35,20 @@ stages:
               steps:
                 - checkout: self
 
+                # ✅ Download Terraform Artifacts
+                - task: DownloadPipelineArtifact@2
+                  displayName: 'Download Terraform Artifacts'
+                  inputs:
+                    artifact: ${{ parameters.artifactName }}
+                    path: ${{ parameters.workingDirectory }}
+
                 # ✅ Ensure Terraform is installed
                 - task: TerraformInstaller@1
                   displayName: 'Install Terraform'
                   inputs:
                     terraformVersion: "latest"
 
+                # ✅ Debug Working Directory
                 - script: |
                     echo "🔍 Debugging Working Directory"
                     echo "Current Working Directory: $(pwd)"
