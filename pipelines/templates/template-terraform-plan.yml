@@ -41,6 +41,12 @@ stages:
                   inputs:
                     terraformVersion: "latest"
 
+                - script: |
+                    echo "🔍 Debugging Working Directory"
+                    echo "Current Working Directory: $(pwd)"
+                    ls -la
+                  displayName: 'Debug: Log Working Directory'
+
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
                   displayName: 'Terraform Init - ${{ parameters.stageDisplayName }}'
