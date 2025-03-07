@@ -16,7 +16,7 @@ parameters:
   - name: workingDirectory
     type: string
   - name: agentPool
-    type: string  # ✅ Configurable from the calling pipeline
+    type: string 
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -35,20 +35,15 @@ stages:
               steps:
                 - checkout: self
 
-                # ✅ Debug Step: Log system info & Terraform path
+                # ✅ Debug Step: Log environment and paths
                 - script: |
-                    echo "🔍 Debugging Information"
-                    echo "🏗️  Agent Name: $(Agent.Name)"
-                    echo "🔧 Agent Machine Name: $(Agent.MachineName)"
-                    echo "💾 Working Directory: ${{ parameters.workingDirectory }}"
-                    echo "📦 Terraform Version:"
-                    terraform version || echo "⚠️ Terraform not found!"
-                    echo "🛠️ Terraform Path:"
+                    echo "🔍 Debugging Terraform PATH"
+                    echo "🔧 Current PATH: $PATH"
+                    echo "📦 Installed Terraform Versions:"
+                    ls -l /home/azureuser/myagent/_work/_tool/terraform/
+                    echo "📌 Terraform Binary Location:"
                     which terraform || echo "⚠️ Terraform binary not found!"
-                    echo "🌎 Environment Variables:"
-                    env | grep -i terraform
-                    echo "🔑 Service Connection: ${{ parameters.backendServiceArm }}"
-                  displayName: "Debug: Log Environment & Terraform Path"
+                  displayName: "Debug: Verify Terraform PATH"
                   failOnStderr: false
                   continueOnError: true
 
@@ -58,13 +53,21 @@ stages:
                   inputs:
                     terraformVersion: "latest"
 
+                # ✅ Manually Update PATH (Fix execution issue)
+                - script: |
+                    echo "🔄 Updating PATH for Terraform..."
+                    export PATH="/home/azureuser/myagent/_work/_tool/terraform/1.11.1/x64:$PATH"
+                    echo "✅ PATH Updated: $PATH"
+                    terraform version
+                  displayName: "Fix: Manually Update Terraform PATH"
+
                 # ✅ Initialize Terraform backend
-                - task: TerraformTaskV2@2
+                - task: TerraformTaskV4@4
                   displayName: 'Terraform Init - ${{ parameters.stageDisplayName }}'
                   inputs:
                     command: "init"
                     backendType: "azurerm"
-                    backendServiceArm: ${{ parameters.backendServiceArm }}  # ✅ Fixed!
+                    backendServiceArm: ${{ parameters.backendServiceArm }}
                     backendAzureRmResourceGroupName: "$(backendResourceGroup)"
                     backendAzureRmStorageAccountName: "$(backendStorageAccount)"
                     backendAzureRmContainerName: "$(backendContainer)"
@@ -72,7 +75,7 @@ stages:
                     workingDirectory: ${{ parameters.workingDirectory }}
 
                 # ✅ Validate Terraform configuration
-                - task: TerraformTaskV2@2
+                - task: TerraformTaskV4@4
                   displayName: 'Terraform Validate - ${{ parameters.stageDisplayName }}'
                   inputs:
                     command: "validate"
@@ -80,7 +83,7 @@ stages:
                     workingDirectory: ${{ parameters.workingDirectory }}
 
                 # ✅ Run Terraform plan
-                - task: TerraformTaskV2@2
+                - task: TerraformTaskV4@4
                   displayName: 'Terraform Plan - ${{ parameters.stageDisplayName }}'
                   inputs:
                     command: "plan"
