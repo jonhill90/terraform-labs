@@ -17,6 +17,8 @@ parameters:
     type: string
   - name: agentPool
     type: string 
+  - name: pipeline
+    type: string  # ✅ New parameter to specify which pipeline to fetch artifacts from
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -36,24 +38,22 @@ stages:
                 - checkout: self
 
                 # ✅ Download Terraform Artifacts
-                - task: DownloadPipelineArtifact@2
+                - task: DownloadBuildArtifacts@0
                   displayName: 'Download Terraform Artifacts'
                   inputs:
-                    artifact: ${{ parameters.artifactName }}
-                    path: ${{ parameters.workingDirectory }}
+                    buildType: 'specific'
+                    project: "$(System.TeamProject)"
+                    pipeline: "${{ parameters.pipeline }}"
+                    artifactName: "$(artifactName)"
+                    buildVersionToDownload: "latest"
+                    downloadPath: "$(Pipeline.Workspace)"
 
-                # ✅ Ensure Terraform is installed
-                - task: TerraformInstaller@1
-                  displayName: 'Install Terraform'
-                  inputs:
-                    terraformVersion: "latest"
-
-                # ✅ Debug Working Directory
+                # ✅ Debug: Verify Working Directory
                 - script: |
                     echo "🔍 Debugging Working Directory"
                     echo "Current Working Directory: $(pwd)"
                     ls -la
-                  displayName: 'Debug: Log Working Directory'
+                  displayName: 'Debug: Verify Working Directory'
 
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
@@ -66,7 +66,7 @@ stages:
                     backendAzureRmStorageAccountName: "$(backendStorageAccount)"
                     backendAzureRmContainerName: "$(backendContainer)"
                     backendAzureRmKey: "$(team)/${{ parameters.environmentName }}.tfstate"
-                    workingDirectory: ${{ parameters.workingDirectory }}
+                    workingDirectory: "$(Pipeline.Workspace)/$(artifactName)/$(team)"
 
                 # ✅ Validate Terraform configuration
                 - task: TerraformTaskV4@4
@@ -74,7 +74,7 @@ stages:
                   inputs:
                     command: "validate"
                     provider: "azurerm"
-                    workingDirectory: ${{ parameters.workingDirectory }}
+                    workingDirectory: "$(Pipeline.Workspace)/$(artifactName)/$(team)"
 
                 # ✅ Run Terraform plan
                 - task: TerraformTaskV4@4
@@ -83,4 +83,4 @@ stages:
                     command: "plan"
                     provider: "azurerm"
                     commandOptions: "-var environment=${{ parameters.environmentName }} -var tenant_id=$(tenantid) -var subscription_id=$(subscriptionid) -refresh=false -out=${{ parameters.environmentName }}-tfplan -input=false -no-color -detailed-exitcode"
-                    workingDirectory: ${{ parameters.workingDirectory }}
+                    workingDirectory: "$(Pipeline.Workspace)/$(artifactName)/$(team)"
