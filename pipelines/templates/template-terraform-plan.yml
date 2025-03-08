@@ -87,6 +87,11 @@ stages:
                     echo "backendResourceGroup: '$(backendResourceGroup)'"
                   displayName: "Debug: Confirm Backend Variables"
 
+                - script: |
+                    echo "🔍 Running Terraform Init WITHOUT Backend to Isolate Issue..."
+                    terraform init -input=false
+                  displayName: "Debug: Terraform Init Without Backend"
+
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
                   displayName: "Terraform Init - ${{ parameters.stageDisplayName }}"
