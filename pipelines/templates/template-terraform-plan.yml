@@ -27,12 +27,6 @@ stages:
       name: ${{ parameters.agentPool }}  # ✅ Uses the passed-in agent pool
     variables:
       - group: ${{ parameters.variableGroup }}  # ✅ Pull secrets from Key Vault
-      - name: backendResourceGroup
-        value: $(backendResourceGroup)
-      - name: backendStorageAccount
-        value: $(backendStorageAccount)
-      - name: backendContainer
-        value: $(backendContainer)
     jobs:
       - deployment: Terraform_Plan
         displayName: 'Terraform Init & Plan - ${{ parameters.stageDisplayName }}'
@@ -53,7 +47,7 @@ stages:
                     echo "🔍 Listing contents of $(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
                     ls -la "$(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
                   displayName: "Debug: Verify Downloaded Artifacts"
-                  
+
                 # ✅ Ensure Terraform is installed
                 - task: TerraformInstaller@1
                   displayName: 'Install Terraform'
@@ -79,36 +73,18 @@ stages:
                   displayName: "Fix: Update PATH Variable"
 
                 - script: |
-                    echo "🔍 Debugging Backend Variables"
-                    echo "Storage Account: $(backendStorageAccount)"
-                    echo "Container Name: $(backendContainer)"
-                    echo "Resource Group: $(backendResourceGroup)"
-                    echo "Subscription ID: $(subscriptionid)"
-                    echo "Tenant ID: $(tenantid)"
-                    echo "Client ID: $(clientid)"
-                    echo "Client Secret: [REDACTED]"
-                  displayName: "Debug: Check Backend Variables (Sanitized)"
+                    echo "Setting backend variables..."
+                    export TF_BACKEND_CONTAINER=$(backendContainer)
+                    export TF_BACKEND_STORAGE_ACCOUNT=$(backendStorageAccount)
+                    export TF_BACKEND_RESOURCE_GROUP=$(backendResourceGroup)
+                  displayName: "Set Backend Variables"
 
                 - script: |
-                    if [[ -z "$(backendStorageAccount)" || -z "$(backendContainer)" || -z "$(backendResourceGroup)" || -z "$(subscriptionid)" || -z "$(tenantid)" ]]; then
-                      echo "❌ ERROR: One or more required backend variables are missing!"
-                      exit 1
-                    else
-                      echo "✅ All backend variables are set."
+                    if [ -z "$TF_BACKEND_CONTAINER" ] || [ -z "$TF_BACKEND_STORAGE_ACCOUNT" ] || [ -z "$TF_BACKEND_RESOURCE_GROUP" ]; then
+                        echo "❌ ERROR: One or more backend variables are missing!"
+                        exit 1
                     fi
-                  displayName: "Pre-check: Validate Terraform Backend Variables"
-
-                - script: |
-                    echo "🔍 Running Terraform Init with the following backend config:"
-                    echo "storage_account_name=$(backendStorageAccount)"
-                    echo "container_name=$(backendContainer)"
-                    echo "key=$(team)/lab.***"
-                    echo "resource_group_name=$(backendResourceGroup)"
-                    echo "subscription_id=$(subscriptionid)"
-                    echo "tenant_id=$(tenantid)"
-                    echo "client_id=$(clientid)"
-                    echo "client_secret=[REDACTED]"
-                  displayName: "Debug: Show Terraform Backend Config Before Init"
+                  displayName: "Validate Backend Variables"
 
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
@@ -117,9 +93,9 @@ stages:
                     command: "init"
                     backendType: "azurerm"
                     backendServiceArm: ${{ parameters.backendServiceArm }}
-                    backendAzureRmResourceGroupName: "$(backendResourceGroup)"
-                    backendAzureRmStorageAccountName: "$(backendStorageAccount)"
-                    backendAzureRmContainerName: "$(backendContainer)"
+                    backendAzureRmResourceGroupName: "$(TF_BACKEND_RESOURCE_GROUP)"
+                    backendAzureRmStorageAccountName: "$(TF_BACKEND_STORAGE_ACCOUNT)"
+                    backendAzureRmContainerName: "$(TF_BACKEND_CONTAINER)"
                     backendAzureRmKey: "$(team)/${{ parameters.environmentName }}.tfstate"
                     workingDirectory: "$(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
 
