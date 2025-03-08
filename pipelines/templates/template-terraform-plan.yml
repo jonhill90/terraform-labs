@@ -82,9 +82,9 @@ stages:
 
                 - script: |
                     echo "🔍 Debugging Backend Variables"
-                    echo "backendContainer: '${backendContainer}'"
-                    echo "backendStorageAccount: '${backendStorageAccount}'"
-                    echo "backendResourceGroup: '${backendResourceGroup}'"
+                    echo "backendContainer: '$(backendContainer)'"
+                    echo "backendStorageAccount: '$(backendStorageAccount)'"
+                    echo "backendResourceGroup: '$(backendResourceGroup)'"
                   displayName: "Debug: Confirm Backend Variables"
 
                 # ✅ Initialize Terraform backend
