@@ -36,25 +36,6 @@ stages:
             deploy:
               steps:
                 - checkout: self
-
-                # ✅ Download Terraform Artifacts
-                - task: DownloadBuildArtifacts@0
-                  displayName: 'Download Terraform Artifacts'
-                  inputs:
-                    buildType: 'specific'
-                    project: "$(System.TeamProject)"
-                    pipeline: "${{ parameters.pipeline }}"
-                    artifactName: "$(artifactName)"
-                    buildVersionToDownload: "latest"
-                    downloadPath: "$(Pipeline.Workspace)"
-
-                # ✅ Debug: Verify Working Directory
-                - script: |
-                    echo "🔍 Debugging Working Directory"
-                    echo "Current Working Directory: $(pwd)"
-                    ls -la
-                  displayName: 'Debug: Verify Working Directory'
-
                 - script: |
                     echo "🔍 Debugging Artifact Variables"
                     echo "Artifact Name: $(artifactName)"
