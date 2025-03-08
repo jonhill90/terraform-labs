@@ -42,6 +42,12 @@ stages:
                     echo "Pipeline: $(pipeline)"
                     echo "Download Path: $(Pipeline.Workspace)"
                   displayName: 'Debug: Verify Artifact Variables'
+                  
+                # ✅ Ensure Terraform is installed
+                - task: TerraformInstaller@1
+                  displayName: 'Install Terraform'
+                  inputs:
+                    terraformVersion: "latest"
 
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
