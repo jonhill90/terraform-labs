@@ -27,6 +27,12 @@ stages:
       name: ${{ parameters.agentPool }}  # ✅ Uses the passed-in agent pool
     variables:
       - group: ${{ parameters.variableGroup }}  # ✅ Pull secrets from Key Vault
+      - name: backendContainer
+        value: $(backendContainer)
+      - name: backendStorageAccount
+        value: $(backendStorageAccount)
+      - name: backendResourceGroup
+        value: $(backendResourceGroup)
     jobs:
       - deployment: Terraform_Plan
         displayName: 'Terraform Init & Plan - ${{ parameters.stageDisplayName }}'
@@ -81,10 +87,10 @@ stages:
 
                 - script: |
                     echo "🔍 Debugging Backend Variables"
-                    echo "backendContainer: '$(backendContainer)'"
-                    echo "backendStorageAccount: '$(backendStorageAccount)'"
-                    echo "backendResourceGroup: '$(backendResourceGroup)'"
-                  displayName: "Debug: Check Backend Variables (Sanitized)"
+                    echo "backendContainer: '${backendContainer}'"
+                    echo "backendStorageAccount: '${backendStorageAccount}'"
+                    echo "backendResourceGroup: '${backendResourceGroup}'"
+                  displayName: "Debug: Confirm Backend Variables"
 
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
