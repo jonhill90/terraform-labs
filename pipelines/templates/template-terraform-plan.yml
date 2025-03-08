@@ -54,6 +54,24 @@ stages:
                   inputs:
                     terraformVersion: "latest"
 
+                - script: |
+                    echo "🔍 Checking Terraform installation..."
+                    ls -la /home/azureuser/myagent/_work/_tool/terraform/
+                    ls -la /home/azureuser/myagent/_work/_tool/terraform/1.11.1/x64/
+                    which terraform
+                    terraform version
+                  displayName: "Debug: Verify Terraform Installation"
+
+                - script: |
+                    echo "🔍 Checking PATH Variable..."
+                    echo $PATH
+                  displayName: "Debug: Check PATH Variable"
+
+                - script: |
+                    export PATH=$PATH:/home/azureuser/myagent/_work/_tool/terraform/1.11.1/x64/
+                    echo "Updated PATH: $PATH"
+                  displayName: "Fix: Update PATH Variable"
+
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
                   displayName: 'Terraform Init - ${{ parameters.stageDisplayName }}'
