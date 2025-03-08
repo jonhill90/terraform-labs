@@ -38,10 +38,15 @@ stages:
                 - checkout: self
                 - script: |
                     echo "🔍 Debugging Artifact Variables"
-                    echo "Artifact Name: $(artifactName)"
-                    echo "Pipeline: $(pipeline)"
-                    echo "Download Path: $(Pipeline.Workspace)"
-                  displayName: 'Debug: Verify Artifact Variables'
+                    echo "Artifact Name: '${{ parameters.artifactName }}'"
+                    echo "Pipeline: '${{ parameters.pipeline }}'"
+                    echo "Download Path: '$(Pipeline.Workspace)'"
+                  displayName: "Debug: Verify Artifact Variables"
+
+                - script: |
+                    echo "🔍 Listing contents of $(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
+                    ls -la "$(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
+                  displayName: "Debug: Verify Downloaded Artifacts"
                   
                 # ✅ Ensure Terraform is installed
                 - task: TerraformInstaller@1
@@ -60,7 +65,7 @@ stages:
                     backendAzureRmStorageAccountName: "$(backendStorageAccount)"
                     backendAzureRmContainerName: "$(backendContainer)"
                     backendAzureRmKey: "$(team)/${{ parameters.environmentName }}.tfstate"
-                    workingDirectory: "$(Pipeline.Workspace)/$(artifactName)/$(team)"
+                    workingDirectory: "$(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
 
                 # ✅ Validate Terraform configuration
                 - task: TerraformTaskV4@4
@@ -68,7 +73,7 @@ stages:
                   inputs:
                     command: "validate"
                     provider: "azurerm"
-                    workingDirectory: "$(Pipeline.Workspace)/$(artifactName)/$(team)"
+                    workingDirectory: "$(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
 
                 # ✅ Run Terraform plan
                 - task: TerraformTaskV4@4
@@ -77,4 +82,4 @@ stages:
                     command: "plan"
                     provider: "azurerm"
                     commandOptions: "-var environment=${{ parameters.environmentName }} -var tenant_id=$(tenantid) -var subscription_id=$(subscriptionid) -refresh=false -out=${{ parameters.environmentName }}-tfplan -input=false -no-color -detailed-exitcode"
-                    workingDirectory: "$(Pipeline.Workspace)/$(artifactName)/$(team)"
+                    workingDirectory: "$(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
