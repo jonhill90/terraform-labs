@@ -27,6 +27,12 @@ stages:
       name: ${{ parameters.agentPool }}  # ✅ Uses the passed-in agent pool
     variables:
       - group: ${{ parameters.variableGroup }}  # ✅ Pull secrets from Key Vault
+      - name: backendResourceGroup
+        value: $(backendResourceGroup)
+      - name: backendStorageAccount
+        value: $(backendStorageAccount)
+      - name: backendContainer
+        value: $(backendContainer)
     jobs:
       - deployment: Terraform_Plan
         displayName: 'Terraform Init & Plan - ${{ parameters.stageDisplayName }}'
@@ -71,6 +77,38 @@ stages:
                     export PATH=$PATH:/home/azureuser/myagent/_work/_tool/terraform/1.11.1/x64/
                     echo "Updated PATH: $PATH"
                   displayName: "Fix: Update PATH Variable"
+
+                - script: |
+                    echo "🔍 Debugging Backend Variables"
+                    echo "Storage Account: $(backendStorageAccount)"
+                    echo "Container Name: $(backendContainer)"
+                    echo "Resource Group: $(backendResourceGroup)"
+                    echo "Subscription ID: $(subscriptionid)"
+                    echo "Tenant ID: $(tenantid)"
+                    echo "Client ID: $(clientid)"
+                    echo "Client Secret: [REDACTED]"
+                  displayName: "Debug: Check Backend Variables (Sanitized)"
+
+                - script: |
+                    if [[ -z "$(backendStorageAccount)" || -z "$(backendContainer)" || -z "$(backendResourceGroup)" || -z "$(subscriptionid)" || -z "$(tenantid)" ]]; then
+                      echo "❌ ERROR: One or more required backend variables are missing!"
+                      exit 1
+                    else
+                      echo "✅ All backend variables are set."
+                    fi
+                  displayName: "Pre-check: Validate Terraform Backend Variables"
+
+                - script: |
+                    echo "🔍 Running Terraform Init with the following backend config:"
+                    echo "storage_account_name=$(backendStorageAccount)"
+                    echo "container_name=$(backendContainer)"
+                    echo "key=$(team)/lab.***"
+                    echo "resource_group_name=$(backendResourceGroup)"
+                    echo "subscription_id=$(subscriptionid)"
+                    echo "tenant_id=$(tenantid)"
+                    echo "client_id=$(clientid)"
+                    echo "client_secret=[REDACTED]"
+                  displayName: "Debug: Show Terraform Backend Config Before Init"
 
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
