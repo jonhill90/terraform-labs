@@ -16,26 +16,21 @@ parameters:
   - name: workingDirectory
     type: string
   - name: agentPool
-    type: string 
+    type: string
   - name: pipeline
-    type: string 
+    type: string
 
 stages:
   - stage: ${{ parameters.stageName }}
-    displayName: 'Terraform Plan - ${{ parameters.stageDisplayName }}'
+    displayName: "Terraform Plan - ${{ parameters.stageDisplayName }}"
     pool:
-      name: ${{ parameters.agentPool }}  # ✅ Uses the passed-in agent pool
+      name: ${{ parameters.agentPool }} # ✅ Uses the passed-in agent pool
     variables:
-      - group: ${{ parameters.variableGroup }}  # ✅ Pull secrets from Key Vault
-      - name: backendContainer
-        value: $(backendContainer)
-      - name: backendStorageAccount
-        value: $(backendStorageAccount)
-      - name: backendResourceGroup
-        value: $(backendResourceGroup)
+      - group: ${{ parameters.variableGroup }} # ✅ Pull secrets from Key Vault
+
     jobs:
       - deployment: Terraform_Plan
-        displayName: 'Terraform Init & Plan - ${{ parameters.stageDisplayName }}'
+        displayName: "Terraform Init & Plan - ${{ parameters.stageDisplayName }}"
         environment: ${{ parameters.environmentName }}
         strategy:
           runOnce:
@@ -56,7 +51,7 @@ stages:
 
                 # ✅ Ensure Terraform is installed
                 - task: TerraformInstaller@1
-                  displayName: 'Install Terraform'
+                  displayName: "Install Terraform"
                   inputs:
                     terraformVersion: "latest"
 
@@ -94,7 +89,7 @@ stages:
 
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
-                  displayName: 'Terraform Init - ${{ parameters.stageDisplayName }}'
+                  displayName: "Terraform Init - ${{ parameters.stageDisplayName }}"
                   inputs:
                     command: "init"
                     backendType: "azurerm"
@@ -107,7 +102,7 @@ stages:
 
                 # ✅ Validate Terraform configuration
                 - task: TerraformTaskV4@4
-                  displayName: 'Terraform Validate - ${{ parameters.stageDisplayName }}'
+                  displayName: "Terraform Validate - ${{ parameters.stageDisplayName }}"
                   inputs:
                     command: "validate"
                     provider: "azurerm"
@@ -115,7 +110,7 @@ stages:
 
                 # ✅ Run Terraform plan
                 - task: TerraformTaskV4@4
-                  displayName: 'Terraform Plan - ${{ parameters.stageDisplayName }}'
+                  displayName: "Terraform Plan - ${{ parameters.stageDisplayName }}"
                   inputs:
                     command: "plan"
                     provider: "azurerm"
