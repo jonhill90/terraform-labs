@@ -55,6 +55,13 @@ stages:
                     ls -la
                   displayName: 'Debug: Verify Working Directory'
 
+                - script: |
+                    echo "🔍 Debugging Artifact Variables"
+                    echo "Artifact Name: $(artifactName)"
+                    echo "Pipeline: $(pipeline)"
+                    echo "Download Path: $(Pipeline.Workspace)"
+                  displayName: 'Debug: Verify Artifact Variables'
+
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
                   displayName: 'Terraform Init - ${{ parameters.stageDisplayName }}'
