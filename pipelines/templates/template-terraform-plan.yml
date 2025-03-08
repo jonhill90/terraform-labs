@@ -73,18 +73,18 @@ stages:
                   displayName: "Fix: Update PATH Variable"
 
                 - script: |
-                    echo "Setting backend variables..."
-                    export TF_BACKEND_CONTAINER=$(backendContainer)
-                    export TF_BACKEND_STORAGE_ACCOUNT=$(backendStorageAccount)
-                    export TF_BACKEND_RESOURCE_GROUP=$(backendResourceGroup)
-                  displayName: "Set Backend Variables"
-
-                - script: |
-                    if [ -z "$TF_BACKEND_CONTAINER" ] || [ -z "$TF_BACKEND_STORAGE_ACCOUNT" ] || [ -z "$TF_BACKEND_RESOURCE_GROUP" ]; then
+                    if [ -z "$(backendContainer)" ] || [ -z "$(backendStorageAccount)" ] || [ -z "$(backendResourceGroup)" ]; then
                         echo "❌ ERROR: One or more backend variables are missing!"
                         exit 1
                     fi
                   displayName: "Validate Backend Variables"
+
+                - script: |
+                    echo "🔍 Debugging Backend Variables"
+                    echo "backendContainer: '$(backendContainer)'"
+                    echo "backendStorageAccount: '$(backendStorageAccount)'"
+                    echo "backendResourceGroup: '$(backendResourceGroup)'"
+                  displayName: "Debug: Check Backend Variables (Sanitized)"
 
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
@@ -93,9 +93,9 @@ stages:
                     command: "init"
                     backendType: "azurerm"
                     backendServiceArm: ${{ parameters.backendServiceArm }}
-                    backendAzureRmResourceGroupName: "$(TF_BACKEND_RESOURCE_GROUP)"
-                    backendAzureRmStorageAccountName: "$(TF_BACKEND_STORAGE_ACCOUNT)"
-                    backendAzureRmContainerName: "$(TF_BACKEND_CONTAINER)"
+                    backendAzureRmResourceGroupName: "$(backendResourceGroup)"
+                    backendAzureRmStorageAccountName: "$(backendStorageAccount)"
+                    backendAzureRmContainerName: "$(backendContainer)"
                     backendAzureRmKey: "$(team)/${{ parameters.environmentName }}.tfstate"
                     workingDirectory: "$(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
 
