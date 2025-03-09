@@ -64,6 +64,12 @@ variable "sp_object_id" {
   sensitive   = true
 }
 
+variable "security_sp_object_id" {
+  description = "Security Service Principal Object ID"
+  type        = string
+  sensitive   = true
+}
+
 # ----------------------------------------
 # Storage Account
 # ----------------------------------------

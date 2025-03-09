@@ -1,7 +1,8 @@
-
+/*
 terraform {
    backend "azurerm" {}
  }
+ */
  
 
 # --------------------------------------------------
@@ -31,7 +32,7 @@ module "security_project" {
 resource "azuredevops_serviceendpoint_azurerm" "security" {
   project_id                             = module.security_project.devops_project_id
   service_endpoint_name                  = "Security-SC"
-  service_endpoint_authentication_scheme = "ManagedServiceIdentity"
+  service_endpoint_authentication_scheme = "ServicePrincipal"
   azurerm_spn_tenantid                   = var.tenant_id
   azurerm_subscription_id                = var.lab_subscription_id
   azurerm_subscription_name              = "Lab"
@@ -302,7 +303,7 @@ module "security_sp_vault_access" {
   access_policies = [
     {
       tenant_id = var.tenant_id
-      object_id = azuredevops_serviceendpoint_azurerm.security.id
+      object_id = var.security_sp_object_id
       #object_id               = var.sp_object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
