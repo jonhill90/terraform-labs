@@ -44,7 +44,7 @@ resource "azurerm_storage_container" "tfstate" {
   name                  = "tfstate"
   storage_account_name  = azurerm_storage_account.tfstate.name
   container_access_type = "private"
-  provider = azurerm.lab
+  provider              = azurerm.lab
 
   depends_on = [azurerm_storage_account.tfstate]
 }
@@ -208,4 +208,6 @@ resource "azuredevops_serviceendpoint_azurerm" "security" {
   service_endpoint_authentication_scheme = "ManagedServiceIdentity"
   azurerm_spn_tenantid                   = var.tenant_id
   azurerm_subscription_id                = var.lab_subscription_id
+
+  depends_on = [module.security_project]
 }
