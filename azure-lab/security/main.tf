@@ -170,7 +170,7 @@ module "security_vault" {
 
   depends_on = [azurerm_resource_group.security]
 }
-
+/*
 module "devops_vault" {
   source                     = "../../modules/azurerm/security/vault"
   key_vault_name             = var.devops_vault_name
@@ -188,7 +188,7 @@ module "devops_vault" {
 
   depends_on = [azurerm_resource_group.security]
 }
-
+*/
 module "networking_vault" {
   source                     = "../../modules/azurerm/security/vault"
   key_vault_name             = var.networking_vault_name
@@ -262,9 +262,8 @@ module "security_sp_vault_access" {
 
   access_policies = [
     {
-      tenant_id = var.tenant_id
-      object_id = var.security_sp_object_id
-      #object_id               = var.sp_object_id
+      tenant_id               = var.tenant_id
+      object_id               = var.security_sp_object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
