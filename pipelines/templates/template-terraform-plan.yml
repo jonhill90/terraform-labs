@@ -127,6 +127,16 @@ stages:
                     command: "validate"
                     provider: "azurerm"
                     workingDirectory: "${{ parameters.workingDirectory }}"
+                
+                - task: replacetokens@6
+                  displayName: 'Replace Tokens in Terraform tfvars File'
+                  inputs:
+                    targetFiles: '"${{ parameters.workingDirectory }}"/env/${{ parameters.environmentName}}.tfvars'
+                    tokenPattern: 'custom'
+                    tokenPrefix: '__'
+                    tokenSuffix: '__'
+                    actionOnMissing: 'warn'
+                    keepToken: false
 
                 # ✅ Run Terraform plan
                 - task: TerraformTaskV4@4
@@ -135,5 +145,5 @@ stages:
                     command: "plan"
                     provider: "azurerm"
                     environmentServiceNameAzureRM: ${{ parameters.backendServiceArm }}
-                    commandOptions: "-var environment=${{ parameters.environmentName }} -var tenant_id=$(tenantid) -var subscription_id=$(subscriptionid) -refresh=false -out=${{ parameters.environmentName }}-tfplan -input=false -no-color -detailed-exitcode"
+                    commandOptions: "-var-file=${{ parameters.workingDirectory }}/env/${{ parameters.environmentName }}.tfvars -out=tfplan"
                     workingDirectory: "${{ parameters.workingDirectory }}"
