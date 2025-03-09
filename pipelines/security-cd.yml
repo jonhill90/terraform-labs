@@ -17,7 +17,7 @@ stages:
       team: "security"
       artifactName: "security-artifacts"
       variableGroup: "Security"
-      backendServiceArm: "Lab-SC"
+      backendServiceArm: "Security-SC"
       environmentName: "lab"
       stageName: "lab"
       stageDisplayName: "Development"
