@@ -1,7 +1,8 @@
+/*
 terraform {
   backend "azurerm" {}
 }
-
+*/
 # ----------------------------------------
 # Resource Groups
 # ----------------------------------------
@@ -190,6 +191,28 @@ module "vault_access" {
   depends_on = [module.vault]
 }
 
+module "security_vault_access" {
+  source       = "../../modules/azurerm/security/vault-access"
+  key_vault_id = module.security_vault.key_vault_id
+
+  access_policies = [
+    {
+      tenant_id               = var.tenant_id
+      object_id               = var.admin_object_id
+      key_permissions         = ["Get", "List"]
+      secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
+      certificate_permissions = ["Get", "List"]
+    }
+  ]
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [module.security_vault]
+}
+
+
 module "networking_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
   key_vault_id = module.networking_vault.key_vault_id
@@ -233,6 +256,28 @@ module "sp_vault_access" {
   }
 
   depends_on = [module.vault]
+}
+
+module "security_sp_vault_access" {
+  source       = "../../modules/azurerm/security/vault-access"
+  key_vault_id = module.security_vault.key_vault_id
+
+  access_policies = [
+    {
+      tenant_id               = var.tenant_id
+      #object_id               = azuredevops_serviceendpoint_azurerm.security.id
+      object_id               = var.sp_object_id
+      key_permissions         = ["Get", "List"]
+      secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
+      certificate_permissions = ["Get", "List"]
+    }
+  ]
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [module.security_vault, azuredevops_serviceendpoint_azurerm.security]
 }
 
 module "networking_sp_vault_access" {
@@ -315,7 +360,7 @@ module "security_variable_group" {
   project_id                  = module.security_project.devops_project_id
   variable_group_name         = "Security"
   variable_group_description  = "Security Variable Group"
-  key_vault_name              = var.networking_vault_name
+  key_vault_name              = var.security_vault_name
   service_endpoint_id         = azuredevops_serviceendpoint_azurerm.security.id
   secrets = [
     "devopspat",
