@@ -97,6 +97,11 @@ stages:
                     terraform init -input=false
                   displayName: "Debug: Terraform Init Without Backend"
 
+                - script: |
+                    echo "🔍 Listing all files and folders in working directory: ${{ parameters.workingDirectory }}"
+                    ls -la "${{ parameters.workingDirectory }}"
+                  displayName: "Debug: List Files in Working Directory"
+
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
                   displayName: "Terraform Init - ${{ parameters.stageDisplayName }}"
