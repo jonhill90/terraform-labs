@@ -50,7 +50,7 @@ resource "azurerm_storage_container" "tfstate" {
 }
 
 # --------------------------------------------------
-# Secure Vault (ToDo: Create needed secrets with empty values)
+# Secure Vault
 # --------------------------------------------------
 module "vault" {
   source                     = "../../modules/azurerm/security/vault"
@@ -247,7 +247,7 @@ resource "azuredevops_serviceendpoint_azurerm" "security" {
 # Azure DevOps Variable Group (Security)
 # --------------------------------------------------
 module "security_variable_group" {
-  source                      = "./../modules/azure-devops/variable-group"
+  source                      = "../../modules/azure-devops/variable-group"
   project_id                  = module.security_project.devops_project_id
   variable_group_name         = "Security"
   variable_group_description  = "Security Variable Group"
