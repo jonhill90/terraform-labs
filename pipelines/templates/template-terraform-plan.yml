@@ -37,80 +37,12 @@ stages:
             deploy:
               steps:
                 - checkout: self
-                
-                - script: |
-                    echo "🔍 Debugging Working Directory Parameter"
-                    echo "workingDirectory: '${{ parameters.workingDirectory }}'"
-                    echo "🔍 Checking actual directory:"
-                    ls -la "${{ parameters.workingDirectory }}"
-                  displayName: "Debug: Verify Working Directory Parameter"
-
-                - script: |
-                    echo "🔍 Debugging Artifact Variables"
-                    echo "Artifact Name: '${{ parameters.artifactName }}'"
-                    echo "Pipeline: '${{ parameters.pipeline }}'"
-                    echo "🔍 Listing contents of $(Pipeline.Workspace)"
-                    ls -la "$(Pipeline.Workspace)"
-                    echo "Download Path: '$(Pipeline.Workspace)'"
-                  displayName: "Debug: Verify Artifact Variables"
 
                 # ✅ Ensure Terraform is installed
                 - task: TerraformInstaller@1
                   displayName: "Install Terraform"
                   inputs:
                     terraformVersion: "latest"
-
-                - script: |
-                    echo "🔍 Checking Terraform installation..."
-                    ls -la /home/azureuser/myagent/_work/_tool/terraform/
-                    ls -la /home/azureuser/myagent/_work/_tool/terraform/1.11.1/x64/
-                    which terraform
-                    terraform version
-                  displayName: "Debug: Verify Terraform Installation"
-
-                - script: |
-                    echo "🔍 Checking PATH Variable..."
-                    echo $PATH
-                  displayName: "Debug: Check PATH Variable"
-
-                - script: |
-                    export PATH=$PATH:/home/azureuser/myagent/_work/_tool/terraform/1.11.1/x64/
-                    echo "Updated PATH: $PATH"
-                  displayName: "Fix: Update PATH Variable"
-
-                - script: |
-                    if [ -z "$(backendContainer)" ] || [ -z "$(backendStorageAccount)" ] || [ -z "$(backendResourceGroup)" ]; then
-                        echo "❌ ERROR: One or more backend variables are missing!"
-                        exit 1
-                    fi
-                  displayName: "Validate Backend Variables"
-
-                - script: |
-                    echo "🔍 Debugging Backend Variables"
-                    echo "backendContainer: '$(backendContainer)'"
-                    echo "backendStorageAccount: '$(backendStorageAccount)'"
-                    echo "backendResourceGroup: '$(backendResourceGroup)'"
-                  displayName: "Debug: Confirm Backend Variables"
-
-                - script: |
-                    echo "🔍 Running Terraform Init WITHOUT Backend to Isolate Issue..."
-                    WORK_DIR="$(Pipeline.Workspace)/${{ parameters.artifactName }}/azure-lab/security"
-                    echo "Using Working Directory: $WORK_DIR"
-                    cd "$WORK_DIR"
-                    echo "Current Directory: $(pwd)"
-                    ls -la
-                    terraform init -input=false
-                  displayName: "Debug: Terraform Init Without Backend"
-
-                - script: |
-                    echo "🔍 Listing all files and folders in working directory: ${{ parameters.workingDirectory }}"
-                    ls -la "${{ parameters.workingDirectory }}"
-                  displayName: "Debug: List Files in Working Directory"
-
-                - script: |
-                    echo "🔍 Checking .tfvars file in: ${{ parameters.workingDirectory }}/env/"
-                    ls -la "${{ parameters.workingDirectory }}/env/"
-                  displayName: "Debug: Check .tfvars File Location"
 
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
@@ -136,11 +68,11 @@ stages:
                 - task: replacetokens@6
                   displayName: "Replace Tokens in Terraform tfvars File"
                   inputs:
-                    targetFiles: "${{ parameters.workingDirectory }}/env/${{ parameters.environmentName }}.tfvars"  # ✅ Ensure correct path
+                    targetFiles: "${{ parameters.workingDirectory }}/env/${{ parameters.environmentName }}.tfvars"
                     tokenPattern: "custom"
                     tokenPrefix: "__"
                     tokenSuffix: "__"
-                    actionOnMissing: "warn"  # ✅ Warn instead of failing if the file is missing
+                    actionOnMissing: "warn"
                     keepToken: false
 
                 # ✅ Run Terraform plan
