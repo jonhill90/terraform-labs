@@ -242,27 +242,32 @@ resource "azuredevops_serviceendpoint_azurerm" "security" {
 
   depends_on = [module.security_project]
 }
-/*
+
 # --------------------------------------------------
 # Azure DevOps Variable Group (Security)
 # --------------------------------------------------
-resource "azuredevops_variable_group" "security" {
-  project_id   = module.security_project.devops_project_id
-  name         = "Security"
-  description  = "Security Variable Group"
-  allow_access = true
-
-  key_vault {
-    name                = "example-kv"
-    service_endpoint_id = azuredevops_serviceendpoint_azurerm.security.id
-  }
-
-  variable {
-    name = "devopspat"
-  }
-
-  variable {
-    name = "key2"
-  }
+module "security_variable_group" {
+  source                      = "./../modules/azure-devops/variable-group"
+  project_id                  = module.security_project.devops_project_id
+  variable_group_name         = "Security"
+  variable_group_description  = "Security Variable Group"
+  key_vault_name              = var.networking_vault_name
+  service_endpoint_id         = azuredevops_serviceendpoint_azurerm.security.id
+  secrets = [
+    "devopspat",
+    "devopsorgname",
+    "networkingvaultname",
+    "adminobjectid",
+    "backendContainer",
+    "backendResourceGroup",
+    "backendStorageAccount",
+    "clientid",
+    "clientsecret",
+    "labsubscriptionid",
+    "managementsubscriptionid",
+    "spobjectid",
+    "storageaccount",
+    "tenantid",
+    "vaultname"
+  ]
 }
-*/
