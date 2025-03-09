@@ -231,6 +231,48 @@ module "security_vault_access" {
   depends_on = [module.security_vault]
 }
 
+module "security_devops_vault_access" {
+  source       = "../../modules/azurerm/security/vault-access"
+  key_vault_id = module.devops_vault.key_vault_id
+
+  access_policies = [
+    {
+      tenant_id               = var.tenant_id
+      object_id               = var.admin_object_id
+      key_permissions         = ["Get", "List"]
+      secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
+      certificate_permissions = ["Get", "List"]
+    }
+  ]
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [module.devops_vault]
+}
+
+module "devops_vault_access" {
+  source       = "../../modules/azurerm/security/vault-access"
+  key_vault_id = module.devops_vault.key_vault_id
+
+  access_policies = [
+    {
+      tenant_id               = var.tenant_id
+      object_id               = var.admin_object_id # Network Admin or Network Admin Group object ID
+      key_permissions         = ["Get", "List"]
+      secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
+      certificate_permissions = ["Get", "List"]
+    }
+  ]
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [module.devops_vault]
+}
+
 
 module "networking_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
