@@ -3,6 +3,57 @@ terraform {
   backend "azurerm" {}
 }
 
+# --------------------------------------------------
+# Azure DevOps Project (Security)
+# --------------------------------------------------
+module "security_project" {
+  source = "../../modules/azure-devops/project"
+
+  devops_org_name     = var.devops_org_name
+  devops_project_name = var.project
+  description         = "Security Managed by Terraform"
+  visibility          = "private"
+  devops_pat          = var.devops_pat
+
+  features = {
+    repositories = "disabled"
+    testplans    = "disabled"
+    artifacts    = "enabled"
+    pipelines    = "enabled"
+    boards       = "disabled"
+  }
+}
+
+# --------------------------------------------------
+# Azure DevOps Service Endpoint (AzureRM)
+# --------------------------------------------------
+resource "azuredevops_serviceendpoint_azurerm" "security" {
+  project_id                             = module.security_project.devops_project_id
+  service_endpoint_name                  = "Security-SC"
+  service_endpoint_authentication_scheme = "ManagedServiceIdentity"
+  azurerm_spn_tenantid                   = var.tenant_id
+  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_name              = "Lab"
+
+  depends_on = [module.security_project]
+}
+
+# --------------------------------------------------
+# Azure DevOps Service Endpoint (github)
+# --------------------------------------------------
+resource "azuredevops_serviceendpoint_github" "github" {
+  project_id            = module.security_project.devops_project_id
+  service_endpoint_name = "GitHub Connection"
+  description           = "GitHub service connection for Terraform Labs"
+
+  auth_personal {
+    # Use a GitHub PAT for authentication
+    personal_access_token = var.github_token
+  }
+  
+  depends_on = [module.security_project]
+}
+
 # ----------------------------------------
 # Resource Groups
 # ----------------------------------------
@@ -105,66 +156,6 @@ module "networking_vault" {
   }
 
   depends_on = [azurerm_resource_group.security]
-}
-# --------------------------------------------------
-# Create Empty Secrets
-# --------------------------------------------------
-module "security_secrets" {
-  source       = "../../modules/azurerm/security/secret" # Adjust to your module path
-  key_vault_id =  module.security_vault.key_vault_id
-  secrets = {
-    "devopspat"                  = ""
-    "devopsorgname"              = ""
-    "networkingvaultname"        = ""
-    "adminobjectid"              = ""
-    "backendContainer"           = ""
-    "backendResourceGroup"       = ""
-    "backendStorageAccount"      = ""
-    "clientid"                   = ""
-    "clientsecret"               = ""
-    "labsubscriptionid"          = ""
-    "managementsubscriptionid"   = ""
-    "spobjectid"                 = ""
-    "storageaccount"             = ""
-    "tenantid"                   = ""
-    "vaultname"                  = ""
-    "githubtoken"                = ""
-  }
-
-  providers = {
-    azurerm = azurerm.lab
-  }
-
-  depends_on = [module.security_vault, module.vault_access]
-}
-
-module "networking_secrets" {
-  source       = "../../modules/azurerm/security/secret" # Adjust to your module path
-  key_vault_id =  module.networking_vault.key_vault_id
-  secrets = {
-    "devopspat"                  = ""
-    "devopsorgname"              = ""
-    "networkingvaultname"        = ""
-    "adminobjectid"              = ""
-    "backendContainer"           = ""
-    "backendResourceGroup"       = ""
-    "backendStorageAccount"      = ""
-    "clientid"                   = ""
-    "clientsecret"               = ""
-    "labsubscriptionid"          = ""
-    "managementsubscriptionid"   = ""
-    "spobjectid"                 = ""
-    "storageaccount"             = ""
-    "tenantid"                   = ""
-    "vaultname"                  = ""
-    "githubtoken"                = ""
-  }
-
-  providers = {
-    azurerm = azurerm.lab
-  }
-
-  depends_on = [module.networking_vault]
 }
 
 # --------------------------------------------------
@@ -302,55 +293,67 @@ module "networking_sp_vault_access" {
 }
 
 # --------------------------------------------------
-# Azure DevOps Project (Security)
+# Create Empty Secrets
 # --------------------------------------------------
-module "security_project" {
-  source = "../../modules/azure-devops/project"
-
-  devops_org_name     = var.devops_org_name
-  devops_project_name = var.project
-  description         = "Security Managed by Terraform"
-  visibility          = "private"
-  devops_pat          = var.devops_pat
-
-  features = {
-    repositories = "disabled"
-    testplans    = "disabled"
-    artifacts    = "enabled"
-    pipelines    = "enabled"
-    boards       = "disabled"
+module "security_secrets" {
+  source       = "../../modules/azurerm/security/secret" # Adjust to your module path
+  key_vault_id =  module.security_vault.key_vault_id
+  secrets = {
+    "devopspat"                  = ""
+    "devopsorgname"              = ""
+    "networkingvaultname"        = ""
+    "adminobjectid"              = ""
+    "backendContainer"           = ""
+    "backendResourceGroup"       = ""
+    "backendStorageAccount"      = ""
+    "clientid"                   = ""
+    "clientsecret"               = ""
+    "labsubscriptionid"          = ""
+    "managementsubscriptionid"   = ""
+    "spobjectid"                 = ""
+    "storageaccount"             = ""
+    "tenantid"                   = ""
+    "vaultname"                  = ""
+    "githubtoken"                = ""
   }
-}
 
-# --------------------------------------------------
-# Azure DevOps Service Endpoint (AzureRM)
-# --------------------------------------------------
-resource "azuredevops_serviceendpoint_azurerm" "security" {
-  project_id                             = module.security_project.devops_project_id
-  service_endpoint_name                  = "Security-SC"
-  service_endpoint_authentication_scheme = "ManagedServiceIdentity"
-  azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_subscription_id                = var.lab_subscription_id
-  azurerm_subscription_name              = "Lab"
-
-  depends_on = [module.security_project]
-}
-
-# --------------------------------------------------
-# Azure DevOps Service Endpoint (github)
-# --------------------------------------------------
-resource "azuredevops_serviceendpoint_github" "github" {
-  project_id            = module.security_project.devops_project_id
-  service_endpoint_name = "GitHub Connection"
-  description           = "GitHub service connection for Terraform Labs"
-
-  auth_personal {
-    # Use a GitHub PAT for authentication
-    personal_access_token = var.github_token
+  providers = {
+    azurerm = azurerm.lab
   }
-  
-  depends_on = [module.security_project]
+
+  depends_on = [module.security_vault, module.sp_vault_access]
 }
+
+module "networking_secrets" {
+  source       = "../../modules/azurerm/security/secret" # Adjust to your module path
+  key_vault_id =  module.networking_vault.key_vault_id
+  secrets = {
+    "devopspat"                  = ""
+    "devopsorgname"              = ""
+    "networkingvaultname"        = ""
+    "adminobjectid"              = ""
+    "backendContainer"           = ""
+    "backendResourceGroup"       = ""
+    "backendStorageAccount"      = ""
+    "clientid"                   = ""
+    "clientsecret"               = ""
+    "labsubscriptionid"          = ""
+    "managementsubscriptionid"   = ""
+    "spobjectid"                 = ""
+    "storageaccount"             = ""
+    "tenantid"                   = ""
+    "vaultname"                  = ""
+    "githubtoken"                = ""
+  }
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [module.networking_vault, module.sp_vault_access]
+}
+
+
 /*
 # --------------------------------------------------
 # Azure DevOps Variable Group (Security)
