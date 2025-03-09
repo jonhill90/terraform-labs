@@ -251,7 +251,7 @@ module "security_devops_vault_access" {
 
   depends_on = [module.devops_vault]
 }
-
+/*
 module "devops_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
   key_vault_id = module.devops_vault.key_vault_id
@@ -272,7 +272,7 @@ module "devops_vault_access" {
 
   depends_on = [module.devops_vault]
 }
-
+*/
 
 module "networking_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
