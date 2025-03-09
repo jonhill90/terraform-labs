@@ -54,11 +54,6 @@ stages:
                     echo "Download Path: '$(Pipeline.Workspace)'"
                   displayName: "Debug: Verify Artifact Variables"
 
-                - script: |
-                    echo "🔍 Listing contents of $(Pipeline.Workspace)/${{ parameters.artifactName }}/azure-lab/security"
-                    ls -la "$(Pipeline.Workspace)/${{ parameters.artifactName }}/azure-lab/security"
-                  displayName: "Debug: Verify Downloaded Artifacts"
-
                 # ✅ Ensure Terraform is installed
                 - task: TerraformInstaller@1
                   displayName: "Install Terraform"
