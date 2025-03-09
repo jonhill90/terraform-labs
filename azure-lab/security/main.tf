@@ -1,7 +1,5 @@
 
-terraform {
-  backend "azurerm" {}
-}
+
 
 # --------------------------------------------------
 # Azure DevOps Project (Security)
@@ -313,7 +311,7 @@ module "security_sp_vault_access" {
     azurerm = azurerm.lab
   }
 
-  depends_on = [module.security_vault, module.vault_access]
+  depends_on = [module.security_vault]
 }
 
 module "networking_sp_vault_access" {
@@ -366,7 +364,7 @@ module "security_secrets" {
     azurerm = azurerm.lab
   }
 
-  depends_on = [module.sp_vault_access]
+  depends_on = [module.security_sp_vault_access]
 }
 
 module "networking_secrets" {
