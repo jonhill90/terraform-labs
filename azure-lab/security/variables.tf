@@ -108,3 +108,17 @@ variable "devops_pat" {
   sensitive   = true
   default     = null  # Optional, only needed if not using SP
 }
+
+# ----------------------------------------
+# GitHub Settings
+# ----------------------------------------
+variable "github_token" {
+  description = "GitHub Personal Access Token"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_repo_id" {
+  description = "GitHub Repository ID"
+  type        = string
+}
