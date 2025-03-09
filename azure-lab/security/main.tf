@@ -244,6 +244,22 @@ resource "azuredevops_serviceendpoint_azurerm" "security" {
 }
 
 # --------------------------------------------------
+# Azure DevOps Service Endpoint (github)
+# --------------------------------------------------
+resource "azuredevops_serviceendpoint_github" "github" {
+  project_id            = module.security_project.devops_project_id
+  service_endpoint_name = "GitHub Connection"
+  description           = "GitHub service connection for Terraform Labs"
+
+  auth_personal {
+    # Use a GitHub PAT for authentication
+    personal_access_token = var.github_token
+  }
+  
+  depends_on = [module.security_project]
+}
+
+# --------------------------------------------------
 # Azure DevOps Variable Group (Security)
 # --------------------------------------------------
 module "security_variable_group" {
@@ -268,7 +284,8 @@ module "security_variable_group" {
     "spobjectid",
     "storageaccount",
     "tenantid",
-    "vaultname"
+    "vaultname",
+    "githubtoken"
   ]
 
   depends_on = [module.security_project]
