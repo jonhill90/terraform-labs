@@ -13,3 +13,9 @@ variable "resource_group_name" {
   description = "Resource group name for Network Watcher"
   type        = string
 }
+
+variable "tags" {
+  description = "Tags to apply to all resources in the Virtual Network"
+  type        = map(string)
+  default     = {}
+}
