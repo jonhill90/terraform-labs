@@ -54,7 +54,7 @@ stages:
                     backendAzureRmResourceGroupName: "$(backendResourceGroup)"
                     backendAzureRmStorageAccountName: "$(backendStorageAccount)"
                     backendAzureRmContainerName: "$(backendContainer)"
-                    backendAzureRmKey: "$(team)/${{ parameters.environmentName }}.tfstate"
+                    backendAzureRmKey: "${{ parameters.team }}/${{ parameters.environmentName }}.tfstate"
                     workingDirectory: "${{ parameters.workingDirectory }}"
 
                 # ✅ Validate Terraform configuration
