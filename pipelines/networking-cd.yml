@@ -2,8 +2,8 @@ trigger: none
 
 resources:
   pipelines:
-    - pipeline: Security-CI
-      source: Security-CI
+    - pipeline: Networking-CI
+      source: Networking-CI
       trigger:
         branches:
           - main
@@ -14,13 +14,13 @@ pool:
 stages:
   - template: templates/template-terraform-plan.yml
     parameters:
-      team: "security"
-      artifactName: "security-artifacts"
-      variableGroup: "Security"
+      team: "networking"
+      artifactName: "networking-artifacts"
+      variableGroup: "Networking"
       backendServiceArm: "Lab-SC"
       environmentName: "lab"
       stageName: "lab"
       stageDisplayName: "Development"
-      workingDirectory: "$(Pipeline.Workspace)/Security-CI/security-artifacts/azure-lab/security"
+      workingDirectory: "$(Pipeline.Workspace)/Networking-CI/networking-artifacts/azure-lab/networking"
       agentPool: "Lab"
-      pipeline: "Security-CI"
+      pipeline: "Networking-CI"

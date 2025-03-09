@@ -77,7 +77,13 @@ variable "storage_account" {
 # Vault
 # ----------------------------------------
 variable "vault_name" {
-  description = "Vault Name"
+  description = "Security Vault Name"
+  type        = string
+  sensitive   = true
+}
+
+variable "networking_vault_name" {
+  description = "Networking Vault Name"
   type        = string
   sensitive   = true
 }
