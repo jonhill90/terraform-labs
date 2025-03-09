@@ -77,6 +77,28 @@ resource "azuredevops_build_definition" "security_ci" {
   depends_on = [azuredevops_serviceendpoint_github.github]
 }
 
+# --------------------------------------------------
+# Azure DevOps Release Pipeline (CD)
+# --------------------------------------------------
+resource "azuredevops_build_definition" "security_cd" {
+  project_id = module.security_project.devops_project_id
+  name       = "Security-CD"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/security-cd.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.github.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.github]
+}
+
 # ----------------------------------------
 # Resource Groups
 # ----------------------------------------
