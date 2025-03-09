@@ -177,3 +177,24 @@ module "networking_sp_vault_access" {
 
   depends_on = [module.networking_vault]
 }
+
+# --------------------------------------------------
+# Azure DevOps Project (Security)
+# --------------------------------------------------
+module "security_project" {
+  source = "../../modules/azure-devops/project"
+
+  devops_org_name     = var.devops_org_name
+  devops_project_name = var.project
+  description         = "Security Managed by Terraform"
+  visibility          = "private"
+  devops_pat          = var.devops_pat
+
+  features = {
+    repositories = "disabled"
+    testplans    = "disabled"
+    artifacts    = "enabled"
+    pipelines    = "enabled"
+    boards       = "disabled"
+  }
+}
