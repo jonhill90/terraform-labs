@@ -67,7 +67,7 @@ resource "azuredevops_build_definition" "security_ci" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "security-ci.yml"
+    yml_path              = "pipelines/security-ci.yml"
     service_connection_id = azuredevops_serviceendpoint_github.github.id
   }
 
