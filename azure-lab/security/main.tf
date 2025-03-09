@@ -50,8 +50,31 @@ resource "azuredevops_serviceendpoint_github" "github" {
     # Use a GitHub PAT for authentication
     personal_access_token = var.github_token
   }
-  
+
   depends_on = [module.security_project]
+}
+
+
+# --------------------------------------------------
+# Azure DevOps Build Pipeline (CI)
+# --------------------------------------------------
+resource "azuredevops_build_definition" "terraform_pipeline" {
+  project_id = module.security_project.devops_project_id
+  name       = "Security-CI"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "security-ci.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.github_connection.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.github]
 }
 
 # ----------------------------------------
@@ -255,7 +278,7 @@ module "security_sp_vault_access" {
 
   access_policies = [
     {
-      tenant_id               = var.tenant_id
+      tenant_id = var.tenant_id
       #object_id               = azuredevops_serviceendpoint_azurerm.security.id
       object_id               = var.sp_object_id
       key_permissions         = ["Get", "List"]
@@ -297,24 +320,24 @@ module "networking_sp_vault_access" {
 # --------------------------------------------------
 module "security_secrets" {
   source       = "../../modules/azurerm/security/secret" # Adjust to your module path
-  key_vault_id =  module.security_vault.key_vault_id
+  key_vault_id = module.security_vault.key_vault_id
   secrets = {
-    "devopspat"                  = ""
-    "devopsorgname"              = ""
-    "networkingvaultname"        = ""
-    "adminobjectid"              = ""
-    "backendContainer"           = ""
-    "backendResourceGroup"       = ""
-    "backendStorageAccount"      = ""
-    "clientid"                   = ""
-    "clientsecret"               = ""
-    "labsubscriptionid"          = ""
-    "managementsubscriptionid"   = ""
-    "spobjectid"                 = ""
-    "storageaccount"             = ""
-    "tenantid"                   = ""
-    "vaultname"                  = ""
-    "githubtoken"                = ""
+    "devopspat"                = ""
+    "devopsorgname"            = ""
+    "networkingvaultname"      = ""
+    "adminobjectid"            = ""
+    "backendContainer"         = ""
+    "backendResourceGroup"     = ""
+    "backendStorageAccount"    = ""
+    "clientid"                 = ""
+    "clientsecret"             = ""
+    "labsubscriptionid"        = ""
+    "managementsubscriptionid" = ""
+    "spobjectid"               = ""
+    "storageaccount"           = ""
+    "tenantid"                 = ""
+    "vaultname"                = ""
+    "githubtoken"              = ""
   }
 
   providers = {
@@ -326,24 +349,24 @@ module "security_secrets" {
 
 module "networking_secrets" {
   source       = "../../modules/azurerm/security/secret" # Adjust to your module path
-  key_vault_id =  module.networking_vault.key_vault_id
+  key_vault_id = module.networking_vault.key_vault_id
   secrets = {
-    "devopspat"                  = ""
-    "devopsorgname"              = ""
-    "networkingvaultname"        = ""
-    "adminobjectid"              = ""
-    "backendContainer"           = ""
-    "backendResourceGroup"       = ""
-    "backendStorageAccount"      = ""
-    "clientid"                   = ""
-    "clientsecret"               = ""
-    "labsubscriptionid"          = ""
-    "managementsubscriptionid"   = ""
-    "spobjectid"                 = ""
-    "storageaccount"             = ""
-    "tenantid"                   = ""
-    "vaultname"                  = ""
-    "githubtoken"                = ""
+    "devopspat"                = ""
+    "devopsorgname"            = ""
+    "networkingvaultname"      = ""
+    "adminobjectid"            = ""
+    "backendContainer"         = ""
+    "backendResourceGroup"     = ""
+    "backendStorageAccount"    = ""
+    "clientid"                 = ""
+    "clientsecret"             = ""
+    "labsubscriptionid"        = ""
+    "managementsubscriptionid" = ""
+    "spobjectid"               = ""
+    "storageaccount"           = ""
+    "tenantid"                 = ""
+    "vaultname"                = ""
+    "githubtoken"              = ""
   }
 
   providers = {
