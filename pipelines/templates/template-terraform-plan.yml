@@ -134,6 +134,6 @@ stages:
                   inputs:
                     command: "plan"
                     provider: "azurerm"
-                    backendServiceArm: ${{ parameters.backendServiceArm }}
+                    environmentServiceNameAzureRM: ${{ parameters.backendServiceArm }}
                     commandOptions: "-var environment=${{ parameters.environmentName }} -var tenant_id=$(tenantid) -var subscription_id=$(subscriptionid) -refresh=false -out=${{ parameters.environmentName }}-tfplan -input=false -no-color -detailed-exitcode"
                     workingDirectory: "${{ parameters.workingDirectory }}"
