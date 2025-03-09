@@ -360,6 +360,7 @@ module "security_secrets" {
     "storageaccount"           = ""
     "tenantid"                 = ""
     "vaultname"                = ""
+    "securityvaultname"        = ""
     "githubtoken"              = ""
   }
 
@@ -426,6 +427,7 @@ module "security_variable_group" {
     "storageaccount",
     "tenantid",
     "vaultname",
+    "securityvaultname",
     "githubtoken"
   ]
 
