@@ -203,7 +203,7 @@ module "security_project" {
 # Azure DevOps Service Endpoint (AzureRM)
 # --------------------------------------------------
 resource "azuredevops_serviceendpoint_azurerm" "security" {
-  project_id                             = module.security_project.project_id
+  project_id                             = module.security_project.devops_project_id
   service_endpoint_name                  = "Security-SC"
   service_endpoint_authentication_scheme = "ManagedServiceIdentity"
   azurerm_spn_tenantid                   = var.tenant_id
