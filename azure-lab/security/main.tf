@@ -208,6 +208,7 @@ resource "azuredevops_serviceendpoint_azurerm" "security" {
   service_endpoint_authentication_scheme = "ManagedServiceIdentity"
   azurerm_spn_tenantid                   = var.tenant_id
   azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_name              = "Lab"
 
   depends_on = [module.security_project]
 }
