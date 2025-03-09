@@ -1,5 +1,8 @@
 
-
+terraform {
+   backend "azurerm" {}
+ }
+ 
 
 # --------------------------------------------------
 # Azure DevOps Project (Security)
