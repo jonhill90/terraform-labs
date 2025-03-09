@@ -270,4 +270,6 @@ module "security_variable_group" {
     "tenantid",
     "vaultname"
   ]
+
+  depends_on = [module.security_project]
 }
