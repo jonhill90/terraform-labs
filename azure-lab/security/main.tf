@@ -50,7 +50,7 @@ resource "azurerm_storage_container" "tfstate" {
 }
 
 # --------------------------------------------------
-# Secure Vault
+# Secure Vault (ToDo: Create needed secrets with empty values)
 # --------------------------------------------------
 module "vault" {
   source                     = "../../modules/azurerm/security/vault"
@@ -86,6 +86,36 @@ module "networking_vault" {
   }
 
   depends_on = [azurerm_resource_group.security]
+}
+# --------------------------------------------------
+# Create Empty Secrets
+# --------------------------------------------------
+module "networking_secrets" {
+  source       = "../../modules/azurerm/security/secret" # Adjust to your module path
+  key_vault_id =  module.networking_vault.key_vault_id
+  secrets = {
+    "devopspat"                  = ""
+    "devopsorgname"              = ""
+    "networkingvaultname"        = ""
+    "adminobjectid"              = ""
+    "backendContainer"           = ""
+    "backendResourceGroup"       = ""
+    "backendStorageAccount"      = ""
+    "clientid"                   = ""
+    "clientsecret"               = ""
+    "labsubscriptionid"          = ""
+    "managementsubscriptionid"   = ""
+    "spobjectid"                 = ""
+    "storageaccount"             = ""
+    "tenantid"                   = ""
+    "vaultname"                  = ""
+  }
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [module.networking_vault]
 }
 
 # --------------------------------------------------
@@ -212,3 +242,27 @@ resource "azuredevops_serviceendpoint_azurerm" "security" {
 
   depends_on = [module.security_project]
 }
+/*
+# --------------------------------------------------
+# Azure DevOps Variable Group (Security)
+# --------------------------------------------------
+resource "azuredevops_variable_group" "security" {
+  project_id   = module.security_project.devops_project_id
+  name         = "Security"
+  description  = "Security Variable Group"
+  allow_access = true
+
+  key_vault {
+    name                = "example-kv"
+    service_endpoint_id = azuredevops_serviceendpoint_azurerm.security.id
+  }
+
+  variable {
+    name = "devopspat"
+  }
+
+  variable {
+    name = "key2"
+  }
+}
+*/
