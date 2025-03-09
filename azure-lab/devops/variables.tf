@@ -33,6 +33,12 @@ variable "github_repo_id" {
 # ----------------------------------------
 # Azure Settings
 # ----------------------------------------
+variable "lab_subscription_id" {
+  description = "Azure Subscription ID"
+  type        = string
+  sensitive   = true
+}
+
 variable "management_subscription_id" {
   description = "Azure Subscription ID"
   type        = string
@@ -40,12 +46,6 @@ variable "management_subscription_id" {
 }
 
 variable "tenant_id" {
-  description = "Azure AD Tenant ID"
-  type        = string
-  sensitive   = true
-}
-
-variable "admin_object_id" {
   description = "Azure AD Tenant ID"
   type        = string
   sensitive   = true
@@ -73,16 +73,22 @@ variable "devops_pat" {
 }
 
 # ----------------------------------------
-# Twingate Settings
+# Azure Service Principal
 # ----------------------------------------
-variable "twingate_network" {
-  description = "Twingate Network Name"
+variable "client_id" {
+  description = "Azure Service Principal Client ID"
   type        = string
   sensitive   = true
 }
 
-variable "twingate_api_key" {
-  description = "Twingate API Key"
+variable "client_secret" {
+  description = "Azure Service Principal Client Secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "sp_object_id" {
+  description = "Service Principal Object ID"
   type        = string
   sensitive   = true
 }
