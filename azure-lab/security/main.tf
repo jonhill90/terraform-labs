@@ -1,6 +1,8 @@
+/*
 terraform {
   backend "azurerm" {}
 }
+*/
 
 # ----------------------------------------
 # Resource Groups
@@ -70,6 +72,24 @@ module "vault" {
   depends_on = [azurerm_resource_group.security]
 }
 
+module "security_vault" {
+  source                     = "../../modules/azurerm/security/vault"
+  key_vault_name             = var.security_vault_name
+  resource_group_name        = azurerm_resource_group.security.name
+  location                   = "eastus"
+  sku_name                   = "standard"
+  purge_protection           = false
+  soft_delete_retention_days = 90
+
+  tenant_id = var.tenant_id
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [azurerm_resource_group.security]
+}
+
 module "networking_vault" {
   source                     = "../../modules/azurerm/security/vault"
   key_vault_name             = var.networking_vault_name
@@ -90,6 +110,35 @@ module "networking_vault" {
 # --------------------------------------------------
 # Create Empty Secrets
 # --------------------------------------------------
+module "security_secrets" {
+  source       = "../../modules/azurerm/security/secret" # Adjust to your module path
+  key_vault_id =  module.security_vault.key_vault_id
+  secrets = {
+    "devopspat"                  = ""
+    "devopsorgname"              = ""
+    "networkingvaultname"        = ""
+    "adminobjectid"              = ""
+    "backendContainer"           = ""
+    "backendResourceGroup"       = ""
+    "backendStorageAccount"      = ""
+    "clientid"                   = ""
+    "clientsecret"               = ""
+    "labsubscriptionid"          = ""
+    "managementsubscriptionid"   = ""
+    "spobjectid"                 = ""
+    "storageaccount"             = ""
+    "tenantid"                   = ""
+    "vaultname"                  = ""
+    "githubtoken"                = ""
+  }
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [module.security_vault]
+}
+
 module "networking_secrets" {
   source       = "../../modules/azurerm/security/secret" # Adjust to your module path
   key_vault_id =  module.networking_vault.key_vault_id
@@ -109,6 +158,7 @@ module "networking_secrets" {
     "storageaccount"             = ""
     "tenantid"                   = ""
     "vaultname"                  = ""
+    "githubtoken"                = ""
   }
 
   providers = {
@@ -288,5 +338,5 @@ module "security_variable_group" {
     "githubtoken"
   ]
 
-  depends_on = [module.security_project]
+  depends_on = [module.security_vault, azuredevops_serviceendpoint_azurerm.security, module.security_project]
 }
