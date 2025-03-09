@@ -351,7 +351,7 @@ resource "azuredevops_serviceendpoint_github" "github" {
   
   depends_on = [module.security_project]
 }
-
+/*
 # --------------------------------------------------
 # Azure DevOps Variable Group (Security)
 # --------------------------------------------------
@@ -383,3 +383,4 @@ module "security_variable_group" {
 
   depends_on = [module.security_vault, azuredevops_serviceendpoint_azurerm.security, module.security_project]
 }
+*/
