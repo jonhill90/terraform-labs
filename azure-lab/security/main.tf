@@ -170,7 +170,7 @@ module "security_vault" {
 
   depends_on = [azurerm_resource_group.security]
 }
-/*
+
 module "devops_vault" {
   source                     = "../../modules/azurerm/security/vault"
   key_vault_name             = var.devops_vault_name
@@ -188,7 +188,7 @@ module "devops_vault" {
 
   depends_on = [azurerm_resource_group.security]
 }
-*/
+
 module "networking_vault" {
   source                     = "../../modules/azurerm/security/vault"
   key_vault_name             = var.networking_vault_name
