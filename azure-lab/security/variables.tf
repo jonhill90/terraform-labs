@@ -88,6 +88,12 @@ variable "security_vault_name" {
   sensitive   = true
 }
 
+variable "devops_vault_name" {
+  description = "DevOps Vault Name"
+  type        = string
+  sensitive   = true
+}
+
 variable "networking_vault_name" {
   description = "Networking Vault Name"
   type        = string

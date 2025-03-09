@@ -87,8 +87,8 @@ variable "client_secret" {
   sensitive   = true
 }
 
-variable "sp_object_id" {
-  description = "Service Principal Object ID"
+variable "devops_sp_object_id" {
+  description = "DevOps Service Principal Object ID"
   type        = string
   sensitive   = true
 }
