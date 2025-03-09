@@ -107,6 +107,11 @@ stages:
                     ls -la "${{ parameters.workingDirectory }}"
                   displayName: "Debug: List Files in Working Directory"
 
+                - script: |
+                    echo "🔍 Checking .tfvars file in: ${{ parameters.workingDirectory }}/env/"
+                    ls -la "${{ parameters.workingDirectory }}/env/"
+                  displayName: "Debug: Check .tfvars File Location"
+
                 # ✅ Initialize Terraform backend
                 - task: TerraformTaskV4@4
                   displayName: "Terraform Init - ${{ parameters.stageDisplayName }}"
@@ -127,15 +132,15 @@ stages:
                     command: "validate"
                     provider: "azurerm"
                     workingDirectory: "${{ parameters.workingDirectory }}"
-                
+              
                 - task: replacetokens@6
-                  displayName: 'Replace Tokens in Terraform tfvars File'
+                  displayName: "Replace Tokens in Terraform tfvars File"
                   inputs:
-                    targetFiles: '"${{ parameters.workingDirectory }}"/env/${{ parameters.environmentName}}.tfvars'
-                    tokenPattern: 'custom'
-                    tokenPrefix: '__'
-                    tokenSuffix: '__'
-                    actionOnMissing: 'warn'
+                    targetFiles: "${{ parameters.workingDirectory }}/env/${{ parameters.environmentName }}.tfvars"  # ✅ Ensure correct path
+                    tokenPattern: "custom"
+                    tokenPrefix: "__"
+                    tokenSuffix: "__"
+                    actionOnMissing: "warn"  # ✅ Warn instead of failing if the file is missing
                     keepToken: false
 
                 # ✅ Run Terraform plan
