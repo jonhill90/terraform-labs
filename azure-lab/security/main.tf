@@ -1,7 +1,6 @@
-
 terraform {
-   backend "azurerm" {}
- }
+  backend "azurerm" {}
+}
 
 # --------------------------------------------------
 # Azure DevOps Project (Security)
@@ -114,6 +113,11 @@ resource "azurerm_resource_group" "security" {
   }
 }
 
+data "azurerm_resource_group" "devops" {
+  name     = "DevOps"
+  provider = azurerm.lab
+}
+
 # ----------------------------------------
 # Storage Accounts
 # ----------------------------------------
@@ -152,6 +156,24 @@ resource "azurerm_storage_container" "tfstate" {
 module "security_vault" {
   source                     = "../../modules/azurerm/security/vault"
   key_vault_name             = var.security_vault_name
+  resource_group_name        = azurerm_resource_group.security.name
+  location                   = "eastus"
+  sku_name                   = "standard"
+  purge_protection           = false
+  soft_delete_retention_days = 90
+
+  tenant_id = var.tenant_id
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [azurerm_resource_group.security]
+}
+
+module "devops_vault" {
+  source                     = "../../modules/azurerm/security/vault"
+  key_vault_name             = var.devops_vault_name
   resource_group_name        = azurerm_resource_group.security.name
   location                   = "eastus"
   sku_name                   = "standard"
@@ -300,6 +322,7 @@ module "security_secrets" {
     "storageaccount"           = ""
     "tenantid"                 = ""
     "securityvaultname"        = ""
+    "devopsvaultname"          = ""
     "githubtoken"              = ""
   }
 
@@ -342,12 +365,12 @@ module "networking_secrets" {
 # Azure DevOps Variable Group (Security)
 # --------------------------------------------------
 module "security_variable_group" {
-  source                      = "../../modules/azure-devops/variable-group"
-  project_id                  = module.security_project.devops_project_id
-  variable_group_name         = "Security"
-  variable_group_description  = "Security Variable Group"
-  key_vault_name              = var.security_vault_name
-  service_endpoint_id         = azuredevops_serviceendpoint_azurerm.security.id
+  source                     = "../../modules/azure-devops/variable-group"
+  project_id                 = module.security_project.devops_project_id
+  variable_group_name        = "Security"
+  variable_group_description = "Security Variable Group"
+  key_vault_name             = var.security_vault_name
+  service_endpoint_id        = azuredevops_serviceendpoint_azurerm.security.id
   secrets = [
     "devopspat",
     "devopsorgname",
@@ -365,6 +388,7 @@ module "security_variable_group" {
     "storageaccount",
     "tenantid",
     "securityvaultname",
+    "devopsvaultname",
     "githubtoken"
   ]
 

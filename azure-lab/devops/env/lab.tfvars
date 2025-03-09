@@ -1,0 +1,13 @@
+lab_subscription_id        = "__labsubscriptionid__"
+management_subscription_id = "__managementsubscriptionid__"
+tenant_id                  = "__tenantid__"
+environment                = "Lab"
+owner                      = "devops"
+project                    = "Devops"
+devops_sp_object_id        = "__devopsspobjectid__" # Service Principal Object ID
+client_id                  = "__clientid__" # Application (client) ID
+client_secret              = "__clientsecret__" # Service Principal Secret created in Azure AD
+devops_org_name            = "__devopsorgname__"
+devops_pat                 = "__devopspat__"
+github_token               = "__githubtoken__"
+github_repo_id             = "jonhill90/terraform-labs"

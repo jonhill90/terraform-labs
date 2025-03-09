@@ -66,6 +66,7 @@ resource "azuredevops_serviceendpoint_azurerm" "devops" {
   depends_on = [module.devops_project]
 }
 # Get ClientID and ID for the Service Principal
+# Currently Getting Service Principal Object ID from Azure Portal by going through the IAM Role Assignment wizard for a vault
 # az ad sp list --query "[].{DisplayName:displayName, ClientID:appId, ID:id}" --output table
 # Create Secret for the Service Principal via Portal
 
@@ -106,3 +107,6 @@ resource "azuredevops_build_definition" "devops_ci" {
   }
   depends_on = [azuredevops_serviceendpoint_github.github]
 }
+
+# Add Agent Pool to the Build Pipeline via DevOps Portal
+# Approve Pipeline to use the Agent Pool vis DevOps Portal
