@@ -58,7 +58,7 @@ resource "azuredevops_serviceendpoint_github" "github" {
 # --------------------------------------------------
 # Azure DevOps Build Pipeline (CI)
 # --------------------------------------------------
-resource "azuredevops_build_definition" "terraform_pipeline" {
+resource "azuredevops_build_definition" "security_ci" {
   project_id = module.security_project.devops_project_id
   name       = "Security-CI"
   path       = "\\"
@@ -68,7 +68,7 @@ resource "azuredevops_build_definition" "terraform_pipeline" {
     repo_id               = var.github_repo_id
     branch_name           = "main"
     yml_path              = "security-ci.yml"
-    service_connection_id = azuredevops_serviceendpoint_github.github_connection.id
+    service_connection_id = azuredevops_serviceendpoint_github.github.id
   }
 
   ci_trigger {
