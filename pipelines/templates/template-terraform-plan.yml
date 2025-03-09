@@ -37,10 +37,20 @@ stages:
             deploy:
               steps:
                 - checkout: self
+                
+                - script: |
+                    echo "🔍 Debugging Working Directory Parameter"
+                    echo "workingDirectory: '${{ parameters.workingDirectory }}'"
+                    echo "🔍 Checking actual directory:"
+                    ls -la "${{ parameters.workingDirectory }}"
+                  displayName: "Debug: Verify Working Directory Parameter"
+
                 - script: |
                     echo "🔍 Debugging Artifact Variables"
                     echo "Artifact Name: '${{ parameters.artifactName }}'"
                     echo "Pipeline: '${{ parameters.pipeline }}'"
+                    echo "🔍 Listing contents of $(Pipeline.Workspace)"
+                    ls -la "$(Pipeline.Workspace)"
                     echo "Download Path: '$(Pipeline.Workspace)'"
                   displayName: "Debug: Verify Artifact Variables"
 
