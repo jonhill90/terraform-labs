@@ -1,8 +1,8 @@
-
+/*
 terraform {
   backend "azurerm" {}
 }
-
+*/
 # --------------------------------------------------
 # Azure DevOps Project (Security)
 # --------------------------------------------------
@@ -301,8 +301,8 @@ module "security_sp_vault_access" {
   access_policies = [
     {
       tenant_id = var.tenant_id
-      #object_id               = azuredevops_serviceendpoint_azurerm.security.id
-      object_id               = var.sp_object_id
+      object_id = azuredevops_serviceendpoint_azurerm.security.id
+      #object_id               = var.sp_object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
@@ -366,7 +366,7 @@ module "security_secrets" {
     azurerm = azurerm.lab
   }
 
-  depends_on = [module.security_vault, module.sp_vault_access]
+  depends_on = [module.sp_vault_access]
 }
 
 module "networking_secrets" {
@@ -398,8 +398,6 @@ module "networking_secrets" {
   depends_on = [module.networking_vault, module.sp_vault_access]
 }
 
-
-/*
 # --------------------------------------------------
 # Azure DevOps Variable Group (Security)
 # --------------------------------------------------
@@ -429,6 +427,5 @@ module "security_variable_group" {
     "githubtoken"
   ]
 
-  depends_on = [module.security_vault, azuredevops_serviceendpoint_azurerm.security, module.security_project]
+  depends_on = [module.security_secrets]
 }
-*/
