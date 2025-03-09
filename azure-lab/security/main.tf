@@ -135,7 +135,7 @@ module "security_secrets" {
     azurerm = azurerm.lab
   }
 
-  depends_on = [module.security_vault]
+  depends_on = [module.security_vault, module.vault_access]
 }
 
 module "networking_secrets" {
@@ -277,7 +277,7 @@ module "security_sp_vault_access" {
     azurerm = azurerm.lab
   }
 
-  depends_on = [module.security_vault, azuredevops_serviceendpoint_azurerm.security]
+  depends_on = [module.security_vault, module.vault_access]
 }
 
 module "networking_sp_vault_access" {
