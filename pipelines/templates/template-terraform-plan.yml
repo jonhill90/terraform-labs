@@ -45,8 +45,8 @@ stages:
                   displayName: "Debug: Verify Artifact Variables"
 
                 - script: |
-                    echo "🔍 Listing contents of $(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
-                    ls -la "$(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
+                    echo "🔍 Listing contents of $(Pipeline.Workspace)/${{ parameters.artifactName }}/azure-lab/security"
+                    ls -la "$(Pipeline.Workspace)/${{ parameters.artifactName }}/azure-lab/security"
                   displayName: "Debug: Verify Downloaded Artifacts"
 
                 # ✅ Ensure Terraform is installed
@@ -89,7 +89,7 @@ stages:
 
                 - script: |
                     echo "🔍 Running Terraform Init WITHOUT Backend to Isolate Issue..."
-                    WORK_DIR="$(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
+                    WORK_DIR="$(Pipeline.Workspace)/${{ parameters.artifactName }}/azure-lab/security"
                     echo "Using Working Directory: $WORK_DIR"
                     cd "$WORK_DIR"
                     echo "Current Directory: $(pwd)"
@@ -108,7 +108,7 @@ stages:
                     backendAzureRmStorageAccountName: "$(backendStorageAccount)"
                     backendAzureRmContainerName: "$(backendContainer)"
                     backendAzureRmKey: "$(team)/${{ parameters.environmentName }}.tfstate"
-                    workingDirectory: "$(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
+                    workingDirectory: "${{ parameters.workingDirectory }}"
 
                 # ✅ Validate Terraform configuration
                 - task: TerraformTaskV4@4
@@ -116,7 +116,7 @@ stages:
                   inputs:
                     command: "validate"
                     provider: "azurerm"
-                    workingDirectory: "$(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
+                    workingDirectory: "${{ parameters.workingDirectory }}"
 
                 # ✅ Run Terraform plan
                 - task: TerraformTaskV4@4
@@ -125,4 +125,4 @@ stages:
                     command: "plan"
                     provider: "azurerm"
                     commandOptions: "-var environment=${{ parameters.environmentName }} -var tenant_id=$(tenantid) -var subscription_id=$(subscriptionid) -refresh=false -out=${{ parameters.environmentName }}-tfplan -input=false -no-color -detailed-exitcode"
-                    workingDirectory: "$(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
+                    workingDirectory: "${{ parameters.workingDirectory }}"
