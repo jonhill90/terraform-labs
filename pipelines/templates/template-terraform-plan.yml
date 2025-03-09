@@ -89,7 +89,9 @@ stages:
 
                 - script: |
                     echo "🔍 Running Terraform Init WITHOUT Backend to Isolate Issue..."
-                    cd "$(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
+                    WORK_DIR="$(Pipeline.Workspace)/${{ parameters.artifactName }}/$(team)"
+                    echo "Using Working Directory: $WORK_DIR"
+                    cd "$WORK_DIR"
                     echo "Current Directory: $(pwd)"
                     ls -la
                     terraform init -input=false
