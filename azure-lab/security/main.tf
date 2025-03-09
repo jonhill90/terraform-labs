@@ -1,8 +1,6 @@
 terraform {
    backend "azurerm" {}
  }
- 
- 
 
 # --------------------------------------------------
 # Azure DevOps Project (Security)
@@ -357,6 +355,7 @@ module "security_secrets" {
     "labsubscriptionid"        = ""
     "managementsubscriptionid" = ""
     "spobjectid"               = ""
+    "securityspobjectid"       = ""
     "storageaccount"           = ""
     "tenantid"                 = ""
     "vaultname"                = ""
@@ -422,6 +421,7 @@ module "security_variable_group" {
     "labsubscriptionid",
     "managementsubscriptionid",
     "spobjectid",
+    "securityspobjectid",
     "storageaccount",
     "tenantid",
     "vaultname",
