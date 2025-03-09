@@ -1,8 +1,6 @@
-/*
 terraform {
   backend "azurerm" {}
 }
-*/
 
 # ----------------------------------------
 # Resource Groups
