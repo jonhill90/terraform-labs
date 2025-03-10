@@ -318,7 +318,7 @@ module "security_sp_vault_access" {
 
   depends_on = [module.security_vault]
 }
-/*
+
 module "devops_sp_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
   key_vault_id = module.devops_vault.key_vault_id
@@ -339,7 +339,7 @@ module "devops_sp_vault_access" {
 
   depends_on = [module.security_vault]
 }
-*/
+
 module "networking_sp_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
   key_vault_id = module.networking_vault.key_vault_id
