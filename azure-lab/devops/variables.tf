@@ -92,3 +92,12 @@ variable "devops_sp_object_id" {
   type        = string
   sensitive   = true
 }
+
+# ----------------------------------------
+# Vault
+# ----------------------------------------
+variable "devops_vault_name" {
+  description = "DevOps Vault Name"
+  type        = string
+  sensitive   = true
+}

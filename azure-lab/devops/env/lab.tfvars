@@ -4,6 +4,7 @@ tenant_id                  = "__tenantid__"
 environment                = "Lab"
 owner                      = "devops"
 project                    = "Devops"
+devops_vault_name          = "__devopsvaultname__"
 devops_sp_object_id        = "__devopsspobjectid__" # Service Principal Object ID
 client_id                  = "__clientid__" # Application (client) ID
 client_secret              = "__clientsecret__" # Service Principal Secret created in Azure AD
