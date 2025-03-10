@@ -318,7 +318,28 @@ module "security_sp_vault_access" {
 
   depends_on = [module.security_vault]
 }
+/*
+module "devops_sp_vault_access" {
+  source       = "../../modules/azurerm/security/vault-access"
+  key_vault_id = module.devops_vault.key_vault_id
 
+  access_policies = [
+    {
+      tenant_id               = var.tenant_id
+      object_id               = var.devops_sp_object_id
+      key_permissions         = ["Get", "List"]
+      secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
+      certificate_permissions = ["Get", "List"]
+    }
+  ]
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [module.security_vault]
+}
+*/
 module "networking_sp_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
   key_vault_id = module.networking_vault.key_vault_id
@@ -359,6 +380,7 @@ module "security_secrets" {
     "labsubscriptionid"        = ""
     "managementsubscriptionid" = ""
     "spobjectid"               = ""
+    "devopsspobjectid"         = ""
     "securityspobjectid"       = ""
     "storageaccount"           = ""
     "tenantid"                 = ""
@@ -426,6 +448,7 @@ module "security_variable_group" {
     "managementsubscriptionid",
     "spobjectid",
     "securityspobjectid",
+    "devopsspobjectid",
     "storageaccount",
     "tenantid",
     "securityvaultname",
