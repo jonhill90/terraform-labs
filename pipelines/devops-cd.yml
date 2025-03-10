@@ -12,7 +12,7 @@ pool:
   name: 'Lab'
 
 stages:
-  - template: templates/template-terraform-plan.yml
+  - template: templates/template-terraform-cd.yml
     parameters:
       team: "devops"
       artifactName: "devops-artifacts"
