@@ -70,6 +70,12 @@ variable "security_sp_object_id" {
   sensitive   = true
 }
 
+variable "devops_sp_object_id" {
+  description = "DevOps Service Principal Object ID"
+  type        = string
+  sensitive   = true
+}
+
 # ----------------------------------------
 # Storage Account
 # ----------------------------------------

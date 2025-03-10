@@ -11,6 +11,7 @@ storage_account            = "__storageaccount__"
 admin_object_id            = "__adminobjectid__"
 sp_object_id               = "__spobjectid__"
 security_sp_object_id      = "__securityspobjectid__"
+devops_sp_object_id        = "__devopsspobjectid__" # Service Principal Object ID
 client_id                  = "__clientid__"
 client_secret              = "__clientsecret__"
 devops_org_name            = "__devopsorgname__"
