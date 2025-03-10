@@ -87,6 +87,71 @@ resource "azuredevops_serviceendpoint_github" "github" {
 }
 
 # --------------------------------------------------
+# Secure Vault
+# --------------------------------------------------
+data "azurerm_key_vault" "devops" {
+  name                = var.devops_vault_name
+  resource_group_name = "Security"
+  provider            = azurerm.lab
+}
+
+# --------------------------------------------------
+# Create Empty Secrets
+# --------------------------------------------------
+module "devops_secrets" {
+  source       = "../../modules/azurerm/security/secret"
+  key_vault_id = data.azurerm_key_vault.devops.id
+  secrets = {
+    "devopspat"                = ""
+    "devopsorgname"            = ""
+    "backendContainer"         = ""
+    "backendResourceGroup"     = ""
+    "backendStorageAccount"    = ""
+    "clientid"                 = ""
+    "clientsecret"             = ""
+    "labsubscriptionid"        = ""
+    "managementsubscriptionid" = ""
+    "tenantid"                 = ""
+    "devopsvaultname"          = ""
+    "githubtoken"              = ""
+  }
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [data.azurerm_key_vault.devops]
+}
+
+# --------------------------------------------------
+# Azure DevOps Variable Groups
+# --------------------------------------------------
+module "devops_variable_group" {
+  source                     = "../../modules/azure-devops/variable-group"
+  project_id                 = module.devops_project.devops_project_id
+  variable_group_name        = "DevOps"
+  variable_group_description = "DevOps Variable Group"
+  key_vault_name             = var.devops_vault_name
+  service_endpoint_id        = azuredevops_serviceendpoint_azurerm.devops.id
+  secrets = [
+    "devopspat",
+    "devopsorgname",
+    "backendContainer",
+    "backendResourceGroup",
+    "backendStorageAccount",
+    "clientid",
+    "clientsecret",
+    "labsubscriptionid",
+    "managementsubscriptionid",
+    "tenantid",
+    "devopsvaultname",
+    "githubtoken"
+  ]
+
+  depends_on = [module.devops_secrets]
+}
+
+# --------------------------------------------------
 # Azure DevOps Build Pipeline (CI)
 # --------------------------------------------------
 resource "azuredevops_build_definition" "devops_ci" {
@@ -110,3 +175,25 @@ resource "azuredevops_build_definition" "devops_ci" {
 
 # Add Agent Pool to the Build Pipeline via DevOps Portal
 # Approve Pipeline to use the Agent Pool vis DevOps Portal
+
+# --------------------------------------------------
+# Azure DevOps Release Pipeline (CD)
+# --------------------------------------------------
+resource "azuredevops_build_definition" "devops_cd" {
+  project_id = module.devops_project.devops_project_id
+  name       = "DevOps-CD"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/devops-cd.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.github.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.github, azuredevops_build_definition.devops_ci]
+}
