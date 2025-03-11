@@ -212,6 +212,24 @@ module "networking_vault" {
   depends_on = [azurerm_resource_group.security]
 }
 
+module "compute_vault" {
+  source                     = "../../modules/azurerm/security/vault"
+  key_vault_name             = var.compute_vault_name
+  resource_group_name        = azurerm_resource_group.security.name
+  location                   = "eastus"
+  sku_name                   = "standard"
+  purge_protection           = false
+  soft_delete_retention_days = 90
+
+  tenant_id = var.tenant_id
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [azurerm_resource_group.security]
+}
+
 # --------------------------------------------------
 # Secure Vault Access (Azure Admin Account)
 # --------------------------------------------------
@@ -276,6 +294,27 @@ module "networking_vault_access" {
   }
 
   depends_on = [module.networking_vault]
+}
+
+module "compute_vault_access" {
+  source       = "../../modules/azurerm/security/vault-access"
+  key_vault_id = module.compute_vault.key_vault_id
+
+  access_policies = [
+    {
+      tenant_id               = var.tenant_id
+      object_id               = var.admin_object_id
+      key_permissions         = ["Get", "List"]
+      secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
+      certificate_permissions = ["Get", "List"]
+    }
+  ]
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [module.compute_vault]
 }
 
 # --------------------------------------------------
