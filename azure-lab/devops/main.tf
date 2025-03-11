@@ -125,7 +125,7 @@ resource "azuredevops_serviceendpoint_azurerm" "compute" {
   azurerm_subscription_id                = var.lab_subscription_id
   azurerm_subscription_name              = "Lab"
 
-  depends_on = [module.networking_project]
+  depends_on = [module.compute_project]
 }
 # Get ClientID and ID for the Service Principal
 # Currently Getting Service Principal Object ID from Azure Portal by going through the IAM Role Assignment wizard for a vault needed for security to grant the service principal access to the vault.
