@@ -101,3 +101,9 @@ variable "networking_vault_name" {
   type        = string
   sensitive   = true
 }
+
+variable "compute_vault_name" {
+  description = "Compute Vault Name"
+  type        = string
+  sensitive   = true
+}

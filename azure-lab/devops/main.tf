@@ -188,7 +188,13 @@ data "azurerm_key_vault" "networking" {
   resource_group_name = "Security"
   provider            = azurerm.lab
 }
-
+/*
+data "azurerm_key_vault" "compute" {
+  name                = var.compute_vault_name
+  resource_group_name = "Compute"
+  provider            = azurerm.lab
+}
+*/
 # --------------------------------------------------
 # Create Empty Secrets
 # --------------------------------------------------
@@ -208,6 +214,7 @@ module "devops_secrets" {
     "tenantid"                 = ""
     "devopsvaultname"          = ""
     "networkingvaultname"      = ""
+    "computevaultname"         = ""
     "githubtoken"              = ""
   }
 
@@ -241,10 +248,11 @@ module "devops_variable_group" {
     "tenantid",
     "devopsvaultname",
     "networkingvaultname",
+    "computevaultname",
     "githubtoken"
   ]
 
-  depends_on = [module.devops_secrets]
+  depends_on = [data.azurerm_key_vault.devops]
 }
 
 module "networking_variable_group" {
@@ -265,9 +273,29 @@ module "networking_variable_group" {
     "twingatenetwork",
     "twingateapikey"
   ]
-
+  depends_on = [data.azurerm_key_vault.networking]
 }
+/*
+module "compute_variable_group" {
+  source                     = "../../modules/azure-devops/variable-group"
+  project_id                 = module.compute_project.devops_project_id
+  variable_group_name        = "Compute"
+  variable_group_description = "Compute Variable Group"
+  key_vault_name             = var.compute_vault_name
+  service_endpoint_id        = azuredevops_serviceendpoint_azurerm.compute.id
+  secrets = [
+    "backendContainer",
+    "backendResourceGroup",
+    "backendStorageAccount",
+    "labsubscriptionid",
+    "managementsubscriptionid",
+    "tenantid",
+    "vaultname",
+  ]
 
+  depends_on = [data.azurerm_key_vault.compute]
+}
+*/
 # --------------------------------------------------
 # Azure DevOps Build Pipeline (CI)
 # --------------------------------------------------
