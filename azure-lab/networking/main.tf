@@ -17,7 +17,7 @@ resource "azurerm_resource_group" "networking" {
   }
 }
 data "azurerm_resource_group" "security" {
-  name = "Security"
+  name     = "Security"
   provider = azurerm.lab
 }
 
@@ -52,7 +52,7 @@ module "networking_secrets" {
 
   depends_on = [data.azurerm_key_vault.networking]
 }
-/*
+
 # ----------------------------------------
 # Network - Watcher
 # ----------------------------------------
@@ -81,13 +81,15 @@ module "network-watcher" {
 module "vnet" {
   source = "../../modules/azurerm/network/vnet"
 
-  vnet_name           = "${var.project}-vnet"
+  vnet_name           = "lab-vnet"
   vnet_location       = azurerm_resource_group.networking.location
   vnet_resource_group = azurerm_resource_group.networking.name
   vnet_address_space  = ["10.100.0.0/16"]
 
   subnets = {
-    management = { address_prefixes = ["10.100.1.0/24"] }
+    default    = { address_prefixes = ["10.100.1.0/24"] }
+    management = { address_prefixes = ["10.100.2.0/24"] }
+    server     = { address_prefixes = ["10.100.5.0/24"] }
     app        = { address_prefixes = ["10.100.10.0/24"] }
     db         = { address_prefixes = ["10.100.20.0/24"] }
   }
@@ -103,4 +105,3 @@ module "vnet" {
   }
   depends_on = [azurerm_resource_group.networking, module.network-watcher]
 }
-*/
