@@ -466,6 +466,7 @@ module "security_variable_group" {
     "securityspobjectid",
     "devopsspobjectid",
     "networkingspobjectid",
+    "computespobjectid",
     "storageaccount",
     "tenantid",
     "securityvaultname",
