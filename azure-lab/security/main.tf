@@ -401,7 +401,7 @@ module "compute_sp_vault_access" {
     azurerm = azurerm.lab
   }
 
-  depends_on = [module.compute_vault]
+  depends_on = [module.compute_vault, module.security_variable_group]
 }
 
 # --------------------------------------------------
