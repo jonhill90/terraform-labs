@@ -157,7 +157,7 @@ module "container_registry" {
     project     = var.project
   }
 }
-/*
+
 # Twingate Image Push Module (Pushes Docker Image to ACR)
 module "twingate_image_push" {
   source                = "../../modules/twingate/connector"
@@ -169,7 +169,7 @@ module "twingate_image_push" {
 
   depends_on = [module.container_registry]
 }
-
+/*
 # **Twingate ACG Module (Deploys Azure Container Group)**
 module "twingate_acg" {
   source                = "../../modules/azurerm/container/group"
