@@ -18,3 +18,10 @@ provider "azurerm" {
   subscription_id = var.management_subscription_id
   features {}
 }
+
+/*
+provider "twingate" {
+  api_token = var.twingate_api_key
+  network   = var.twingate_network
+}
+*/

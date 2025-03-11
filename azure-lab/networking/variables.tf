@@ -45,3 +45,18 @@ variable "vault_name" {
   type        = string
   sensitive   = true
 }
+
+# ----------------------------------------
+# Twingate
+# ----------------------------------------
+variable "twingate_network" {
+  description = "Twingate Network Name"
+  type        = string
+  sensitive   = true
+}
+
+variable "twingate_api_key" {
+  description = "Twingate API Key"
+  type        = string
+  sensitive   = true
+}

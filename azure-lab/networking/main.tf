@@ -44,6 +44,8 @@ module "networking_secrets" {
     "managementsubscriptionid" = ""
     "tenantid"                 = ""
     "vaultname"                = ""
+    "twingatenetwork"          = ""
+    "twingateapikey"           = ""
   }
 
   providers = {
@@ -105,3 +107,74 @@ module "lab_vnet" {
   }
   depends_on = [azurerm_resource_group.networking, module.network-watcher]
 }
+/*
+# ----------------------------------------
+# Twingate
+# ----------------------------------------
+module "twingate_groups" {
+  source = "../../modules/twingate/group"
+
+  groups = {
+    networking = "Networking Team"
+  }
+}
+
+module "twingate_resource" {
+  source = "../../modules/twingate/network"
+
+  providers = {
+    twingate = twingate
+  }
+
+  remote_network_name = "Lab"
+  connector_name      = "lab-connector"
+  subnet_map = {
+    "agent-subnet" = "10.100.2.0/24"
+  }
+  twingate_api_key = var.twingate_api_key
+  twingate_network = var.twingate_network
+
+}
+
+# Twingate Image Push Module (Pushes Docker Image to ACR)
+module "twingate_image_push" {
+  source                = "../../modules/twingate/connector"
+  registry_login_server = module.container_registry.acr_login_server
+  acr_id                = module.container_registry.acr_id
+  connector_id          = module.twingate_resource.connector_id
+  image_name            = "twingate-connector"
+  image_tag             = "latest"
+
+  depends_on = [module.container_registry]
+}
+
+# **Twingate ACG Module (Deploys Azure Container Group)**
+module "twingate_acg" {
+  source                = "../../modules/azurerm/container/group"
+  container_name        = "twingate-connector"
+  location              = azurerm_resource_group.networking.location
+  resource_group        = azurerm_resource_group.networking.name
+  registry_login_server = module.container_registry.acr_login_server
+  registry_username     = module.container_registry.acr_admin_username
+  registry_password     = module.container_registry.acr_admin_password
+  image                 = "twingate-connector"
+  image_tag             = "latest"
+  cpu                   = "1"
+  memory                = "1.5"
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  environment_variables = {
+    TWINGATE_NETWORK = module.twingate_resource.twingate_network
+  }
+
+  secure_environment_variables = {
+    TWINGATE_ACCESS_TOKEN  = module.twingate_resource.connector_tokens.access_token
+    TWINGATE_REFRESH_TOKEN = module.twingate_resource.connector_tokens.refresh_token
+  }
+
+  depends_on = [module.twingate_image_push]
+}
+*/
