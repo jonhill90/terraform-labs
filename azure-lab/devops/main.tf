@@ -220,6 +220,8 @@ module "networking_variable_group" {
     "managementsubscriptionid",
     "tenantid",
     "vaultname",
+    "twingatenetwork",
+    "twingateapikey"
   ]
 
 }
