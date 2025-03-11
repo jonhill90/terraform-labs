@@ -90,7 +90,7 @@ module "compute_secrets" {
 
   depends_on = [data.azurerm_key_vault.compute]
 }
-/*
+
 # ----------------------------------------
 # Azure Container Registry (ACR)
 # ----------------------------------------
@@ -111,4 +111,3 @@ module "container_registry" {
     project     = var.project
   }
 }
-*/
