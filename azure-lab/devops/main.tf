@@ -185,6 +185,7 @@ module "devops_variable_group" {
     "managementsubscriptionid",
     "tenantid",
     "devopsvaultname",
+    "networkingvaultname",
     "githubtoken"
   ]
 
@@ -204,6 +205,25 @@ resource "azuredevops_build_definition" "devops_ci" {
     repo_id               = var.github_repo_id
     branch_name           = "main"
     yml_path              = "pipelines/devops-ci.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.github.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.github]
+}
+
+resource "azuredevops_build_definition" "networking_ci" {
+  project_id = module.networking_project.devops_project_id
+  name       = "Networking-CI"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/networking-ci.yml"
     service_connection_id = azuredevops_serviceendpoint_github.github.id
   }
 
