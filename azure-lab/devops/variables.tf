@@ -87,18 +87,6 @@ variable "client_secret" {
   sensitive   = true
 }
 
-variable "devops_sp_object_id" {
-  description = "DevOps Service Principal Object ID"
-  type        = string
-  sensitive   = true
-}
-
-variable "networking_sp_object_id" {
-  description = "Networking Service Principal Object ID"
-  type        = string
-  sensitive   = true
-}
-
 # ----------------------------------------
 # Vault
 # ----------------------------------------

@@ -58,12 +58,6 @@ variable "admin_object_id" {
   sensitive   = true
 }
 
-variable "sp_object_id" {
-  description = "Service Principal Object ID"
-  type        = string
-  sensitive   = true
-}
-
 variable "security_sp_object_id" {
   description = "Security Service Principal Object ID"
   type        = string
