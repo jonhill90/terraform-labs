@@ -36,7 +36,7 @@ variable "tenant_id" {
   type        = string
   sensitive   = true
 }
-/*
+
 # ----------------------------------------
 # Vault
 # ----------------------------------------
@@ -45,4 +45,3 @@ variable "vault_name" {
   type        = string
   sensitive   = true
 }
-*/
