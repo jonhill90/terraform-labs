@@ -271,7 +271,8 @@ module "networking_variable_group" {
     "tenantid",
     "vaultname",
     "twingatenetwork",
-    "twingateapikey"
+    "twingateapikey",
+    "acr"
   ]
   depends_on = [data.azurerm_key_vault.networking]
 }
