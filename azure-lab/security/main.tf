@@ -383,6 +383,27 @@ module "networking_sp_vault_access" {
   depends_on = [module.networking_vault]
 }
 
+module "compute_sp_vault_access" {
+  source       = "../../modules/azurerm/security/vault-access"
+  key_vault_id = module.compute_vault.key_vault_id
+
+  access_policies = [
+    {
+      tenant_id               = var.tenant_id
+      object_id               = var.compute_sp_object_id
+      key_permissions         = ["Get", "List"]
+      secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
+      certificate_permissions = ["Get", "List"]
+    }
+  ]
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [module.compute_vault]
+}
+
 # --------------------------------------------------
 # Create Empty Secrets
 # --------------------------------------------------
