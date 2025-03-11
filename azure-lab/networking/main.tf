@@ -136,7 +136,7 @@ module "twingate_resource" {
   twingate_network = var.twingate_network
 
 }
-/*
+
 # ----------------------------------------
 # Azure Container Registry (ACR)
 # ----------------------------------------
