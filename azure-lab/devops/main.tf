@@ -291,6 +291,7 @@ module "compute_variable_group" {
     "managementsubscriptionid",
     "tenantid",
     "vaultname",
+    "acr"
   ]
 
   depends_on = [data.azurerm_key_vault.compute]
