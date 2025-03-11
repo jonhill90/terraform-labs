@@ -140,13 +140,13 @@ data "azurerm_key_vault" "devops" {
   resource_group_name = "Security"
   provider            = azurerm.lab
 }
-/*
+
 data "azurerm_key_vault" "networking" {
   name                = var.networking_vault_name
   resource_group_name = "Networking"
   provider            = azurerm.lab
 }
-*/
+
 # --------------------------------------------------
 # Create Empty Secrets
 # --------------------------------------------------
@@ -203,6 +203,25 @@ module "devops_variable_group" {
   ]
 
   depends_on = [module.devops_secrets]
+}
+
+module "networking_variable_group" {
+  source                     = "../../modules/azure-devops/variable-group"
+  project_id                 = module.networking_project.devops_project_id
+  variable_group_name        = "Networking"
+  variable_group_description = "Networking Variable Group"
+  key_vault_name             = var.networking_vault_name
+  service_endpoint_id        = azuredevops_serviceendpoint_azurerm.networking.id
+  secrets = [
+    "backendContainer",
+    "backendResourceGroup",
+    "backendStorageAccount",
+    "labsubscriptionid",
+    "managementsubscriptionid",
+    "tenantid",
+    "vaultname",
+  ]
+
 }
 
 # --------------------------------------------------

@@ -17,7 +17,7 @@ stages:
       team: "networking"
       artifactName: "networking-artifacts"
       variableGroup: "Networking"
-      backendServiceArm: "Lab-SC"
+      backendServiceArm: "Networking-SC"
       environmentName: "lab"
       stageName: "lab"
       stageDisplayName: "Development"
