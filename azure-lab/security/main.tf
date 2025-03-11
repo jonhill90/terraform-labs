@@ -256,28 +256,6 @@ module "security_devops_vault_access" {
 
   depends_on = [module.devops_vault]
 }
-/*
-module "devops_vault_access" {
-  source       = "../../modules/azurerm/security/vault-access"
-  key_vault_id = module.devops_vault.key_vault_id
-
-  access_policies = [
-    {
-      tenant_id               = var.tenant_id
-      object_id               = var.admin_object_id # DevOps Admin or DevOps Admin Group object ID
-      key_permissions         = ["Get", "List"]
-      secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
-      certificate_permissions = ["Get", "List"]
-    }
-  ]
-
-  providers = {
-    azurerm = azurerm.lab
-  }
-
-  depends_on = [module.devops_vault]
-}
-*/
 
 module "networking_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
@@ -387,6 +365,7 @@ module "security_secrets" {
     "spobjectid"               = ""
     "devopsspobjectid"         = ""
     "securityspobjectid"       = ""
+    "networkingspobjectid"     = ""
     "storageaccount"           = ""
     "tenantid"                 = ""
     "securityvaultname"        = ""
@@ -400,35 +379,7 @@ module "security_secrets" {
 
   depends_on = [module.security_sp_vault_access]
 }
-/*
-module "networking_secrets" {
-  source       = "../../modules/azurerm/security/secret" # Adjust to your module path
-  key_vault_id = module.networking_vault.key_vault_id
-  secrets = {
-    "devopspat"                = ""
-    "devopsorgname"            = ""
-    "adminobjectid"            = ""
-    "backendContainer"         = ""
-    "backendResourceGroup"     = ""
-    "backendStorageAccount"    = ""
-    "clientid"                 = ""
-    "clientsecret"             = ""
-    "labsubscriptionid"        = ""
-    "managementsubscriptionid" = ""
-    "spobjectid"               = ""
-    "storageaccount"           = ""
-    "tenantid"                 = ""
-    "vaultname"                = ""
-    "githubtoken"              = ""
-  }
 
-  providers = {
-    azurerm = azurerm.lab
-  }
-
-  depends_on = [module.networking_vault]
-}
-*/
 # --------------------------------------------------
 # Azure DevOps Variable Group (Security)
 # --------------------------------------------------
@@ -454,6 +405,7 @@ module "security_variable_group" {
     "spobjectid",
     "securityspobjectid",
     "devopsspobjectid",
+    "networkingspobjectid",
     "storageaccount",
     "tenantid",
     "securityvaultname",
