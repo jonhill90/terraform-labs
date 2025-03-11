@@ -119,6 +119,19 @@ resource "azuredevops_serviceendpoint_github" "github" {
   depends_on = [module.devops_project]
 }
 
+resource "azuredevops_serviceendpoint_github" "networking" {
+  project_id            = module.networking_project.devops_project_id
+  service_endpoint_name = "GitHub Connection"
+  description           = "GitHub service connection for Terraform Labs"
+
+  auth_personal {
+    # Use a GitHub PAT for authentication
+    personal_access_token = var.github_token
+  }
+
+  depends_on = [module.networking_project]
+}
+
 # --------------------------------------------------
 # Secure Vault
 # --------------------------------------------------
