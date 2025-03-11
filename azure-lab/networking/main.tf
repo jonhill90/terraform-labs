@@ -78,7 +78,7 @@ module "network-watcher" {
 # ----------------------------------------
 # Network - VNet
 # ----------------------------------------
-module "vnet" {
+module "lab_vnet" {
   source = "../../modules/azurerm/network/vnet"
 
   vnet_name           = "lab-vnet"
