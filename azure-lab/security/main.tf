@@ -382,7 +382,7 @@ module "networking_sp_vault_access" {
 
   depends_on = [module.networking_vault]
 }
-
+/*
 module "compute_sp_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
   key_vault_id = module.compute_vault.key_vault_id
@@ -401,9 +401,9 @@ module "compute_sp_vault_access" {
     azurerm = azurerm.lab
   }
 
-  depends_on = [module.compute_vault, module.security_variable_group]
+  depends_on = [module.compute_vault]
 }
-
+*/
 # --------------------------------------------------
 # Create Empty Secrets
 # --------------------------------------------------
