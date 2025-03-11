@@ -289,3 +289,22 @@ resource "azuredevops_build_definition" "devops_cd" {
   }
   depends_on = [azuredevops_serviceendpoint_github.github, azuredevops_build_definition.devops_ci]
 }
+
+resource "azuredevops_build_definition" "networking_cd" {
+  project_id = module.networking_project.devops_project_id
+  name       = "Networking-CD"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/networking-cd.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.networking.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.networking, azuredevops_build_definition.networking_ci]
+}
