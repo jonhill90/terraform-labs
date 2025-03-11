@@ -115,6 +115,8 @@ module "container_registry" {
 # ---------------------------------------------------------
 # Twingate Image Push Module (Pushes Docker Image to ACR)
 # ---------------------------------------------------------
+
+/*
 module "twingate_image_push" {
   source                = "../../modules/twingate/connector"
   registry_login_server = module.container_registry.acr_login_server
@@ -125,3 +127,4 @@ module "twingate_image_push" {
 
   depends_on = [module.container_registry]
 }
+*/
