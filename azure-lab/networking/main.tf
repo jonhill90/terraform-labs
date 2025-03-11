@@ -46,6 +46,7 @@ module "networking_secrets" {
     "vaultname"                = ""
     "twingatenetwork"          = ""
     "twingateapikey"           = ""
+    "acr"                      = ""
   }
 
   providers = {
@@ -134,6 +135,27 @@ module "twingate_resource" {
   twingate_api_key = var.twingate_api_key
   twingate_network = var.twingate_network
 
+}
+/*
+# ----------------------------------------
+# Azure Container Registry (ACR)
+# ----------------------------------------
+module "container_registry" {
+  source             = "../../modules/azurerm/container/registry"
+  acr_name           = var.acr
+  acr_resource_group = azurerm_resource_group.networking.name
+  acr_location       = azurerm_resource_group.networking.location
+  acr_sku            = "Basic"
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
 }
 /*
 # Twingate Image Push Module (Pushes Docker Image to ACR)

@@ -60,3 +60,11 @@ variable "twingate_api_key" {
   type        = string
   sensitive   = true
 }
+
+# ----------------------------------------
+# Azure Container Registry
+# ----------------------------------------
+variable "acr" {
+  description = "Azure Container Registry Name"
+  type        = string
+}
