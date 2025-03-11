@@ -1,0 +1,26 @@
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: Compute-CI
+      source: Compute-CI
+      trigger:
+        branches:
+          - main
+
+pool:
+  name: 'Lab'
+
+stages:
+  - template: templates/template-terraform-plan.yml
+    parameters:
+      team: "compute"
+      artifactName: "compute-artifacts"
+      variableGroup: "Compute"
+      backendServiceArm: "Compute-SC"
+      environmentName: "lab"
+      stageName: "lab"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/Compute-CI/compute-artifacts/azure-lab/compute"
+      agentPool: "Lab"
+      pipeline: "Compute-CI"
