@@ -275,7 +275,7 @@ module "networking_variable_group" {
   ]
   depends_on = [data.azurerm_key_vault.networking]
 }
-
+/*
 module "compute_variable_group" {
   source                     = "../../modules/azure-devops/variable-group"
   project_id                 = module.compute_project.devops_project_id
@@ -295,7 +295,7 @@ module "compute_variable_group" {
 
   depends_on = [data.azurerm_key_vault.compute]
 }
-
+*/
 # --------------------------------------------------
 # Azure DevOps Build Pipeline (CI)
 # --------------------------------------------------
@@ -335,6 +335,25 @@ resource "azuredevops_build_definition" "networking_ci" {
     use_yaml = true
   }
   depends_on = [azuredevops_serviceendpoint_github.networking]
+}
+
+resource "azuredevops_build_definition" "compute_ci" {
+  project_id = module.networking_project.devops_project_id
+  name       = "Compute-CI"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/compute-ci.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.compute.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.compute]
 }
 
 # Add Agent Pool to the Build Pipeline via DevOps Portal
