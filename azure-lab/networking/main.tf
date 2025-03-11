@@ -36,8 +36,6 @@ module "networking_secrets" {
     "backendContainer"         = ""
     "backendResourceGroup"     = ""
     "backendStorageAccount"    = ""
-    "clientid"                 = ""
-    "clientsecret"             = ""
     "labsubscriptionid"        = ""
     "managementsubscriptionid" = ""
     "tenantid"                 = ""

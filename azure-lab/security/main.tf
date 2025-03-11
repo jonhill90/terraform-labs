@@ -362,7 +362,6 @@ module "security_secrets" {
     "clientsecret"             = ""
     "labsubscriptionid"        = ""
     "managementsubscriptionid" = ""
-    "spobjectid"               = ""
     "devopsspobjectid"         = ""
     "securityspobjectid"       = ""
     "networkingspobjectid"     = ""
@@ -402,7 +401,6 @@ module "security_variable_group" {
     "clientsecret",
     "labsubscriptionid",
     "managementsubscriptionid",
-    "spobjectid",
     "securityspobjectid",
     "devopsspobjectid",
     "networkingspobjectid",
