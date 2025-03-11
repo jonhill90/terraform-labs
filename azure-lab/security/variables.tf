@@ -76,6 +76,12 @@ variable "devops_sp_object_id" {
   sensitive   = true
 }
 
+variable "networking_sp_object_id" {
+  description = "Networking Service Principal Object ID"
+  type        = string
+  sensitive   = true
+}
+
 # ----------------------------------------
 # Storage Account
 # ----------------------------------------

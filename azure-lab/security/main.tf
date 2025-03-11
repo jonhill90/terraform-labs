@@ -118,6 +118,11 @@ data "azurerm_resource_group" "devops" {
   provider = azurerm.lab
 }
 
+data "azurerm_resource_group" "networking" {
+  name     = "Networking"
+  provider = azurerm.lab
+}
+
 # ----------------------------------------
 # Storage Accounts
 # ----------------------------------------
@@ -259,7 +264,7 @@ module "devops_vault_access" {
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = var.admin_object_id # Network Admin or Network Admin Group object ID
+      object_id               = var.admin_object_id # DevOps Admin or DevOps Admin Group object ID
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
@@ -395,7 +400,7 @@ module "security_secrets" {
 
   depends_on = [module.security_sp_vault_access]
 }
-
+/*
 module "networking_secrets" {
   source       = "../../modules/azurerm/security/secret" # Adjust to your module path
   key_vault_id = module.networking_vault.key_vault_id
@@ -423,7 +428,7 @@ module "networking_secrets" {
 
   depends_on = [module.networking_vault]
 }
-
+*/
 # --------------------------------------------------
 # Azure DevOps Variable Group (Security)
 # --------------------------------------------------

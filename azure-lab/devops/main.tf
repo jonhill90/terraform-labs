@@ -41,6 +41,24 @@ module "devops_project" {
   }
 }
 
+module "networking_project" {
+  source = "../../modules/azure-devops/project"
+
+  devops_org_name     = var.devops_org_name
+  devops_project_name = "Networking"
+  description         = "Networking Managed by Terraform"
+  visibility          = "private"
+  devops_pat          = var.devops_pat
+
+  features = {
+    repositories = "disabled"
+    testplans    = "disabled"
+    artifacts    = "enabled"
+    pipelines    = "enabled"
+    boards       = "disabled"
+  }
+}
+
 # ----------------------------------------
 # Resource Groups
 # ----------------------------------------
@@ -68,6 +86,17 @@ resource "azuredevops_serviceendpoint_azurerm" "devops" {
   azurerm_subscription_name              = "Lab"
 
   depends_on = [module.devops_project]
+}
+
+resource "azuredevops_serviceendpoint_azurerm" "networking" {
+  project_id                             = module.networking_project.devops_project_id
+  service_endpoint_name                  = "Networking-SC"
+  service_endpoint_authentication_scheme = "ServicePrincipal"
+  azurerm_spn_tenantid                   = var.tenant_id
+  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_name              = "Lab"
+
+  depends_on = [module.networking_project]
 }
 # Get ClientID and ID for the Service Principal
 # Currently Getting Service Principal Object ID from Azure Portal by going through the IAM Role Assignment wizard for a vault
@@ -98,7 +127,13 @@ data "azurerm_key_vault" "devops" {
   resource_group_name = "Security"
   provider            = azurerm.lab
 }
-
+/*
+data "azurerm_key_vault" "networking" {
+  name                = var.networking_vault_name
+  resource_group_name = "Networking"
+  provider            = azurerm.lab
+}
+*/
 # --------------------------------------------------
 # Create Empty Secrets
 # --------------------------------------------------
@@ -117,6 +152,7 @@ module "devops_secrets" {
     "managementsubscriptionid" = ""
     "tenantid"                 = ""
     "devopsvaultname"          = ""
+    "networkingvaultname"      = ""
     "githubtoken"              = ""
   }
 

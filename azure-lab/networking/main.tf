@@ -2,7 +2,7 @@
 # Resource Groups (local)
 # ----------------------------------------
 resource "azurerm_resource_group" "networking" {
-  name     = "networking"
+  name     = "Networking"
   location = "eastus"
   provider = azurerm.lab
 
@@ -12,7 +12,7 @@ resource "azurerm_resource_group" "networking" {
     project     = var.project
   }
 }
-
+/*
 # ----------------------------------------
 # Network - Watcher
 # ----------------------------------------
@@ -63,3 +63,4 @@ module "vnet" {
   }
   depends_on = [azurerm_resource_group.networking, module.network-watcher]
 }
+*/
