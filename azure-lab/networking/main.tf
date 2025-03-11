@@ -107,7 +107,7 @@ module "lab_vnet" {
   }
   depends_on = [azurerm_resource_group.networking, module.network-watcher]
 }
-/*
+
 # ----------------------------------------
 # Twingate
 # ----------------------------------------
@@ -115,7 +115,7 @@ module "twingate_groups" {
   source = "../../modules/twingate/group"
 
   groups = {
-    networking = "Networking Team"
+    admins = "Admin Team"
   }
 }
 
@@ -129,13 +129,13 @@ module "twingate_resource" {
   remote_network_name = "Lab"
   connector_name      = "lab-connector"
   subnet_map = {
-    "agent-subnet" = "10.100.2.0/24"
+    "management-subnet" = "10.100.2.0/24"
   }
   twingate_api_key = var.twingate_api_key
   twingate_network = var.twingate_network
 
 }
-
+/*
 # Twingate Image Push Module (Pushes Docker Image to ACR)
 module "twingate_image_push" {
   source                = "../../modules/twingate/connector"
