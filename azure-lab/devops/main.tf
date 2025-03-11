@@ -237,7 +237,7 @@ resource "azuredevops_build_definition" "networking_ci" {
     repo_id               = var.github_repo_id
     branch_name           = "main"
     yml_path              = "pipelines/networking-ci.yml"
-    service_connection_id = azuredevops_serviceendpoint_github.github.id
+    service_connection_id = azuredevops_serviceendpoint_github.networking.id
   }
 
   ci_trigger {
