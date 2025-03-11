@@ -143,7 +143,7 @@ data "azurerm_key_vault" "devops" {
 
 data "azurerm_key_vault" "networking" {
   name                = var.networking_vault_name
-  resource_group_name = "Networking"
+  resource_group_name = "Security"
   provider            = azurerm.lab
 }
 
