@@ -106,6 +106,12 @@ variable "networking_vault_name" {
   sensitive   = true
 }
 
+variable "compute_vault_name" {
+  description = "Compute Vault Name"
+  type        = string
+  sensitive   = true
+}
+
 # ----------------------------------------
 # Azure DevOps Settings
 # ----------------------------------------

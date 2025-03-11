@@ -369,6 +369,7 @@ module "security_secrets" {
     "tenantid"                 = ""
     "securityvaultname"        = ""
     "devopsvaultname"          = ""
+    "computevaultname"         = ""
     "githubtoken"              = ""
   }
 
@@ -408,6 +409,7 @@ module "security_variable_group" {
     "tenantid",
     "securityvaultname",
     "devopsvaultname",
+    "computevaultname",
     "githubtoken"
   ]
 
