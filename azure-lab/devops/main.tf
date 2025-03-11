@@ -243,7 +243,7 @@ resource "azuredevops_build_definition" "networking_ci" {
   ci_trigger {
     use_yaml = true
   }
-  depends_on = [azuredevops_serviceendpoint_github.github]
+  depends_on = [azuredevops_serviceendpoint_github.networking]
 }
 
 # Add Agent Pool to the Build Pipeline via DevOps Portal
