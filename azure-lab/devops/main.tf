@@ -188,13 +188,13 @@ data "azurerm_key_vault" "networking" {
   resource_group_name = "Security"
   provider            = azurerm.lab
 }
-
+/*
 data "azurerm_key_vault" "compute" {
   name                = var.compute_vault_name
   resource_group_name = "Compute"
   provider            = azurerm.lab
 }
-
+*/
 # --------------------------------------------------
 # Create Empty Secrets
 # --------------------------------------------------
