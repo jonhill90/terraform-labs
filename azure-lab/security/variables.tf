@@ -76,6 +76,12 @@ variable "networking_sp_object_id" {
   sensitive   = true
 }
 
+variable "compute_sp_object_id" {
+  description = "Compute Service Principal Object ID"
+  type        = string
+  sensitive   = true
+}
+
 # ----------------------------------------
 # Storage Account
 # ----------------------------------------

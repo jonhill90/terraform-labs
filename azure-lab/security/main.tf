@@ -404,6 +404,7 @@ module "security_secrets" {
     "devopsspobjectid"         = ""
     "securityspobjectid"       = ""
     "networkingspobjectid"     = ""
+    "computespobjectid"        = ""
     "storageaccount"           = ""
     "tenantid"                 = ""
     "securityvaultname"        = ""

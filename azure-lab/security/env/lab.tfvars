@@ -13,6 +13,7 @@ admin_object_id            = "__adminobjectid__"
 security_sp_object_id      = "__securityspobjectid__"
 devops_sp_object_id        = "__devopsspobjectid__" # Service Principal Object ID
 networking_sp_object_id    = "__networkingspobjectid__"
+compute_sp_object_id       = "__computespobjectid__"
 client_id                  = "__clientid__"
 client_secret              = "__clientsecret__"
 devops_org_name            = "__devopsorgname__"
