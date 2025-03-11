@@ -338,7 +338,7 @@ resource "azuredevops_build_definition" "networking_ci" {
 }
 
 resource "azuredevops_build_definition" "compute_ci" {
-  project_id = module.networking_project.devops_project_id
+  project_id = module.compute_project.devops_project_id
   name       = "Compute-CI"
   path       = "\\"
 
