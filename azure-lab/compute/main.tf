@@ -111,3 +111,17 @@ module "container_registry" {
     project     = var.project
   }
 }
+
+# ---------------------------------------------------------
+# Twingate Image Push Module (Pushes Docker Image to ACR)
+# ---------------------------------------------------------
+module "twingate_image_push" {
+  source                = "../../modules/twingate/connector"
+  registry_login_server = module.container_registry.acr_login_server
+  acr_id                = module.container_registry.acr_id
+  connector_id          = module.twingate_resource.connector_id
+  image_name            = "twingate-connector"
+  image_tag             = "latest"
+
+  depends_on = [module.container_registry]
+}
