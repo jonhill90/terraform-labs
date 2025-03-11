@@ -110,6 +110,27 @@ module "lab_vnet" {
 }
 
 # ----------------------------------------
+# Azure Container Registry (ACR)
+# ----------------------------------------
+module "container_registry" {
+  source             = "../../modules/azurerm/container/registry"
+  acr_name           = var.acr
+  acr_resource_group = azurerm_resource_group.networking.name
+  acr_location       = azurerm_resource_group.networking.location
+  acr_sku            = "Basic"
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
+# ----------------------------------------
 # Twingate
 # ----------------------------------------
 module "twingate_groups" {
@@ -137,27 +158,6 @@ module "twingate_resource" {
 
 }
 
-# ----------------------------------------
-# Azure Container Registry (ACR)
-# ----------------------------------------
-module "container_registry" {
-  source             = "../../modules/azurerm/container/registry"
-  acr_name           = var.acr
-  acr_resource_group = azurerm_resource_group.networking.name
-  acr_location       = azurerm_resource_group.networking.location
-  acr_sku            = "Basic"
-
-  providers = {
-    azurerm = azurerm.lab
-  }
-
-  tags = {
-    environment = var.environment
-    owner       = var.owner
-    project     = var.project
-  }
-}
-
 # Twingate Image Push Module (Pushes Docker Image to ACR)
 module "twingate_image_push" {
   source                = "../../modules/twingate/connector"
@@ -169,7 +169,7 @@ module "twingate_image_push" {
 
   depends_on = [module.container_registry]
 }
-/*
+
 # **Twingate ACG Module (Deploys Azure Container Group)**
 module "twingate_acg" {
   source                = "../../modules/azurerm/container/group"
@@ -185,7 +185,7 @@ module "twingate_acg" {
   memory                = "1.5"
 
   providers = {
-    azurerm = azurerm.management
+    azurerm = azurerm.lab
   }
 
   environment_variables = {
@@ -199,4 +199,3 @@ module "twingate_acg" {
 
   depends_on = [module.twingate_image_push]
 }
-*/
