@@ -81,6 +81,7 @@ module "compute_secrets" {
     "managementsubscriptionid" = ""
     "tenantid"                 = ""
     "vaultname"                = ""
+    "acr"                      = ""
   }
 
   providers = {
@@ -89,3 +90,25 @@ module "compute_secrets" {
 
   depends_on = [data.azurerm_key_vault.compute]
 }
+/*
+# ----------------------------------------
+# Azure Container Registry (ACR)
+# ----------------------------------------
+module "container_registry" {
+  source             = "../../modules/azurerm/container/registry"
+  acr_name           = var.acr
+  acr_resource_group = azurerm_resource_group.lab.name
+  acr_location       = azurerm_resource_group.lab.location
+  acr_sku            = "Basic"
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+*/
