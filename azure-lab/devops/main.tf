@@ -188,13 +188,13 @@ data "azurerm_key_vault" "networking" {
   resource_group_name = "Security"
   provider            = azurerm.lab
 }
-/*
+
 data "azurerm_key_vault" "compute" {
   name                = var.compute_vault_name
   resource_group_name = "Compute"
   provider            = azurerm.lab
 }
-*/
+
 # --------------------------------------------------
 # Create Empty Secrets
 # --------------------------------------------------
@@ -275,7 +275,7 @@ module "networking_variable_group" {
   ]
   depends_on = [data.azurerm_key_vault.networking]
 }
-/*
+
 module "compute_variable_group" {
   source                     = "../../modules/azure-devops/variable-group"
   project_id                 = module.compute_project.devops_project_id
@@ -295,7 +295,7 @@ module "compute_variable_group" {
 
   depends_on = [data.azurerm_key_vault.compute]
 }
-*/
+
 # --------------------------------------------------
 # Azure DevOps Build Pipeline (CI)
 # --------------------------------------------------
