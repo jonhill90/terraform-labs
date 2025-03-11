@@ -330,7 +330,7 @@ module "networking_sp_vault_access" {
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = var.sp_object_id
+      object_id               = var.networking_sp_object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
