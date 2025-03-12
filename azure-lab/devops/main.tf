@@ -655,3 +655,22 @@ resource "azuredevops_build_definition" "appsingle_cd" {
   }
   depends_on = [azuredevops_serviceendpoint_github.application, azuredevops_build_definition.appsingle_ci]
 }
+
+resource "azuredevops_build_definition" "appmulti_cd" {
+  project_id = module.application_project.devops_project_id
+  name       = "AppMulti-CD"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/app-multi-cd.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.application.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.application, azuredevops_build_definition.appmulti_ci]
+}
