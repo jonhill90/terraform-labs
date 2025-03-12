@@ -12,7 +12,7 @@ pool:
   name: 'Lab'
 
 stages:
-  - template: templates/template-terraform-cd.yml
+  - template: templates/template-terraform-plannew.yml
     parameters:
       team: "appsingle"
       artifactName: "appsingle-artifacts"
@@ -24,3 +24,4 @@ stages:
       workingDirectory: "$(Pipeline.Workspace)/AppSingle-CI/appsingle-artifacts/apps/appsingle"
       agentPool: "Lab"
       pipeline: "AppSingle-CI"
+      dependsOn: []  # Explicitly set to an empty list for independent execution
