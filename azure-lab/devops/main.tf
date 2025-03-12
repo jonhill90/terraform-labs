@@ -517,6 +517,25 @@ resource "azuredevops_build_definition" "database_ci" {
   depends_on = [azuredevops_serviceendpoint_github.database]
 }
 
+resource "azuredevops_build_definition" "appsingle_ci" {
+  project_id = module.application_project.devops_project_id
+  name       = "AppSingle-CI"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/appsingle-ci.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.application.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.application]
+}
+
 # Add Agent Pool to the Build Pipeline via DevOps Portal
 # Approve Pipeline to use the Agent Pool vis DevOps Portal
 
