@@ -1,0 +1,26 @@
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: Database-CI
+      source: Database-CI
+      trigger:
+        branches:
+          - main
+
+pool:
+  name: 'Lab'
+
+stages:
+  - template: templates/template-terraform-cd.yml
+    parameters:
+      team: "database"
+      artifactName: "database-artifacts"
+      variableGroup: "Database"
+      backendServiceArm: "Database-SC"
+      environmentName: "lab"
+      stageName: "lab"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/Database-CI/database-artifacts/azure-lab/database"
+      agentPool: "Lab"
+      pipeline: "Database-CI"
