@@ -12,52 +12,43 @@ pool:
   name: 'Lab'
 
 stages:
-  - stage: Development
-    displayName: "Development"
-    jobs:
-      - template: templates/template-terraform-plan.yml
-        parameters:
-          team: "appmulti"
-          artifactName: "appmulti-artifacts"
-          variableGroup: "AppMulti"
-          backendServiceArm: "Application-SC"
-          environmentName: "dev"
-          stageName: "dev"
-          stageDisplayName: "Development"
-          workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
-          agentPool: "Lab"
-          pipeline: "AppMulti-CI"
+  - template: templates/template-terraform-plan.yml
+    parameters:
+      team: "appmulti"
+      artifactName: "appmulti-artifacts"
+      variableGroup: "AppMulti"
+      backendServiceArm: "Application-SC"
+      environmentName: "dev"
+      stageName: "dev"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
+      agentPool: "Lab"
+      pipeline: "AppMulti-CI"
 
-  - stage: Test
-    displayName: "Test Environment"
+  - template: templates/template-terraform-plan.yml
+    parameters:
+      team: "appmulti"
+      artifactName: "appmulti-artifacts"
+      variableGroup: "AppMulti"
+      backendServiceArm: "Application-SC"
+      environmentName: "test"
+      stageName: "test"
+      stageDisplayName: "Test Environment"
+      workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
+      agentPool: "Lab"
+      pipeline: "AppMulti-CI"
     dependsOn: Development
-    jobs:
-      - template: templates/template-terraform-plan.yml
-        parameters:
-          team: "appmulti"
-          artifactName: "appmulti-artifacts"
-          variableGroup: "AppMulti"
-          backendServiceArm: "Application-SC"
-          environmentName: "test"
-          stageName: "test"
-          stageDisplayName: "Test Environment"
-          workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
-          agentPool: "Lab"
-          pipeline: "AppMulti-CI"
 
-  - stage: Production
-    displayName: "Production Environment"
+  - template: templates/template-terraform-plan.yml
+    parameters:
+      team: "appmulti"
+      artifactName: "appmulti-artifacts"
+      variableGroup: "AppMulti"
+      backendServiceArm: "Application-SC"
+      environmentName: "prod"
+      stageName: "prod"
+      stageDisplayName: "Production Environment"
+      workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
+      agentPool: "Lab"
+      pipeline: "AppMulti-CI"
     dependsOn: Test
-    jobs:
-      - template: templates/template-terraform-plan.yml
-        parameters:
-          team: "appmulti"
-          artifactName: "appmulti-artifacts"
-          variableGroup: "AppMulti"
-          backendServiceArm: "Application-SC"
-          environmentName: "prod"
-          stageName: "prod"
-          stageDisplayName: "Production Environment"
-          workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
-          agentPool: "Lab"
-          pipeline: "AppMulti-CI"
