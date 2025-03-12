@@ -285,6 +285,12 @@ data "azurerm_key_vault" "database" {
   provider            = azurerm.lab
 }
 
+data "azurerm_key_vault" "application" {
+  name                = var.application_vault_name
+  resource_group_name = "Security"
+  provider            = azurerm.lab
+}
+
 # --------------------------------------------------
 # Create Empty Secrets
 # --------------------------------------------------
@@ -410,6 +416,26 @@ module "database_variable_group" {
   ]
 
   depends_on = [data.azurerm_key_vault.database]
+}
+
+module "application_variable_group" {
+  source                     = "../../modules/azure-devops/variable-group"
+  project_id                 = module.application_project.devops_project_id
+  variable_group_name        = "Application"
+  variable_group_description = "Application Variable Group"
+  key_vault_name             = var.application_vault_name
+  service_endpoint_id        = azuredevops_serviceendpoint_azurerm.application.id
+  secrets = [
+    "backendContainer",
+    "backendResourceGroup",
+    "backendStorageAccount",
+    "labsubscriptionid",
+    "managementsubscriptionid",
+    "tenantid",
+    "vaultname",
+  ]
+
+  depends_on = [data.azurerm_key_vault.application]
 }
 
 # --------------------------------------------------
