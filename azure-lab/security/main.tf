@@ -502,7 +502,7 @@ module "database_sp_vault_access" {
 
   depends_on = [module.database_vault]
 }
-/*
+
 module "application_sp_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
   key_vault_id = module.application_vault.key_vault_id
@@ -523,7 +523,7 @@ module "application_sp_vault_access" {
 
   depends_on = [module.application_vault]
 }
-*/
+
 
 # --------------------------------------------------
 # Create Empty Secrets
