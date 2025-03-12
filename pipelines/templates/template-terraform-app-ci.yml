@@ -1,0 +1,46 @@
+parameters:
+  - name: artifactName
+    type: string
+  - name: team
+    type: string
+  - name: agentPool
+    type: string
+    default: "Lab"
+
+variables:
+  - name: artifactName
+    value: ${{ parameters.artifactName }}
+  - name: team
+    value: ${{ parameters.team }}
+
+stages:
+  - stage: Build
+    displayName: 'Build Stage'
+    pool:
+      name: ${{ parameters.agentPool }}
+    jobs:
+      - job: Build
+        displayName: 'Prepare Terraform Artifacts'
+        steps:
+          - checkout: self
+            fetchDepth: 1 
+
+          - task: CopyFiles@2
+            displayName: 'Copy Terraform Files for $(team)'
+            inputs:
+              SourceFolder: '$(Build.SourcesDirectory)/apps/$(team)'
+              Contents: '**'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/apps/$(team)'
+
+          - task: CopyFiles@2
+            displayName: 'Copy Shared Terraform Modules'
+            inputs:
+              SourceFolder: '$(Build.SourcesDirectory)/modules'
+              Contents: '**'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/modules'
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Terraform Artifacts'
+            inputs:
+              pathToPublish: '$(Build.ArtifactStagingDirectory)/$(artifactName)'
+              artifactName: '$(artifactName)'

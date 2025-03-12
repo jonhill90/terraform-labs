@@ -2,7 +2,7 @@
 # Resource Groups
 # ----------------------------------------
 resource "azurerm_resource_group" "rg" {
-  name     = "appmulti-${var.environment}"
+  name     = "AppMulti-${var.environment}"
   location = "eastus"
   provider = azurerm.lab
 

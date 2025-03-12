@@ -10,7 +10,7 @@ pool:
   name: 'Lab'  
 
 extends:
-  template: templates/template-terraform-ci.yml  
+  template: templates/template-terraform-app-ci.yml  
   parameters:
     artifactName: "appmulti-artifacts"
     team: "appmulti"

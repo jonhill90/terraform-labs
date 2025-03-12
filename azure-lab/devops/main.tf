@@ -536,6 +536,25 @@ resource "azuredevops_build_definition" "appsingle_ci" {
   depends_on = [azuredevops_serviceendpoint_github.application]
 }
 
+resource "azuredevops_build_definition" "appmulti_ci" {
+  project_id = module.application_project.devops_project_id
+  name       = "AppMulti-CI"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/app-multi-ci.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.application.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.application]
+}
+
 # Add Agent Pool to the Build Pipeline via DevOps Portal
 # Approve Pipeline to use the Agent Pool vis DevOps Portal
 
