@@ -526,7 +526,7 @@ resource "azuredevops_build_definition" "appsingle_ci" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/appsingle-ci.yml"
+    yml_path              = "pipelines/app-single-ci.yml"
     service_connection_id = azuredevops_serviceendpoint_github.application.id
   }
 
