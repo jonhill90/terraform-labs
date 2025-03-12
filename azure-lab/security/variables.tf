@@ -82,6 +82,12 @@ variable "compute_sp_object_id" {
   sensitive   = true
 }
 
+variable "database_sp_object_id" {
+  description = "Database Service Principal Object ID"
+  type        = string
+  sensitive   = true
+}
+
 # ----------------------------------------
 # Storage Account
 # ----------------------------------------
@@ -114,6 +120,12 @@ variable "networking_vault_name" {
 
 variable "compute_vault_name" {
   description = "Compute Vault Name"
+  type        = string
+  sensitive   = true
+}
+
+variable "database_vault_name" {
+  description = "Database Vault Name"
   type        = string
   sensitive   = true
 }
