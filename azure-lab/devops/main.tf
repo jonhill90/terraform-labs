@@ -95,6 +95,24 @@ module "database_project" {
   }
 }
 
+module "application_project" {
+  source = "../../modules/azure-devops/project"
+
+  devops_org_name     = var.devops_org_name
+  devops_project_name = "Applications"
+  description         = "Applications Managed by Terraform"
+  visibility          = "private"
+  devops_pat          = var.devops_pat
+
+  features = {
+    repositories = "disabled"
+    testplans    = "disabled"
+    artifacts    = "enabled"
+    pipelines    = "enabled"
+    boards       = "disabled"
+  }
+}
+
 # ----------------------------------------
 # Resource Groups
 # ----------------------------------------
@@ -156,6 +174,17 @@ resource "azuredevops_serviceendpoint_azurerm" "database" {
 
   depends_on = [module.database_project]
 }
+
+resource "azuredevops_serviceendpoint_azurerm" "application" {
+  project_id                             = module.application_project.devops_project_id
+  service_endpoint_name                  = "Application-SC"
+  service_endpoint_authentication_scheme = "ServicePrincipal"
+  azurerm_spn_tenantid                   = var.tenant_id
+  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_name              = "Lab"
+
+  depends_on = [module.application_project]
+}
 # Get ClientID and ID for the Service Principal
 # Currently Getting Service Principal Object ID from Azure Portal by going through the IAM Role Assignment wizard for a vault needed for security to grant the service principal access to the vault.
 # az ad sp list --query "[].{DisplayName:displayName, ClientID:appId, ID:id}" --output table
@@ -214,6 +243,19 @@ resource "azuredevops_serviceendpoint_github" "database" {
   }
 
   depends_on = [module.database_project]
+}
+
+resource "azuredevops_serviceendpoint_github" "application" {
+  project_id            = module.application_project.devops_project_id
+  service_endpoint_name = "GitHub Connection"
+  description           = "GitHub service connection for Terraform Labs"
+
+  auth_personal {
+    # Use a GitHub PAT for authentication
+    personal_access_token = var.github_token
+  }
+
+  depends_on = [module.application_project]
 }
 
 # --------------------------------------------------
