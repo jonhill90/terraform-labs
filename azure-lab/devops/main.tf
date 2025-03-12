@@ -429,7 +429,7 @@ resource "azuredevops_build_definition" "compute_ci" {
 }
 
 resource "azuredevops_build_definition" "database_ci" {
-  project_id = module.compute_project.devops_project_id
+  project_id = module.database_project.devops_project_id
   name       = "Database-CI"
   path       = "\\"
 
