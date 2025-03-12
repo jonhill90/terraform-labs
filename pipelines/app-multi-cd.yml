@@ -12,22 +12,25 @@ pool:
   name: 'Lab'
 
 stages:
-  - template: templates/template-terraform-plan.yml
-    parameters:
-      team: "appmulti"
-      artifactName: "appmulti-artifacts"
-      variableGroup: "AppMulti"
-      backendServiceArm: "Application-SC"
-      environmentName: "dev"
-      stageName: "dev"
-      stageDisplayName: "Development"
-      workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
-      agentPool: "Lab"
-      pipeline: "AppMulti-CI"
+  - stage: Development
+    displayName: "Development"
+    jobs:
+      - template: templates/template-terraform-plan.yml
+        parameters:
+          team: "appmulti"
+          artifactName: "appmulti-artifacts"
+          variableGroup: "AppMulti"
+          backendServiceArm: "Application-SC"
+          environmentName: "dev"
+          stageName: "dev"
+          stageDisplayName: "Development"
+          workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
+          agentPool: "Lab"
+          pipeline: "AppMulti-CI"
 
   - stage: ApproveTest
     displayName: "Approval for Test Deployment"
-    dependsOn: dev
+    dependsOn: Development
     jobs:
       - job: ManualApproval
         displayName: "Manual Approval Required"
@@ -38,23 +41,26 @@ stages:
               instructions: "Review and approve before proceeding to Test."
               onTimeout: "reject"
 
-  - template: templates/template-terraform-plan.yml
-    parameters:
-      team: "appmulti"
-      artifactName: "appmulti-artifacts"
-      variableGroup: "AppMulti"
-      backendServiceArm: "Application-SC"
-      environmentName: "test"
-      stageName: "test"
-      stageDisplayName: "Test Environment"
-      workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
-      agentPool: "Lab"
-      pipeline: "AppMulti-CI"
+  - stage: Test
+    displayName: "Test Environment"
     dependsOn: ApproveTest
+    jobs:
+      - template: templates/template-terraform-plan.yml
+        parameters:
+          team: "appmulti"
+          artifactName: "appmulti-artifacts"
+          variableGroup: "AppMulti"
+          backendServiceArm: "Application-SC"
+          environmentName: "test"
+          stageName: "test"
+          stageDisplayName: "Test Environment"
+          workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
+          agentPool: "Lab"
+          pipeline: "AppMulti-CI"
 
   - stage: ApproveProd
     displayName: "Approval for Production Deployment"
-    dependsOn: test
+    dependsOn: Test
     jobs:
       - job: ManualApproval
         displayName: "Manual Approval Required"
@@ -65,16 +71,19 @@ stages:
               instructions: "Review and approve before proceeding to Production."
               onTimeout: "reject"
 
-  - template: templates/template-terraform-plan.yml
-    parameters:
-      team: "appmulti"
-      artifactName: "appmulti-artifacts"
-      variableGroup: "AppMulti"
-      backendServiceArm: "Application-SC"
-      environmentName: "prod"
-      stageName: "prod"
-      stageDisplayName: "Production Environment"
-      workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
-      agentPool: "Lab"
-      pipeline: "AppMulti-CI"
+  - stage: Production
+    displayName: "Production Environment"
     dependsOn: ApproveProd
+    jobs:
+      - template: templates/template-terraform-plan.yml
+        parameters:
+          team: "appmulti"
+          artifactName: "appmulti-artifacts"
+          variableGroup: "AppMulti"
+          backendServiceArm: "Application-SC"
+          environmentName: "prod"
+          stageName: "prod"
+          stageDisplayName: "Production Environment"
+          workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
+          agentPool: "Lab"
+          pipeline: "AppMulti-CI"
