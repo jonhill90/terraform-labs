@@ -1,0 +1,80 @@
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: AppMulti-CI
+      source: AppMulti-CI
+      trigger:
+        branches:
+          - main
+
+pool:
+  name: 'Lab'
+
+stages:
+  - template: templates/template-terraform-cd.yml
+    parameters:
+      team: "appmulti"
+      artifactName: "appmulti-artifacts"
+      variableGroup: "AppMulti"
+      backendServiceArm: "AppMulti-SC"
+      environmentName: "dev"
+      stageName: "dev"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
+      agentPool: "Lab"
+      pipeline: "AppMulti-CI"
+
+  - stage: ApproveTest
+    displayName: "Approval for Test Deployment"
+    dependsOn: dev
+    jobs:
+      - job: ManualApproval
+        displayName: "Manual Approval Required"
+        pool: server
+        steps:
+          - task: ManualValidation@0
+            inputs:
+              instructions: "Review and approve before proceeding to Test."
+              onTimeout: "reject"
+
+  - template: templates/template-terraform-cd.yml
+    parameters:
+      team: "appmulti"
+      artifactName: "appmulti-artifacts"
+      variableGroup: "AppMulti"
+      backendServiceArm: "AppMulti-SC"
+      environmentName: "test"
+      stageName: "test"
+      stageDisplayName: "Test Environment"
+      workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
+      agentPool: "Lab"
+      pipeline: "AppMulti-CI"
+    dependsOn: ApproveTest
+
+  - stage: ApproveProd
+    displayName: "Approval for Production Deployment"
+    dependsOn: test
+    jobs:
+      - job: ManualApproval
+        displayName: "Manual Approval Required"
+        pool: server
+        steps:
+          - task: ManualValidation@0
+            inputs:
+              instructions: "Review and approve before proceeding to Production."
+              onTimeout: "reject"
+
+  - template: templates/template-terraform-cd.yml
+    parameters:
+      team: "appmulti"
+      artifactName: "appmulti-artifacts"
+      variableGroup: "AppMulti"
+      backendServiceArm: "AppMulti-SC"
+      environmentName: "prod"
+      stageName: "prod"
+      stageDisplayName: "Production Environment"
+      workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
+      agentPool: "Lab"
+      pipeline: "AppMulti-CI"
+    dependsOn: ApproveProd
