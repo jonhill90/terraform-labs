@@ -28,22 +28,9 @@ stages:
           agentPool: "Lab"
           pipeline: "AppMulti-CI"
 
-  - stage: ApproveTest
-    displayName: "Approval for Test Deployment"
-    dependsOn: Development
-    jobs:
-      - job: ManualApproval
-        displayName: "Manual Approval Required"
-        pool: server
-        steps:
-          - task: ManualValidation@0
-            inputs:
-              instructions: "Review and approve before proceeding to Test."
-              onTimeout: "reject"
-
   - stage: Test
     displayName: "Test Environment"
-    dependsOn: ApproveTest
+    dependsOn: Development
     jobs:
       - template: templates/template-terraform-plan.yml
         parameters:
@@ -58,22 +45,9 @@ stages:
           agentPool: "Lab"
           pipeline: "AppMulti-CI"
 
-  - stage: ApproveProd
-    displayName: "Approval for Production Deployment"
-    dependsOn: Test
-    jobs:
-      - job: ManualApproval
-        displayName: "Manual Approval Required"
-        pool: server
-        steps:
-          - task: ManualValidation@0
-            inputs:
-              instructions: "Review and approve before proceeding to Production."
-              onTimeout: "reject"
-
   - stage: Production
     displayName: "Production Environment"
-    dependsOn: ApproveProd
+    dependsOn: Test
     jobs:
       - template: templates/template-terraform-plan.yml
         parameters:
