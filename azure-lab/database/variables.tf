@@ -36,3 +36,12 @@ variable "tenant_id" {
   type        = string
   sensitive   = true
 }
+
+# ----------------------------------------
+# Vault
+# ----------------------------------------
+variable "vault_name" {
+  description = "Database Vault Name"
+  type        = string
+  sensitive   = true
+}

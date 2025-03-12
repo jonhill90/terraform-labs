@@ -237,6 +237,12 @@ data "azurerm_key_vault" "compute" {
   provider            = azurerm.lab
 }
 
+data "azurerm_key_vault" "database" {
+  name                = var.database_vault_name
+  resource_group_name = "Security"
+  provider            = azurerm.lab
+}
+
 # --------------------------------------------------
 # Create Empty Secrets
 # --------------------------------------------------
@@ -342,6 +348,26 @@ module "compute_variable_group" {
   depends_on = [data.azurerm_key_vault.compute]
 }
 
+module "database_variable_group" {
+  source                     = "../../modules/azure-devops/variable-group"
+  project_id                 = module.database_project.devops_project_id
+  variable_group_name        = "Database"
+  variable_group_description = "Database Variable Group"
+  key_vault_name             = var.database_vault_name
+  service_endpoint_id        = azuredevops_serviceendpoint_azurerm.database.id
+  secrets = [
+    "backendContainer",
+    "backendResourceGroup",
+    "backendStorageAccount",
+    "labsubscriptionid",
+    "managementsubscriptionid",
+    "tenantid",
+    "vaultname",
+  ]
+
+  depends_on = [data.azurerm_key_vault.database]
+}
+
 # --------------------------------------------------
 # Azure DevOps Build Pipeline (CI)
 # --------------------------------------------------
@@ -400,6 +426,25 @@ resource "azuredevops_build_definition" "compute_ci" {
     use_yaml = true
   }
   depends_on = [azuredevops_serviceendpoint_github.compute]
+}
+
+resource "azuredevops_build_definition" "database_ci" {
+  project_id = module.compute_project.devops_project_id
+  name       = "Database-CI"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/database-ci.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.database.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.database]
 }
 
 # Add Agent Pool to the Build Pipeline via DevOps Portal
