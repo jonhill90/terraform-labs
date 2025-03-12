@@ -12,7 +12,7 @@ pool:
   name: 'Lab'
 
 stages:
-  - template: templates/template-terraform-plan.yml
+  - template: templates/template-terraform-plannew.yml
     parameters:
       team: "appmulti"
       artifactName: "appmulti-artifacts"
@@ -24,8 +24,9 @@ stages:
       workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
       agentPool: "Lab"
       pipeline: "AppMulti-CI"
+      dependsOn: []  # Explicitly set to an empty list for independent execution
 
-  - template: templates/template-terraform-plan.yml
+  - template: templates/template-terraform-plannew.yml
     parameters:
       team: "appmulti"
       artifactName: "appmulti-artifacts"
@@ -37,9 +38,9 @@ stages:
       workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
       agentPool: "Lab"
       pipeline: "AppMulti-CI"
-    dependsOn: Development
+      dependsOn: ["dev"]  # Correctly references the actual stage name
 
-  - template: templates/template-terraform-plan.yml
+  - template: templates/template-terraform-plannew.yml
     parameters:
       team: "appmulti"
       artifactName: "appmulti-artifacts"
@@ -51,4 +52,4 @@ stages:
       workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
       agentPool: "Lab"
       pipeline: "AppMulti-CI"
-    dependsOn: Test
+      dependsOn: ["test"]  # Correctly references the actual stage name
