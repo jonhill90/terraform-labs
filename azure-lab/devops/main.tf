@@ -509,3 +509,22 @@ resource "azuredevops_build_definition" "compute_cd" {
   }
   depends_on = [azuredevops_serviceendpoint_github.compute, azuredevops_build_definition.compute_ci]
 }
+
+resource "azuredevops_build_definition" "database_cd" {
+  project_id = module.database_project.devops_project_id
+  name       = "Database-CD"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/database-cd.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.database.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.database, azuredevops_build_definition.database_ci]
+}
