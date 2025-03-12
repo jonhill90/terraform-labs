@@ -257,6 +257,7 @@ module "devops_secrets" {
     "devopsvaultname"          = ""
     "networkingvaultname"      = ""
     "computevaultname"         = ""
+    "databasevaultname"        = ""
     "githubtoken"              = ""
   }
 
@@ -291,6 +292,7 @@ module "devops_variable_group" {
     "devopsvaultname",
     "networkingvaultname",
     "computevaultname",
+    "databasevaultname",
     "githubtoken"
   ]
 
