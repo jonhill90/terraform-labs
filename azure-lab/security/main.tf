@@ -487,12 +487,14 @@ module "security_secrets" {
     "networkingspobjectid"     = ""
     "computespobjectid"        = ""
     "databasespobjectid"       = ""
+    "applicationobjectid"      = ""
     "storageaccount"           = ""
     "tenantid"                 = ""
     "securityvaultname"        = ""
     "devopsvaultname"          = ""
     "computevaultname"         = ""
     "databasevaultname"        = ""
+    "applicationvaultname"     = ""
     "githubtoken"              = ""
   }
 
@@ -530,12 +532,14 @@ module "security_variable_group" {
     "networkingspobjectid",
     "computespobjectid",
     "databasespobjectid",
+    "applicationobjectid",
     "storageaccount",
     "tenantid",
     "securityvaultname",
     "devopsvaultname",
     "computevaultname",
     "databasevaultname",
+    "applicationvaultname",
     "githubtoken"
   ]
 
