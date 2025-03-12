@@ -21,6 +21,6 @@ stages:
       environmentName: "lab"
       stageName: "lab"
       stageDisplayName: "Development"
-      workingDirectory: "$(Pipeline.Workspace)/AppSingle-CI/appsingle-artifacts/azure-lab/appsingle"
+      workingDirectory: "$(Pipeline.Workspace)/AppSingle-CI/appsingle-artifacts/apps/appsingle"
       agentPool: "Lab"
       pipeline: "AppSingle-CI"
