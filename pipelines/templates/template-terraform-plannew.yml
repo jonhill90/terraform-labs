@@ -88,3 +88,11 @@ stages:
                     environmentServiceNameAzureRM: ${{ parameters.backendServiceArm }}
                     commandOptions: "-var-file=${{ parameters.workingDirectory }}/env/${{ parameters.environmentName }}.tfvars -out=tfplan"
                     workingDirectory: "${{ parameters.workingDirectory }}"
+                    
+                # ✅ Cleanup Step After Plan
+                - task: Bash@3
+                  displayName: "Cleanup Working Directory After Plan"
+                  condition: always()  # Ensures cleanup runs regardless of success or failure
+                  inputs:
+                    targetType: "inline"
+                    script: "rm -rf ${{ parameters.workingDirectory }}/*"
