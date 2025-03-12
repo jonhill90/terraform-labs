@@ -107,3 +107,9 @@ variable "compute_vault_name" {
   type        = string
   sensitive   = true
 }
+
+variable "database_vault_name" {
+  description = "Database Vault Name"
+  type        = string
+  sensitive   = true
+}
