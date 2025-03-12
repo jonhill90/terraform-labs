@@ -12,7 +12,7 @@ pool:
   name: 'Lab'
 
 stages:
-  - template: templates/template-terraform-plannew.yml
+  - template: templates/template-terraform-cdnew.yml
     parameters:
       team: "appmulti"
       artifactName: "appmulti-artifacts"
@@ -26,7 +26,7 @@ stages:
       pipeline: "AppMulti-CI"
       dependsOn: []  # Explicitly set to an empty list for independent execution
 
-  - template: templates/template-terraform-plannew.yml
+  - template: templates/template-terraform-cdnew.yml
     parameters:
       team: "appmulti"
       artifactName: "appmulti-artifacts"
@@ -40,7 +40,7 @@ stages:
       pipeline: "AppMulti-CI"
       dependsOn: ["dev"]  # Correctly references the actual stage name
 
-  - template: templates/template-terraform-plannew.yml
+  - template: templates/template-terraform-cdnew.yml
     parameters:
       team: "appmulti"
       artifactName: "appmulti-artifacts"
