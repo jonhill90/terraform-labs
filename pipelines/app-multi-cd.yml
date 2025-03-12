@@ -12,7 +12,7 @@ pool:
   name: 'Lab'
 
 stages:
-  - template: templates/template-terraform-cd.yml
+  - template: templates/template-terraform-plan.yml
     parameters:
       team: "appmulti"
       artifactName: "appmulti-artifacts"
@@ -38,7 +38,7 @@ stages:
               instructions: "Review and approve before proceeding to Test."
               onTimeout: "reject"
 
-  - template: templates/template-terraform-cd.yml
+  - template: templates/template-terraform-plan.yml
     parameters:
       team: "appmulti"
       artifactName: "appmulti-artifacts"
@@ -65,7 +65,7 @@ stages:
               instructions: "Review and approve before proceeding to Production."
               onTimeout: "reject"
 
-  - template: templates/template-terraform-cd.yml
+  - template: templates/template-terraform-plan.yml
     parameters:
       team: "appmulti"
       artifactName: "appmulti-artifacts"

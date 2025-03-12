@@ -16,7 +16,7 @@ stages:
     parameters:
       team: "appsingle"
       artifactName: "appsingle-artifacts"
-      variableGroup: "AppSingle"
+      variableGroup: "Application"
       backendServiceArm: "AppSingle-SC"
       environmentName: "lab"
       stageName: "lab"
