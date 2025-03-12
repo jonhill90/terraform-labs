@@ -38,7 +38,7 @@ stages:
       workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
       agentPool: "Lab"
       pipeline: "AppMulti-CI"
-      dependsOn: ["dev"]  # Correctly references the actual stage name
+      dependsOn: ["dev"]
 
   - template: templates/template-terraform-cd.yml
     parameters:
@@ -52,4 +52,4 @@ stages:
       workingDirectory: "$(Pipeline.Workspace)/AppMulti-CI/appmulti-artifacts/apps/appmulti"
       agentPool: "Lab"
       pipeline: "AppMulti-CI"
-      dependsOn: ["test"]  # Correctly references the actual stage name
+      dependsOn: ["test"]
