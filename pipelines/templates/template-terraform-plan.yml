@@ -19,10 +19,14 @@ parameters:
     type: string
   - name: pipeline
     type: string
+  - name: dependsOn
+    type: object
+    default: []  # Default to an empty list if not provided
 
 stages:
   - stage: ${{ parameters.stageName }}
     displayName: "Terraform Plan - ${{ parameters.stageDisplayName }}"
+    dependsOn: ${{ parameters.dependsOn }} # ✅ Dynamically set dependencies
     pool:
       name: ${{ parameters.agentPool }} # ✅ Uses the passed-in agent pool
     variables:
@@ -84,3 +88,14 @@ stages:
                     environmentServiceNameAzureRM: ${{ parameters.backendServiceArm }}
                     commandOptions: "-var-file=${{ parameters.workingDirectory }}/env/${{ parameters.environmentName }}.tfvars -out=tfplan"
                     workingDirectory: "${{ parameters.workingDirectory }}"
+
+                # ✅ Cleanup Step After Plan
+                - task: Bash@3
+                  displayName: "Force Cleanup of Working Directory Contents"
+                  condition: always()
+                  inputs:
+                    targetType: "inline"
+                    script: |
+                      echo "Deleting all contents inside: ${{ parameters.workingDirectory }}"
+                      rm -rf ${{ parameters.workingDirectory }}/* ${{ parameters.workingDirectory }}/.[!.]* ${{ parameters.workingDirectory }}/..?*
+                      echo "Working directory contents deleted: ${{ parameters.workingDirectory }}"

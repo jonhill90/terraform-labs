@@ -24,3 +24,4 @@ stages:
       workingDirectory: "$(Pipeline.Workspace)/DevOps-CI/devops-artifacts/azure-lab/devops"
       agentPool: "Lab"
       pipeline: "DevOps-CI"
+      dependsOn: []  # Explicitly set to an empty list for independent execution

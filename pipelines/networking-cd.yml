@@ -24,3 +24,4 @@ stages:
       workingDirectory: "$(Pipeline.Workspace)/Networking-CI/networking-artifacts/azure-lab/networking"
       agentPool: "Lab"
       pipeline: "Networking-CI"
+      dependsOn: []  # Explicitly set to an empty list for independent execution

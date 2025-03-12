@@ -24,3 +24,4 @@ stages:
       workingDirectory: "$(Pipeline.Workspace)/Database-CI/database-artifacts/azure-lab/database"
       agentPool: "Lab"
       pipeline: "Database-CI"
+      dependsOn: []  # Explicitly set to an empty list for independent execution

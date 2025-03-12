@@ -24,3 +24,4 @@ stages:
       workingDirectory: "$(Pipeline.Workspace)/Security-CI/security-artifacts/azure-lab/security"
       agentPool: "Lab"
       pipeline: "Security-CI"
+      dependsOn: []  # Explicitly set to an empty list for independent execution
