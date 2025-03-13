@@ -541,7 +541,7 @@ module "database_sp_vault_access" {
 
   depends_on = [module.database_vault]
 }
-
+/*
 module "storage_sp_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
   key_vault_id = module.storage_vault.key_vault_id
@@ -562,7 +562,7 @@ module "storage_sp_vault_access" {
 
   depends_on = [module.storage_vault]
 }
-
+*/
 module "application_sp_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
   key_vault_id = module.application_vault.key_vault_id
@@ -655,6 +655,7 @@ module "security_variable_group" {
     "networkingspobjectid",
     "computespobjectid",
     "databasespobjectid",
+    "storagespobjectid",
     "applicationspobjectid",
     "storageaccount",
     "tenantid",
