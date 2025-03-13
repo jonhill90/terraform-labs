@@ -95,6 +95,24 @@ module "database_project" {
   }
 }
 
+module "storage_project" {
+  source = "../../modules/azure-devops/project"
+
+  devops_org_name     = var.devops_org_name
+  devops_project_name = "Storage"
+  description         = "Storage Managed by Terraform"
+  visibility          = "private"
+  devops_pat          = var.devops_pat
+
+  features = {
+    repositories = "disabled"
+    testplans    = "disabled"
+    artifacts    = "enabled"
+    pipelines    = "enabled"
+    boards       = "disabled"
+  }
+}
+
 module "application_project" {
   source = "../../modules/azure-devops/project"
 
@@ -175,6 +193,17 @@ resource "azuredevops_serviceendpoint_azurerm" "database" {
   depends_on = [module.database_project]
 }
 
+resource "azuredevops_serviceendpoint_azurerm" "storage" {
+  project_id                             = module.storage_project.devops_project_id
+  service_endpoint_name                  = "Storage-SC"
+  service_endpoint_authentication_scheme = "ServicePrincipal"
+  azurerm_spn_tenantid                   = var.tenant_id
+  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_name              = "Lab"
+
+  depends_on = [module.storage_project]
+}
+
 resource "azuredevops_serviceendpoint_azurerm" "application" {
   project_id                             = module.application_project.devops_project_id
   service_endpoint_name                  = "Application-SC"
@@ -244,6 +273,20 @@ resource "azuredevops_serviceendpoint_github" "database" {
 
   depends_on = [module.database_project]
 }
+
+resource "azuredevops_serviceendpoint_github" "storage" {
+  project_id            = module.storage_project.devops_project_id
+  service_endpoint_name = "GitHub Connection"
+  description           = "GitHub service connection for Terraform Labs"
+
+  auth_personal {
+    # Use a GitHub PAT for authentication
+    personal_access_token = var.github_token
+  }
+
+  depends_on = [module.storage_project]
+}
+
 
 resource "azuredevops_serviceendpoint_github" "application" {
   project_id            = module.application_project.devops_project_id
