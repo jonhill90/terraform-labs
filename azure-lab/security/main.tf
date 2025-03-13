@@ -555,6 +555,7 @@ module "security_secrets" {
     "devopsvaultname"          = ""
     "computevaultname"         = ""
     "databasevaultname"        = ""
+    "storagevaultname"         = ""
     "applicationvaultname"     = ""
     "githubtoken"              = ""
   }
@@ -600,6 +601,7 @@ module "security_variable_group" {
     "devopsvaultname",
     "computevaultname",
     "databasevaultname",
+    "storagevaultname",
     "applicationvaultname",
     "githubtoken"
   ]
