@@ -248,6 +248,24 @@ module "database_vault" {
   depends_on = [azurerm_resource_group.security]
 }
 
+module "storage_vault" {
+  source                     = "../../modules/azurerm/security/vault"
+  key_vault_name             = var.storage_vault_name
+  resource_group_name        = azurerm_resource_group.security.name
+  location                   = "eastus"
+  sku_name                   = "standard"
+  purge_protection           = false
+  soft_delete_retention_days = 90
+
+  tenant_id = var.tenant_id
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [azurerm_resource_group.security]
+}
+
 module "application_vault" {
   source                     = "../../modules/azurerm/security/vault"
   key_vault_name             = var.application_vault_name
@@ -372,6 +390,27 @@ module "database_vault_access" {
   }
 
   depends_on = [module.database_vault]
+}
+
+module "storage_vault_access" {
+  source       = "../../modules/azurerm/security/vault-access"
+  key_vault_id = module.storage_vault.key_vault_id
+
+  access_policies = [
+    {
+      tenant_id               = var.tenant_id
+      object_id               = var.admin_object_id
+      key_permissions         = ["Get", "List"]
+      secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
+      certificate_permissions = ["Get", "List"]
+    }
+  ]
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [module.storage_vault]
 }
 
 module "application_vault_access" {
@@ -501,6 +540,27 @@ module "database_sp_vault_access" {
   }
 
   depends_on = [module.database_vault]
+}
+
+module "storage_sp_vault_access" {
+  source       = "../../modules/azurerm/security/vault-access"
+  key_vault_id = module.storage_vault.key_vault_id
+
+  access_policies = [
+    {
+      tenant_id               = var.tenant_id
+      object_id               = var.storage_sp_object_id
+      key_permissions         = ["Get", "List"]
+      secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
+      certificate_permissions = ["Get", "List"]
+    }
+  ]
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [module.storage_vault]
 }
 
 module "application_sp_vault_access" {
