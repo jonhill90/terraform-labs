@@ -1,0 +1,17 @@
+trigger:
+  branches:
+    include:
+      - main  
+  paths:
+    include:
+      - azure-lab/storage/**  
+
+pool:
+  name: 'Lab'  
+
+extends:
+  template: templates/template-terraform-ci.yml  
+  parameters:
+    artifactName: "storage-artifacts"
+    team: "storage"
+    agentPool: "Lab"

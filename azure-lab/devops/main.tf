@@ -588,6 +588,25 @@ resource "azuredevops_build_definition" "database_ci" {
   depends_on = [azuredevops_serviceendpoint_github.database]
 }
 
+resource "azuredevops_build_definition" "storage_ci" {
+  project_id = module.storage_project.devops_project_id
+  name       = "Storage-CI"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/storage-ci.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.storage.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.storage]
+}
+
 resource "azuredevops_build_definition" "appsingle_ci" {
   project_id = module.application_project.devops_project_id
   name       = "AppSingle-CI"

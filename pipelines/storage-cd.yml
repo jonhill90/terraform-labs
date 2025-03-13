@@ -1,0 +1,27 @@
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: Storage-CI
+      source: Storage-CI
+      trigger:
+        branches:
+          - main
+
+pool:
+  name: 'Lab'
+
+stages:
+  - template: templates/template-terraform-cd.yml
+    parameters:
+      team: "storage"
+      artifactName: "storage-artifacts"
+      variableGroup: "Storage"
+      backendServiceArm: "Storage-SC"
+      environmentName: "lab"
+      stageName: "lab"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/Storage-CI/storage-artifacts/azure-lab/storage"
+      agentPool: "Lab"
+      pipeline: "Storage-CI"
+      dependsOn: []  # Explicitly set to an empty list for independent execution
