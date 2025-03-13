@@ -114,6 +114,12 @@ variable "database_vault_name" {
   sensitive   = true
 }
 
+variable "storage_vault_name" {
+  description = "Storage Vault Name"
+  type        = string
+  sensitive   = true
+}
+
 variable "application_vault_name" {
   description = "Application Vault Name"
   type        = string

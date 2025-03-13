@@ -8,6 +8,7 @@ devops_vault_name          = "__devopsvaultname__"
 networking_vault_name      = "__networkingvaultname__"
 compute_vault_name         = "__computevaultname__"
 database_vault_name        = "__databasevaultname__"
+storage_vault_name         = "__storagevaultname__"
 application_vault_name     = "__applicationvaultname__"
 client_id                  = "__clientid__" # Application (client) ID
 client_secret              = "__clientsecret__" # Service Principal Secret created in Azure AD

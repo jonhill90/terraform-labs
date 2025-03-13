@@ -328,6 +328,12 @@ data "azurerm_key_vault" "database" {
   provider            = azurerm.lab
 }
 
+data "azurerm_key_vault" "storage" {
+  name                = var.storage_vault_name
+  resource_group_name = "Security"
+  provider            = azurerm.lab
+}
+
 data "azurerm_key_vault" "application" {
   name                = var.application_vault_name
   resource_group_name = "Security"
@@ -461,6 +467,26 @@ module "database_variable_group" {
   ]
 
   depends_on = [data.azurerm_key_vault.database]
+}
+
+module "storage_variable_group" {
+  source                     = "../../modules/azure-devops/variable-group"
+  project_id                 = module.storage_project.devops_project_id
+  variable_group_name        = "Storage"
+  variable_group_description = "Storage Variable Group"
+  key_vault_name             = var.storage_vault_name
+  service_endpoint_id        = azuredevops_serviceendpoint_azurerm.storage.id
+  secrets = [
+    "backendContainer",
+    "backendResourceGroup",
+    "backendStorageAccount",
+    "labsubscriptionid",
+    "managementsubscriptionid",
+    "tenantid",
+    "vaultname",
+  ]
+
+  depends_on = [data.azurerm_key_vault.storage]
 }
 
 module "application_variable_group" {

@@ -36,3 +36,11 @@ variable "tenant_id" {
   type        = string
   sensitive   = true
 }
+
+# ----------------------------------------
+# Vault Settings
+# ----------------------------------------
+variable "vault_name" {
+  description = "Security Key Vault Name"
+  type        = string
+}
