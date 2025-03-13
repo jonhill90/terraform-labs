@@ -88,6 +88,13 @@ variable "database_sp_object_id" {
   sensitive   = true
 }
 
+variable "storage_sp_object_id" {
+  description = "Storage Service Principal Object ID"
+  type        = string
+  sensitive   = true
+  
+}
+
 variable "application_sp_object_id" {
   description = "Application Service Principal Object ID"
   type        = string
@@ -132,6 +139,12 @@ variable "compute_vault_name" {
 
 variable "database_vault_name" {
   description = "Database Vault Name"
+  type        = string
+  sensitive   = true
+}
+
+variable "storage_vault_name" {
+  description = "Storage Vault Name"
   type        = string
   sensitive   = true
 }

@@ -548,6 +548,7 @@ module "security_secrets" {
     "networkingspobjectid"     = ""
     "computespobjectid"        = ""
     "databasespobjectid"       = ""
+    "storagespobjectid"        = ""
     "applicationspobjectid"    = ""
     "storageaccount"           = ""
     "tenantid"                 = ""
