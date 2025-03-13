@@ -727,6 +727,25 @@ resource "azuredevops_build_definition" "database_cd" {
   depends_on = [azuredevops_serviceendpoint_github.database, azuredevops_build_definition.database_ci]
 }
 
+resource "azuredevops_build_definition" "storage_cd" {
+  project_id = module.storage_project.devops_project_id
+  name       = "Storage-CD"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/storage-cd.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.storage.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.storage, azuredevops_build_definition.storage_ci]
+}
+
 resource "azuredevops_build_definition" "appsingle_cd" {
   project_id = module.application_project.devops_project_id
   name       = "AppSingle-CD"
