@@ -59,7 +59,7 @@ module "compute_secrets" {
 # Azure Compute Gallery
 # ----------------------------------------
 resource "azurerm_shared_image_gallery" "compute_gallery_dev" {
-  name                = "ComputeGallery-Dev"
+  name                = "ComputeGalleryDev"
   resource_group_name = azurerm_resource_group.lab.name
   location            = azurerm_resource_group.lab.location
   provider            = azurerm.lab
