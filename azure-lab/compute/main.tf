@@ -54,20 +54,15 @@ module "compute_secrets" {
 
   depends_on = [data.azurerm_key_vault.compute]
 }
-/*
-# ----------------------------------------
-# Azure Container Registry (ACR)
-# ----------------------------------------
-module "container_registry" {
-  source             = "../../modules/azurerm/container/registry"
-  acr_name           = var.acr
-  acr_resource_group = azurerm_resource_group.lab.name
-  acr_location       = azurerm_resource_group.lab.location
-  acr_sku            = "Basic"
 
-  providers = {
-    azurerm = azurerm.lab
-  }
+# ----------------------------------------
+# Azure Compute Gallery
+# ----------------------------------------
+resource "azurerm_shared_image_gallery" "compute_gallery" {
+  name                = "ComputeGallery"
+  resource_group_name = azurerm_resource_group.lab.name
+  location            = azurerm_resource_group.lab.location
+  description         = "Shared image gallery for compute resources"
 
   tags = {
     environment = var.environment
@@ -75,4 +70,3 @@ module "container_registry" {
     project     = var.project
   }
 }
-*/
