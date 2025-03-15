@@ -62,6 +62,7 @@ resource "azurerm_shared_image_gallery" "compute_gallery" {
   name                = "ComputeGallery"
   resource_group_name = azurerm_resource_group.lab.name
   location            = azurerm_resource_group.lab.location
+  provider            = azurerm.lab
   description         = "Shared image gallery for compute resources"
 
   tags = {
