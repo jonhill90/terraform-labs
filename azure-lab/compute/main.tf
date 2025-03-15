@@ -58,12 +58,26 @@ module "compute_secrets" {
 # ----------------------------------------
 # Azure Compute Gallery
 # ----------------------------------------
+resource "azurerm_shared_image_gallery" "compute_gallery_dev" {
+  name                = "ComputeGallery-Dev"
+  resource_group_name = azurerm_resource_group.lab.name
+  location            = azurerm_resource_group.lab.location
+  provider            = azurerm.lab
+  description         = "Development image gallery for compute resources"
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
 resource "azurerm_shared_image_gallery" "compute_gallery" {
   name                = "ComputeGallery"
   resource_group_name = azurerm_resource_group.lab.name
   location            = azurerm_resource_group.lab.location
   provider            = azurerm.lab
-  description         = "Shared image gallery for compute resources"
+  description         = "Production image gallery for compute resources"
 
   tags = {
     environment = var.environment
