@@ -20,4 +20,11 @@ resource "twingate_resource" "resources" {
   name              = each.key
   address           = each.value
   remote_network_id = twingate_remote_network.remote_network.id
+
+  dynamic "access_group" {
+    for_each = var.access_groups != null ? var.access_groups : []
+    content {
+      id = access_group.value
+    }
+  }
 }

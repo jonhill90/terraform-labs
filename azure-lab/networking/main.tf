@@ -153,9 +153,10 @@ module "twingate_resource" {
   subnet_map = {
     "management-subnet" = "10.100.2.0/24"
   }
-  twingate_api_key = var.twingate_api_key
-  twingate_network = var.twingate_network
+  twingate_api_key    = var.twingate_api_key
+  twingate_network    = var.twingate_network
 
+  access_groups = values(module.twingate_groups.group_ids)
 }
 
 # Twingate Image Push Module (Pushes Docker Image to ACR)
