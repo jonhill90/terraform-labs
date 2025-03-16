@@ -1,0 +1,41 @@
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: windows-2025-base-ci
+      source: windows-2025-base-ci
+      trigger:
+        branches:
+          - main
+
+pool:
+  name: 'Lab'
+
+stages:
+  - template: templates/template-packer-validate.yml
+    parameters:
+      imageName: "windows-2025-base"
+      artifactName: "windows-2025-base-artifacts"
+      variableGroup: "Compute"
+      backendServiceArm: "Compute-SC"
+      environmentName: "validate"
+      stageName: "labvalidate"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/windows-2025-base-ci/windows-2025-base-artifacts/azure-lab/image-bakery/windows"
+      agentPool: "Lab"
+      pipeline: "windows-2025-base-ci"
+      dependsOn: []  # Independent execution
+#
+#  - template: templates/template-packer-cd.yml
+#    parameters:
+#      imageName: "windows-2025-base"
+#      artifactName: "windows-2025-base-artifacts"
+#      variableGroup: "Compute"
+#      backendServiceArm: "Compute-SC"
+#      environmentName: "lab"
+#      stageName: "lab"
+#      stageDisplayName: "Development"
+#      workingDirectory: "$(Pipeline.Workspace)/windows-2025-base-ci/windows-2025-base-artifacts/azure-lab/image-bakery/windows"
+#      agentPool: "Lab"
+#      pipeline: "windows-2025-base-ci"
+#      dependsOn: [labvalidate]  # Dependent on validation

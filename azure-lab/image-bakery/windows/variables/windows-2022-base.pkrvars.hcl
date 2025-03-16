@@ -5,5 +5,5 @@ client_secret    = "__clientsecret__"   # Token replaced by pipeline
 resource_group   = "Compute"
 location         = "eastus"
 gallery_name     = "ComputeGallery"
-image_name       = "win2022-base"
+image_name       = "windows-2022-base"
 windows_version  = "2022-Datacenter-smalldisk"

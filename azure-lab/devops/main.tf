@@ -436,6 +436,25 @@ resource "azuredevops_build_definition" "appmulti_ci" {
   depends_on = [azuredevops_serviceendpoint_github.application]
 }
 
+resource "azuredevops_build_definition" "image_bakery_ci" {
+  project_id = module.compute_project.devops_project_id
+  name       = "windows-2025-base-ci"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/packer/windows-2025-base-ci.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.compute.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.compute]
+}
+
 # Add Agent Pool to the Build Pipeline via DevOps Portal
 # Approve Pipeline to use the Agent Pool vis DevOps Portal
 
