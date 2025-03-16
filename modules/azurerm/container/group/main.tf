@@ -6,8 +6,10 @@ resource "azurerm_container_group" "acg" {
 
   provider = azurerm
 
-  ip_address_type = "None"
+  ip_address_type = "Private"
   restart_policy  = "Always"
+
+  subnet_ids = [var.subnet_id]
 
   container {
     name   = var.container_name

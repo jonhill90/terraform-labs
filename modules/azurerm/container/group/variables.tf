@@ -60,3 +60,8 @@ variable "secure_environment_variables" {
   type        = map(string)
   sensitive   = true
 }
+
+variable "subnet_id" {
+  description = "The ID of the subnet"
+  type        = string
+}

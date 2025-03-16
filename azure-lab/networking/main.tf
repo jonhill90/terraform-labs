@@ -90,7 +90,7 @@ module "container_registry" {
     project     = var.project
   }
 }
-/*
+
 # ----------------------------------------
 # Twingate
 # ----------------------------------------
@@ -148,6 +148,7 @@ module "twingate_acg" {
   image_tag             = "latest"
   cpu                   = "1"
   memory                = "1.5"
+  subnet_id             = module.lab_vnet.subnets["compute"].id 
 
   providers = {
     azurerm = azurerm.lab
@@ -164,4 +165,3 @@ module "twingate_acg" {
 
   depends_on = [module.twingate_image_push]
 }
-*/
