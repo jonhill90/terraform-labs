@@ -23,6 +23,7 @@ source "azure-arm" "win_base" {
   client_id       = var.client_id
   client_secret   = var.client_secret
   location        = var.location
+  build_resource_group_name = var.resource_group
 
   vm_size         = "Standard_D2s_v3"
   os_type         = "Windows"
