@@ -43,21 +43,33 @@ stages:
               steps:
                 - checkout: self
 
-                # ✅ Ensure Packer is installed
-                - task: PackerToolInstaller@1
-                  displayName: "Install Packer"
+                # ✅ Install Packer manually if not installed
+                - task: Bash@3
+                  displayName: "Install Packer Manually"
                   inputs:
-                    version: "latest"
+                    targetType: "inline"
+                    script: |
+                      echo "Checking if Packer is installed..."
+                      if ! command -v packer &> /dev/null
+                      then
+                        echo "Packer not found. Installing..."
+                        curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+                        sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+                        sudo apt-get update && sudo apt-get install -y packer
+                        echo "Packer installed successfully."
 
-                # ✅ Initialize Packer backend
-                - script: |
-                    packer init ${{ parameters.workingDirectory }}/base.pkr.hcl
-                  displayName: "Packer Init"
+                        # Add Packer to PATH for this session
+                        export PATH=$PATH:/usr/bin/packer
+                        echo 'export PATH=$PATH:/usr/bin/packer' >> ~/.bashrc
+                      else
+                        echo "Packer is already installed."
+                      fi
 
-                # ✅ Validate the Packer template
+                # ✅ Verify Packer installation
                 - script: |
-                    packer validate ${{ parameters.workingDirectory }}/base.pkr.hcl
-                  displayName: "Packer Validate"
+                    export PATH=$PATH:/usr/bin/packer  # Ensure Packer is in PATH
+                    packer version
+                  displayName: "Verify Packer Installation"
 
                 # ✅ Replace Tokens (if applicable)
                 - task: replacetokens@6
@@ -69,6 +81,16 @@ stages:
                     tokenSuffix: "__"
                     actionOnMissing: "warn"
                     keepToken: false
+
+                # ✅ Initialize Packer backend
+                - script: |
+                    packer init ${{ parameters.workingDirectory }}/base.pkr.hcl
+                  displayName: "Packer Init"
+
+                # ✅ Validate the Packer template
+                - script: |
+                    packer validate -var-file=${{ parameters.workingDirectory }}/variables/${{ parameters.imageName }}.pkrvars.hcl ${{ parameters.workingDirectory }}/base.pkr.hcl
+                  displayName: "Packer Validate"
 
                 # ✅ Cleanup Step
                 - task: Bash@3
