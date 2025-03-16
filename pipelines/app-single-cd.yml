@@ -38,4 +38,4 @@ stages:
       workingDirectory: "$(Pipeline.Workspace)/AppSingle-CI/appsingle-artifacts/apps/appsingle"
       agentPool: "Lab"
       pipeline: "AppSingle-CI"
-      dependsOn: [lab-plan]  # Explicitly set to an empty list for independent execution
+      dependsOn: [labplan]  # Explicitly set to an empty list for independent execution
