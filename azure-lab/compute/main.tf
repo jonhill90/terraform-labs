@@ -83,7 +83,7 @@ resource "azurerm_shared_image" "win2025_base" {
   provider            = azurerm.lab
 
   os_type            = "Windows"
-  hyper_v_generation = "V2" # Use "V1" if appropriate for your environment
+  hyper_v_generation = "V1" # Use "V2" if appropriate for your environment
   identifier {
     publisher = "MicrosoftWindowsServer"
     offer     = "WindowsServer"
