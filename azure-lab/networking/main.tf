@@ -92,6 +92,31 @@ module "container_registry" {
 }
 
 # ----------------------------------------
+# Subnet for Azure Container Instances (ACI)
+# ----------------------------------------
+resource "azurerm_subnet" "aci" {
+  name                 = "aci"
+  resource_group_name  = azurerm_resource_group.networking.name
+  virtual_network_name = module.lab_vnet.vnet_name
+  address_prefixes     = ["10.100.25.0/24"]
+  provider             = azurerm.lab
+
+  delegation {
+    name = "aci-delegation"
+
+    service_delegation {
+      name = "Microsoft.ContainerInstance/containerGroups"
+
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action",
+        "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action",
+      ]
+    }
+  }
+}
+
+
+# ----------------------------------------
 # Twingate
 # ----------------------------------------
 module "twingate_groups" {
@@ -148,7 +173,7 @@ module "twingate_acg" {
   image_tag             = "latest"
   cpu                   = "1"
   memory                = "1.5"
-  subnet_id             = module.lab_vnet.subnet_ids["compute"]
+  subnet_id             = azurerm_subnet.aci.id
 
   providers = {
     azurerm = azurerm.lab
