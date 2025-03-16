@@ -53,7 +53,11 @@ stages:
                       if ! command -v packer &> /dev/null
                       then
                         echo "Packer not found. Installing..."
-                        sudo apt-get update && sudo apt-get install -y packer
+                        PACKER_VERSION=$(curl -sL https://checkpoint-api.hashicorp.com/v1/check/packer | jq -r .current_version)
+                        curl -fsSL "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip" -o packer.zip
+                        unzip packer.zip
+                        sudo mv packer /usr/local/bin/
+                        rm packer.zip
                       else
                         echo "Packer is already installed."
                       fi
