@@ -115,12 +115,12 @@ module "twingate_resource" {
     "management" = "10.100.2.0/24"
     "compute"    = "10.100.5.0/24"
   }
-  twingate_api_key    = var.twingate_api_key
-  twingate_network    = var.twingate_network
+  twingate_api_key = var.twingate_api_key
+  twingate_network = var.twingate_network
 
   # Pass only the group IDs dynamically
   access_groups = values(module.twingate_groups.group_ids)
-  depends_on = [module.twingate_groups]
+  depends_on    = [module.twingate_groups]
 }
 
 # Twingate Image Push Module (Pushes Docker Image to ACR)
@@ -148,7 +148,7 @@ module "twingate_acg" {
   image_tag             = "latest"
   cpu                   = "1"
   memory                = "1.5"
-  subnet_id             = module.lab_vnet.subnets["compute"].id 
+  subnet_id             = module.lab_vnet.subnet_ids["compute"]
 
   providers = {
     azurerm = azurerm.lab
