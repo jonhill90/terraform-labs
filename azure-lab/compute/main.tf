@@ -21,38 +21,20 @@ data "azurerm_resource_group" "security" {
   name     = "Security"
   provider = azurerm.lab
 }
-
-# --------------------------------------------------
-# Secure Vault
-# --------------------------------------------------
-data "azurerm_key_vault" "compute" {
-  name                = var.vault_name
-  resource_group_name = data.azurerm_resource_group.security.name
+# ----------------------------------------
+# Compute Network
+# ----------------------------------------
+data "azurerm_virtual_network" "networking" {
+  name                = "lab-vnet"
+  resource_group_name = "Networking"
   provider            = azurerm.lab
 }
 
-# --------------------------------------------------
-# Create Empty Secrets
-# --------------------------------------------------
-module "compute_secrets" {
-  source       = "../../modules/azurerm/security/secret"
-  key_vault_id = data.azurerm_key_vault.compute.id
-  secrets = {
-    "backendContainer"         = ""
-    "backendResourceGroup"     = ""
-    "backendStorageAccount"    = ""
-    "labsubscriptionid"        = ""
-    "managementsubscriptionid" = ""
-    "tenantid"                 = ""
-    "vaultname"                = ""
-    "acr"                      = ""
-  }
-
-  providers = {
-    azurerm = azurerm.lab
-  }
-
-  depends_on = [data.azurerm_key_vault.compute]
+data "azurerm_subnet" "compute" {
+  name                 = "compute"
+  virtual_network_name = data.azurerm_virtual_network.networking.name
+  resource_group_name  = "Networking"
+  provider             = azurerm.lab
 }
 
 # ----------------------------------------
@@ -73,7 +55,7 @@ resource "azurerm_shared_image_gallery" "compute_gallery" {
 }
 
 # ----------------------------------------
-# Shared Image Definition for win2025-base
+# Azure Compute Gallery Image Definitions
 # ----------------------------------------
 resource "azurerm_shared_image" "win2025_base" {
   name                = "win2025-base"
@@ -96,3 +78,32 @@ resource "azurerm_shared_image" "win2025_base" {
     project     = var.project
   }
 }
+/*
+# ----------------------------------------
+# Test VM
+# ----------------------------------------
+module "test_vm" {
+  source = "../../modules/azurerm/compute/vm/windows"
+
+  vm_name                = "TestVM"
+  vm_size                = "Standard_D2s_v3"
+  location              = azurerm_resource_group.lab.location
+  resource_group        = azurerm_resource_group.lab.name
+  gallery_name          = azurerm_shared_image_gallery.compute_gallery.name
+  image_name            = azurerm_shared_image.win2025_base.name
+  subnet_id             = data.azurerm_subnet.compute.id
+  admin_username        = "azureuser"
+  admin_password        = var.admin_password
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [
+    data.azurerm_virtual_network.networking,
+    data.azurerm_subnet.compute,
+    azurerm_shared_image_gallery.compute_gallery,
+    azurerm_shared_image.win2025_base
+  ]
+}
+*/
