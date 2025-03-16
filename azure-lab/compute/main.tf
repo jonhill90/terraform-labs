@@ -80,6 +80,7 @@ resource "azurerm_shared_image" "win2025_base" {
   gallery_name        = azurerm_shared_image_gallery.compute_gallery.name
   resource_group_name = azurerm_resource_group.lab.name
   location            = azurerm_resource_group.lab.location
+  provider            = azurerm.lab
 
   os_type            = "Windows"
   hyper_v_generation = "V2" # Use "V1" if appropriate for your environment
