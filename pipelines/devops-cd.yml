@@ -12,6 +12,20 @@ pool:
   name: 'Lab'
 
 stages:
+  - template: templates/template-terraform-plan.yml
+    parameters:
+      team: "devops"
+      artifactName: "devops-artifacts"
+      variableGroup: "DevOps"
+      backendServiceArm: "DevOps-SC"
+      environmentName: "lab"
+      stageName: "labplan"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/DevOps-CI/devops-artifacts/azure-lab/devops"
+      agentPool: "Lab"
+      pipeline: "DevOps-CI"
+      dependsOn: []  # Explicitly set to an empty list for independent execution
+
   - template: templates/template-terraform-cd.yml
     parameters:
       team: "devops"
@@ -24,4 +38,4 @@ stages:
       workingDirectory: "$(Pipeline.Workspace)/DevOps-CI/devops-artifacts/azure-lab/devops"
       agentPool: "Lab"
       pipeline: "DevOps-CI"
-      dependsOn: []  # Explicitly set to an empty list for independent execution
+      dependsOn: [labplan]  # Explicitly set to an empty list for independent execution
