@@ -12,6 +12,20 @@ pool:
   name: 'Lab'
 
 stages:
+  - template: templates/template-terraform-plan.yml
+    parameters:
+      team: "security"
+      artifactName: "security-artifacts"
+      variableGroup: "Security"
+      backendServiceArm: "Security-SC"
+      environmentName: "lab"
+      stageName: "labplan"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/Security-CI/security-artifacts/azure-lab/security"
+      agentPool: "Lab"
+      pipeline: "Security-CI"
+      dependsOn: []  # Explicitly set to an empty list for independent execution
+
   - template: templates/template-terraform-cd.yml
     parameters:
       team: "security"
@@ -24,4 +38,4 @@ stages:
       workingDirectory: "$(Pipeline.Workspace)/Security-CI/security-artifacts/azure-lab/security"
       agentPool: "Lab"
       pipeline: "Security-CI"
-      dependsOn: []  # Explicitly set to an empty list for independent execution
+      dependsOn: [labplan]  # Explicitly set to an empty list for independent execution
