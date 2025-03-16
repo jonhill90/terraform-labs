@@ -25,6 +25,6 @@ variable "twingate_network" {
 
 variable "access_groups" {
   type        = list(string)
-  description = "List of Twingate Access Group IDs to associate with the resource"
+  description = "List of Twingate Group IDs for access control"
   default     = []
 }

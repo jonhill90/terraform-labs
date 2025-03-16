@@ -156,8 +156,9 @@ module "twingate_resource" {
   twingate_api_key    = var.twingate_api_key
   twingate_network    = var.twingate_network
 
-  # Use dynamically created Twingate group IDs
+  # Pass only the group IDs dynamically
   access_groups = values(module.twingate_groups.group_ids)
+  depends_on = [module.twingate_groups]
 }
 
 # Twingate Image Push Module (Pushes Docker Image to ACR)

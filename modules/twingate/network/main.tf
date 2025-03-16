@@ -20,12 +20,11 @@ resource "twingate_resource" "resources" {
   name              = each.key
   address           = each.value
   remote_network_id = twingate_remote_network.remote_network.id
+
+dynamic "access_group" {
+  for_each = var.access_groups
+  content {
+    group_id = access_group.value
+  }
 }
-
-# Attach each Twingate group to each resource
-resource "twingate_resource_group" "resource_groups" {
-  for_each = { for k, v in var.subnet_map : k => v if length(var.access_groups) > 0 }
-
-  resource_id = twingate_resource.resources[each.key].id
-  group_id    = var.access_groups[0]  # Assign first group in the list (adjust if needed)
 }
