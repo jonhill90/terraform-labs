@@ -78,7 +78,7 @@ resource "azurerm_shared_image" "win2025_base" {
     project     = var.project
   }
 }
-
+/*
 # ----------------------------------------
 # Test VM
 # ----------------------------------------
@@ -106,3 +106,4 @@ module "test_vm" {
     azurerm_shared_image.win2025_base
   ]
 }
+*/
