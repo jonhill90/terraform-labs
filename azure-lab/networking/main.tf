@@ -112,7 +112,8 @@ module "twingate_resource" {
   remote_network_name = "Lab"
   connector_name      = "lab-connector"
   subnet_map = {
-    "management-subnet" = "10.100.2.0/24"
+    "management" = "10.100.2.0/24"
+    "compute"    = "10.100.5.0/24"
   }
   twingate_api_key    = var.twingate_api_key
   twingate_network    = var.twingate_network

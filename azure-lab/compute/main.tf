@@ -31,7 +31,7 @@ data "azurerm_virtual_network" "networking" {
 }
 
 data "azurerm_subnet" "compute" {
-  name                 = "management"
+  name                 = "compute"
   virtual_network_name = data.azurerm_virtual_network.networking.name
   resource_group_name  = "Networking"
   provider             = azurerm.lab
