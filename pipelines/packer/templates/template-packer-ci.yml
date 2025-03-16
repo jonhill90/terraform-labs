@@ -1,0 +1,40 @@
+parameters:
+  - name: artifactName
+    type: string
+  - name: imageName
+    type: string
+  - name: agentPool
+    type: string
+    default: "Lab"
+
+variables:
+  - name: artifactName
+    value: ${{ parameters.artifactName }}
+  - name: imageName
+    value: ${{ parameters.imageName }}
+
+stages:
+  - stage: Build
+    displayName: 'Packer Build Stage'
+    pool:
+      name: ${{ parameters.agentPool }}
+
+    jobs:
+      - job: Build
+        displayName: 'Prepare Packer Artifacts'
+        steps:
+          - checkout: self
+            fetchDepth: 1 
+
+          - task: CopyFiles@2
+            displayName: 'Copy Packer Files for $(imageName)'
+            inputs:
+              SourceFolder: '$(Build.SourcesDirectory)/azure-lab/image-bakery/windows'
+              Contents: '**'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/azure-lab/image-bakery/windows'
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Packer Artifacts'
+            inputs:
+              pathToPublish: '$(Build.ArtifactStagingDirectory)/$(artifactName)'
+              artifactName: '$(artifactName)'
