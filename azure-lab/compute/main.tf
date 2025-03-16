@@ -58,12 +58,12 @@ module "compute_secrets" {
 # ----------------------------------------
 # Azure Compute Gallery
 # ----------------------------------------
-resource "azurerm_shared_image_gallery" "compute_gallery_dev" {
-  name                = "ComputeGalleryDev"
+resource "azurerm_shared_image_gallery" "compute_gallery" {
+  name                = "ComputeGallery"
   resource_group_name = azurerm_resource_group.lab.name
   location            = azurerm_resource_group.lab.location
   provider            = azurerm.lab
-  description         = "Development image gallery for compute resources"
+  description         = "Production image gallery for compute resources"
 
   tags = {
     environment = var.environment
@@ -72,12 +72,22 @@ resource "azurerm_shared_image_gallery" "compute_gallery_dev" {
   }
 }
 
-resource "azurerm_shared_image_gallery" "compute_gallery" {
-  name                = "ComputeGallery"
+# ----------------------------------------
+# Shared Image Definition for win2025-base
+# ----------------------------------------
+resource "azurerm_shared_image" "win2025_base" {
+  name                = "win2025-base"
+  gallery_name        = azurerm_shared_image_gallery.compute_gallery.name
   resource_group_name = azurerm_resource_group.lab.name
   location            = azurerm_resource_group.lab.location
-  provider            = azurerm.lab
-  description         = "Production image gallery for compute resources"
+
+  os_type            = "Windows"
+  hyper_v_generation = "V2" # Use "V1" if appropriate for your environment
+  identifier {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2025-Datacenter-smalldisk"
+  }
 
   tags = {
     environment = var.environment

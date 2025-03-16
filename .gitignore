@@ -20,6 +20,8 @@ backend.tf
 
 # Packer Variables (Secrets)
 packer.auto.pkrvars.hcl
+example-windows-2025.pkrvars.hcl
+azure-lab/image-bakery/test/test.pkr.hcl
 
 # Ansible Vault encrypted files (if unencrypted versions exist)
 *.vault.yml
