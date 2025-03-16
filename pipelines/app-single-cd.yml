@@ -18,7 +18,7 @@ stages:
       artifactName: "appsingle-artifacts"
       variableGroup: "Application"
       backendServiceArm: "Application-SC"
-      environmentName: "plan"
+      environmentName: "lab"
       stageName: "labplan"
       stageDisplayName: "Development"
       workingDirectory: "$(Pipeline.Workspace)/AppSingle-CI/appsingle-artifacts/apps/appsingle"
