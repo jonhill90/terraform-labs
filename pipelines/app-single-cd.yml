@@ -19,7 +19,7 @@ stages:
       variableGroup: "Application"
       backendServiceArm: "Application-SC"
       environmentName: "plan"
-      stageName: "lab-plan"
+      stageName: "labplan"
       stageDisplayName: "Development"
       workingDirectory: "$(Pipeline.Workspace)/AppSingle-CI/appsingle-artifacts/apps/appsingle"
       agentPool: "Lab"
