@@ -12,6 +12,20 @@ pool:
   name: 'Lab'
 
 stages:
+  - template: templates/template-terraform-plan.yml
+    parameters:
+      team: "networking"
+      artifactName: "networking-artifacts"
+      variableGroup: "Networking"
+      backendServiceArm: "Networking-SC"
+      environmentName: "lab"
+      stageName: "labplan"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/Networking-CI/networking-artifacts/azure-lab/networking"
+      agentPool: "Lab"
+      pipeline: "Networking-CI"
+      dependsOn: []  # Explicitly set to an empty list for independent execution
+
   - template: templates/template-terraform-cd.yml
     parameters:
       team: "networking"
@@ -24,4 +38,4 @@ stages:
       workingDirectory: "$(Pipeline.Workspace)/Networking-CI/networking-artifacts/azure-lab/networking"
       agentPool: "Lab"
       pipeline: "Networking-CI"
-      dependsOn: []  # Explicitly set to an empty list for independent execution
+      dependsOn: [labplan]
