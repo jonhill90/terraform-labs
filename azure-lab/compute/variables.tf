@@ -53,3 +53,12 @@ variable "acr" {
   description = "Azure Container Registry Name"
   type        = string
 }
+
+# ----------------------------------------
+# Admin Password
+# ----------------------------------------
+variable "admin_password" {
+  description = "Admin Password for VMs"
+  type        = string
+  sensitive   = true
+}

@@ -31,7 +31,7 @@ data "azurerm_virtual_network" "networking" {
 }
 
 data "azurerm_subnet" "compute" {
-  name                 = "compute"
+  name                 = "management"
   virtual_network_name = data.azurerm_virtual_network.networking.name
   resource_group_name  = "Networking"
   provider             = azurerm.lab
@@ -78,7 +78,7 @@ resource "azurerm_shared_image" "win2025_base" {
     project     = var.project
   }
 }
-/*
+
 # ----------------------------------------
 # Test VM
 # ----------------------------------------
@@ -106,4 +106,3 @@ module "test_vm" {
     azurerm_shared_image.win2025_base
   ]
 }
-*/
