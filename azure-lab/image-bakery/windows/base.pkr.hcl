@@ -18,11 +18,10 @@ variable "client_id" {}
 variable "client_secret" {}
 
 source "azure-arm" "win_base" {
-  subscription_id = var.subscription_id
-  tenant_id       = var.tenant_id
-  client_id       = var.client_id
-  client_secret   = var.client_secret
-  location        = var.location
+  subscription_id           = var.subscription_id
+  tenant_id                 = var.tenant_id
+  client_id                 = var.client_id
+  client_secret             = var.client_secret
   build_resource_group_name = var.resource_group
 
   vm_size         = "Standard_D2s_v3"
@@ -30,6 +29,12 @@ source "azure-arm" "win_base" {
   image_publisher = "MicrosoftWindowsServer"
   image_offer     = "WindowsServer"
   image_sku       = var.windows_version
+
+  communicator   = "winrm"
+  winrm_use_ssl  = true
+  winrm_insecure = true
+  winrm_timeout  = "5m"
+  winrm_username = "packer"
 
   # Publish directly to the Shared Image Gallery
   shared_image_gallery_destination {
@@ -44,12 +49,6 @@ source "azure-arm" "win_base" {
       name = var.location
     }
   }
-
-  communicator   = "winrm"
-  winrm_use_ssl  = true
-  winrm_insecure = true
-  winrm_timeout  = "5m"
-  winrm_username = "packer"
 }
 
 build {

@@ -71,7 +71,7 @@ resource "azurerm_shared_image_gallery" "compute_gallery" {
     project     = var.project
   }
 }
-/*
+
 # ----------------------------------------
 # Shared Image Definition for win2025-base
 # ----------------------------------------
@@ -96,5 +96,3 @@ resource "azurerm_shared_image" "win2025_base" {
     project     = var.project
   }
 }
-
-*/
