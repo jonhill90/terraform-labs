@@ -53,17 +53,22 @@ stages:
                       if ! command -v packer &> /dev/null
                       then
                         echo "Packer not found. Installing..."
-                        curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+                        curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo tee /etc/apt/trusted.gpg.d/hashicorp.gpg > /dev/null
                         sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
                         sudo apt-get update && sudo apt-get install -y packer
                         echo "Packer installed successfully."
 
-                        # Add Packer to PATH for this session
-                        export PATH=$PATH:/usr/bin/packer
-                        echo 'export PATH=$PATH:/usr/bin/packer' >> ~/.bashrc
+                        # Ensure Packer is in PATH
+                        sudo ln -s /usr/bin/packer /usr/local/bin/packer
+                        export PATH=$PATH:/usr/local/bin
+                        echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
                       else
                         echo "Packer is already installed."
                       fi
+
+                      # Verify Installation
+                      echo "Verifying Packer installation..."
+                      packer version
 
                 # ✅ Verify Packer installation
                 - script: |
