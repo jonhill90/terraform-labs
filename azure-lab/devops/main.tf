@@ -593,3 +593,22 @@ resource "azuredevops_build_definition" "appmulti_cd" {
   }
   depends_on = [azuredevops_serviceendpoint_github.application, azuredevops_build_definition.appmulti_ci]
 }
+
+resource "azuredevops_build_definition" "image_bakery_cd" {
+  project_id = module.compute_project.devops_project_id
+  name       = "windows-2025-base-cd"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/packer/windows-2025-base-cd.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.compute.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.compute, azuredevops_build_definition.image_bakery_ci]
+}
