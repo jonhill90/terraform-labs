@@ -34,6 +34,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
   }
 
   source_image_id = data.azurerm_shared_image.custom_image.id
+  custom_data = base64encode(file("${path.module}/scripts/custom_data.ps1"))
 
   boot_diagnostics {
     storage_account_uri = null
