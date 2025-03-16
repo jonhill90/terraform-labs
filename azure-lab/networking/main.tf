@@ -108,6 +108,7 @@ resource "azurerm_subnet" "aci" {
       name = "Microsoft.ContainerInstance/containerGroups"
 
       actions = [
+        "Microsoft.Network/virtualNetworks/subnets/action",
         "Microsoft.Network/virtualNetworks/subnets/join/action",
         "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action",
       ]
