@@ -43,9 +43,9 @@ stages:
               steps:
                 - checkout: self
 
-                # ✅ Install Packer manually if not installed
+                # ✅ Install Packer
                 - task: Bash@3
-                  displayName: "Install Packer Manually"
+                  displayName: "Install Packer"
                   inputs:
                     targetType: "inline"
                     script: |
@@ -53,31 +53,14 @@ stages:
                       if ! command -v packer &> /dev/null
                       then
                         echo "Packer not found. Installing..."
-
-                        # Fix GPG key issue
-                        sudo rm -rf /etc/apt/keyrings
-                        sudo mkdir -p /etc/apt/keyrings
-                        curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo tee /etc/apt/keyrings/hashicorp-archive-keyring.gpg > /dev/null
-                        sudo chmod 0644 /etc/apt/keyrings/hashicorp-archive-keyring.gpg
-                        sudo apt-add-repository "deb [signed-by=/etc/apt/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
                         sudo apt-get update && sudo apt-get install -y packer
-
-                        # Ensure Packer is in PATH
-                        sudo ln -sf /usr/bin/packer /usr/local/bin/packer
-                        export PATH=$PATH:/usr/local/bin:/usr/bin
-                        echo 'export PATH=$PATH:/usr/local/bin:/usr/bin' >> ~/.bashrc
-                        echo 'export PATH=$PATH:/usr/local/bin:/usr/bin' >> ~/.profile
                       else
                         echo "Packer is already installed."
                       fi
 
-                      # Verify Installation
-                      echo "Verifying Packer installation..."
-                      packer version || { echo "Packer not found after install. Exiting."; exit 1; }
-
                 # ✅ Verify Packer installation
                 - script: |
-                    export PATH=$PATH:/usr/bin/packer  # Ensure Packer is in PATH
+                    export PATH=$PATH:/usr/local/bin
                     packer version
                   displayName: "Verify Packer Installation"
 
