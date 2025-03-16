@@ -17,7 +17,7 @@ resource "azurerm_resource_group" "lab" {
   }
 }
 
-resource "azurerm_resource_group" "lab" {
+resource "azurerm_resource_group" "labtest" {
   name     = "AppSingle-Lab-Test"
   location = "eastus"
   provider = azurerm.lab

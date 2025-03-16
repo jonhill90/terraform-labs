@@ -34,7 +34,7 @@ stages:
 
     jobs:
       - deployment: Terraform_Apply
-        displayName: "Terraform Init & Plan - ${{ parameters.stageDisplayName }}"
+        displayName: "Terraform Apply - ${{ parameters.stageDisplayName }}"
         environment: ${{ parameters.environmentName }}
         strategy:
           runOnce:
