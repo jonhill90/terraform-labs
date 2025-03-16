@@ -12,6 +12,20 @@ pool:
   name: 'Lab'
 
 stages:
+  - template: templates/template-terraform-plan.yml
+    parameters:
+      team: "appsingle"
+      artifactName: "appsingle-artifacts"
+      variableGroup: "Application"
+      backendServiceArm: "Application-SC"
+      environmentName: "plan"
+      stageName: "lab-plan"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/AppSingle-CI/appsingle-artifacts/apps/appsingle"
+      agentPool: "Lab"
+      pipeline: "AppSingle-CI"
+      dependsOn: []  # Explicitly set to an empty list for independent execution
+
   - template: templates/template-terraform-cd.yml
     parameters:
       team: "appsingle"
@@ -24,4 +38,4 @@ stages:
       workingDirectory: "$(Pipeline.Workspace)/AppSingle-CI/appsingle-artifacts/apps/appsingle"
       agentPool: "Lab"
       pipeline: "AppSingle-CI"
-      dependsOn: []  # Explicitly set to an empty list for independent execution
+      dependsOn: [lab-plan]  # Explicitly set to an empty list for independent execution

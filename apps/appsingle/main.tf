@@ -17,6 +17,18 @@ resource "azurerm_resource_group" "lab" {
   }
 }
 
+resource "azurerm_resource_group" "lab" {
+  name     = "AppSingle-Lab-Test"
+  location = "eastus"
+  provider = azurerm.lab
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
 data "azurerm_resource_group" "security" {
   name     = "Security"
   provider = azurerm.lab

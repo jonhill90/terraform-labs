@@ -35,7 +35,7 @@ stages:
     jobs:
       - deployment: Terraform_Plan
         displayName: "Terraform Init & Plan - ${{ parameters.stageDisplayName }}"
-        environment: ${{ parameters.environmentName }}
+        environment: plan
         strategy:
           runOnce:
             deploy:
@@ -86,7 +86,7 @@ stages:
                     command: "plan"
                     provider: "azurerm"
                     environmentServiceNameAzureRM: ${{ parameters.backendServiceArm }}
-                    commandOptions: "-var-file=${{ parameters.workingDirectory }}/env/${{ parameters.environmentName }}.tfvars -out=tfplan"
+                    commandOptions: "-var-file=${{ parameters.workingDirectory }}/env/${{ parameters.environmentName }}.tfvars"
                     workingDirectory: "${{ parameters.workingDirectory }}"
 
                 # ✅ Cleanup Step After Plan

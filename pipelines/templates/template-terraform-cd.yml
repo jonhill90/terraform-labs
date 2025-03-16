@@ -33,7 +33,7 @@ stages:
       - group: ${{ parameters.variableGroup }} # ✅ Pull secrets from Key Vault
 
     jobs:
-      - deployment: Terraform_Plan
+      - deployment: Terraform_Apply
         displayName: "Terraform Init & Plan - ${{ parameters.stageDisplayName }}"
         environment: ${{ parameters.environmentName }}
         strategy:
