@@ -54,7 +54,7 @@ module "lab_vnet" {
     default     = { address_prefixes = ["10.100.1.0/24"] }
     compute     = { address_prefixes = ["10.100.5.0/24"] }
     database    = { address_prefixes = ["10.100.10.0/24"] }
-    atorage     = { address_prefixes = ["10.100.15.0/24"] }
+    storage     = { address_prefixes = ["10.100.15.0/24"] }
     application = { address_prefixes = ["10.100.20.0/24"] }
   }
 
@@ -90,7 +90,7 @@ module "container_registry" {
     project     = var.project
   }
 }
-
+/*
 # ----------------------------------------
 # Twingate
 # ----------------------------------------
@@ -164,3 +164,4 @@ module "twingate_acg" {
 
   depends_on = [module.twingate_image_push]
 }
+*/
