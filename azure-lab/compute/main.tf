@@ -78,12 +78,12 @@ resource "azurerm_shared_image" "win2025_base" {
     project     = var.project
   }
 }
-/*
+
 # ----------------------------------------
 # Test VM
 # ----------------------------------------
 module "test_vm" {
-  source = "../../modules/azurerm/compute/vm/windows"
+  source = "../../modules/azurerm/compute/vm/windowsnew"
 
   vm_name                = "TestVM"
   vm_size                = "Standard_D2s_v3"
@@ -106,4 +106,3 @@ module "test_vm" {
     azurerm_shared_image.win2025_base
   ]
 }
-*/
