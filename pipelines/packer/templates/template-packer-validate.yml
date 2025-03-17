@@ -88,13 +88,3 @@ stages:
                 - script: |
                     packer validate -var-file=${{ parameters.workingDirectory }}/variables/${{ parameters.imageName }}.pkrvars.hcl ${{ parameters.workingDirectory }}/base.pkr.hcl
                   displayName: "Packer Validate"
-
-                # ✅ Cleanup Step
-                - task: Bash@3
-                  displayName: "Cleanup Working Directory"
-                  condition: always()
-                  inputs:
-                    targetType: "inline"
-                    script: |
-                      echo "Cleaning up: ${{ parameters.workingDirectory }}"
-                      rm -rf ${{ parameters.workingDirectory }}/*

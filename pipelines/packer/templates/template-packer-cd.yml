@@ -1,0 +1,100 @@
+parameters:
+  - name: imageName
+    type: string
+  - name: artifactName
+    type: string
+  - name: variableGroup
+    type: string
+  - name: backendServiceArm
+    type: string
+  - name: environmentName
+    type: string
+  - name: stageName
+    type: string
+  - name: stageDisplayName
+    type: string
+  - name: workingDirectory
+    type: string
+  - name: agentPool
+    type: string
+  - name: pipeline
+    type: string
+  - name: dependsOn
+    type: object
+    default: []  # Default to an empty list if not provided
+
+stages:
+  - stage: ${{ parameters.stageName }}
+    displayName: "Packer Validate - ${{ parameters.stageDisplayName }}"
+    dependsOn: ${{ parameters.dependsOn }}
+    pool:
+      name: ${{ parameters.agentPool }}
+
+    variables:
+      - group: ${{ parameters.variableGroup }}  # Pull secrets from Key Vault
+
+    jobs:
+      - deployment: Packer_Validate
+        displayName: "Packer Init & Validate - ${{ parameters.stageDisplayName }}"
+        environment: validate
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                # ✅ Install Packer
+                - task: Bash@3
+                  displayName: "Install Packer"
+                  inputs:
+                    targetType: "inline"
+                    script: |
+                      echo "Checking if Packer is installed..."
+                      if ! command -v packer &> /dev/null
+                      then
+                        echo "Packer not found. Installing..."
+                        PACKER_VERSION=$(curl -sL https://checkpoint-api.hashicorp.com/v1/check/packer | jq -r .current_version)
+                        curl -fsSL "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip" -o packer.zip
+                        unzip packer.zip
+                        sudo mv packer /usr/local/bin/
+                        rm packer.zip
+                      else
+                        echo "Packer is already installed."
+                      fi
+
+                # ✅ Verify Packer installation
+                - script: |
+                    export PATH=$PATH:/usr/local/bin
+                    packer version
+                  displayName: "Verify Packer Installation"
+
+                # ✅ Replace Tokens (if applicable)
+                - task: replacetokens@6
+                  displayName: "Replace Tokens in Packer Variables"
+                  inputs:
+                    targetFiles: "${{ parameters.workingDirectory }}/variables/${{ parameters.imageName }}.pkrvars.hcl"
+                    tokenPattern: "custom"
+                    tokenPrefix: "__"
+                    tokenSuffix: "__"
+                    actionOnMissing: "warn"
+                    keepToken: false
+
+                # ✅ Initialize Packer backend
+                - script: |
+                    packer init ${{ parameters.workingDirectory }}/base.pkr.hcl
+                  displayName: "Packer Init"
+
+                # ✅ Validate the Packer template
+                - script: |
+                    packer validate -var-file=${{ parameters.workingDirectory }}/variables/${{ parameters.imageName }}.pkrvars.hcl ${{ parameters.workingDirectory }}/base.pkr.hcl
+                  displayName: "Packer Validate"
+
+                # ✅ Cleanup Step
+                - task: Bash@3
+                  displayName: "Cleanup Working Directory"
+                  condition: always()
+                  inputs:
+                    targetType: "inline"
+                    script: |
+                      echo "Cleaning up: ${{ parameters.workingDirectory }}"
+                      rm -rf ${{ parameters.workingDirectory }}/*
