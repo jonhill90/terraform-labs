@@ -83,7 +83,7 @@ resource "azurerm_shared_image" "windows_2025_base" {
 # Test VM
 # ----------------------------------------
 module "test_vm" {
-  source = "../../modules/azurerm/compute/vm/windowsnew"
+  source = "../../modules/azurerm/compute/vm/windows"
 
   vm_name                = "TestVM"
   vm_size                = "Standard_D2s_v3"
