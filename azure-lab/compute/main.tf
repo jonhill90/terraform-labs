@@ -78,7 +78,7 @@ resource "azurerm_shared_image" "windows_2025_base" {
     project     = var.project
   }
 }
-/*
+
 # ----------------------------------------
 # Test VM
 # ----------------------------------------
@@ -90,7 +90,7 @@ module "test_vm" {
   location              = azurerm_resource_group.lab.location
   resource_group        = azurerm_resource_group.lab.name
   gallery_name          = azurerm_shared_image_gallery.compute_gallery.name
-  image_name            = azurerm_shared_image.win2025_base.name
+  image_name            = azurerm_shared_image.windows_2025_base.name
   subnet_id             = data.azurerm_subnet.compute.id
   admin_username        = "azureuser"
   admin_password        = var.admin_password
@@ -106,4 +106,3 @@ module "test_vm" {
     azurerm_shared_image.win2025_base
   ]
 }
-*/
