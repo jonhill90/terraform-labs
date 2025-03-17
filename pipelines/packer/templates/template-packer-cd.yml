@@ -25,7 +25,7 @@ parameters:
 
 stages:
   - stage: ${{ parameters.stageName }}
-    displayName: "Packer Validate - ${{ parameters.stageDisplayName }}"
+    displayName: "Packer Build - ${{ parameters.stageDisplayName }}"
     dependsOn: ${{ parameters.dependsOn }}
     pool:
       name: ${{ parameters.agentPool }}
@@ -34,9 +34,9 @@ stages:
       - group: ${{ parameters.variableGroup }}  # Pull secrets from Key Vault
 
     jobs:
-      - deployment: Packer_Validate
-        displayName: "Packer Init & Validate - ${{ parameters.stageDisplayName }}"
-        environment: validate
+      - deployment: Packer_Build
+        displayName: "Packer Build - ${{ parameters.stageDisplayName }}"
+        environment: ${{ parameters.environmentName }}
         strategy:
           runOnce:
             deploy:
@@ -86,8 +86,15 @@ stages:
 
                 # ✅ Validate the Packer template
                 - script: |
-                    packer validate -var-file=${{ parameters.workingDirectory }}/variables/${{ parameters.imageName }}.pkrvars.hcl ${{ parameters.workingDirectory }}/base.pkr.hcl
+                    cd ${{ parameters.workingDirectory }}
+                    packer validate -var-file=variables/${{ parameters.imageName }}.pkrvars.hcl base.pkr.hcl
                   displayName: "Packer Validate"
+
+                # ✅ Build the Packer Image
+                - script: |
+                    cd ${{ parameters.workingDirectory }}
+                    packer build -var-file=variables/${{ parameters.imageName }}.pkrvars.hcl base.pkr.hcl
+                  displayName: "Packer Build"
 
                 # ✅ Cleanup Step
                 - task: Bash@3

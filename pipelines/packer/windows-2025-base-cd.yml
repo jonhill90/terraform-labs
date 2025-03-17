@@ -25,17 +25,17 @@ stages:
       agentPool: "Lab"
       pipeline: "windows-2025-base-ci"
       dependsOn: []  # Independent execution
-#
-#  - template: templates/template-packer-cd.yml
-#    parameters:
-#      imageName: "windows-2025-base"
-#      artifactName: "windows-2025-base-artifacts"
-#      variableGroup: "Compute"
-#      backendServiceArm: "Compute-SC"
-#      environmentName: "lab"
-#      stageName: "lab"
-#      stageDisplayName: "Development"
-#      workingDirectory: "$(Pipeline.Workspace)/windows-2025-base-ci/windows-2025-base-artifacts/azure-lab/image-bakery/windows"
-#      agentPool: "Lab"
-#      pipeline: "windows-2025-base-ci"
-#      dependsOn: [labvalidate]  # Dependent on validation
+
+  - template: templates/template-packer-cd.yml
+    parameters:
+      imageName: "windows-2025-base"
+      artifactName: "windows-2025-base-artifacts"
+      variableGroup: "Compute"
+      backendServiceArm: "Compute-SC"
+      environmentName: "lab"
+      stageName: "lab"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/windows-2025-base-ci/windows-2025-base-artifacts/azure-lab/image-bakery/windows"
+      agentPool: "Lab"
+      pipeline: "windows-2025-base-ci"
+      dependsOn: [labvalidate]  # Dependent on validation
