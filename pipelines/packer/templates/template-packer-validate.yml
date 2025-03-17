@@ -86,5 +86,6 @@ stages:
 
                 # ✅ Validate the Packer template
                 - script: |
-                    packer validate -var-file=${{ parameters.workingDirectory }}/variables/${{ parameters.imageName }}.pkrvars.hcl ${{ parameters.workingDirectory }}/base.pkr.hcl
+                    cd ${{ parameters.workingDirectory }}
+                    packer validate -var-file=variables/${{ parameters.imageName }}.pkrvars.hcl base.pkr.hcl
                   displayName: "Packer Validate"
