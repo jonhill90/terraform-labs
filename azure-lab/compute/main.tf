@@ -57,8 +57,8 @@ resource "azurerm_shared_image_gallery" "compute_gallery" {
 # ----------------------------------------
 # Azure Compute Gallery Image Definitions
 # ----------------------------------------
-resource "azurerm_shared_image" "win2025_base" {
-  name                = "win2025-base"
+resource "azurerm_shared_image" "windows_2025_base" {
+  name                = "windows-2025-base"
   gallery_name        = azurerm_shared_image_gallery.compute_gallery.name
   resource_group_name = azurerm_resource_group.lab.name
   location            = azurerm_resource_group.lab.location
