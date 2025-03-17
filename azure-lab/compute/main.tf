@@ -103,6 +103,6 @@ module "test_vm" {
     data.azurerm_virtual_network.networking,
     data.azurerm_subnet.compute,
     azurerm_shared_image_gallery.compute_gallery,
-    azurerm_shared_image.win2025_base
+    azurerm_shared_image.windows_2025_base
   ]
 }
