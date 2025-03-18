@@ -5,11 +5,18 @@ This repository follows **Azure Landing Zone best practices** by using **Terrafo
 
 For more details on best practices, refer to:
 - [Azure Landing Zone Design Areas](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/design-areas)
+- [CI/CD baseline architecture with Azure Pipelines](https://learn.microsoft.com/en-us/azure/devops/pipelines/architectures/devops-pipelines-baseline-architecture?view=azure-devops)
 - [HashiCorp Terraform Recommended Practices](https://developer.hashicorp.com/terraform/cloud-docs/recommended-practices/part3.3)
 
 <p align="left">
   <a href="https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/design-areas" target="_blank">
     <img src="https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/enterprise-scale/media/azure-landing-zone-architecture-diagram-hub-spoke.svg" width="50%" alt="Azure Landing Zone Architecture">
+  </a>
+</p>
+
+<p align="left">
+  <a href="https://learn.microsoft.com/en-us/azure/devops/pipelines/architectures/devops-pipelines-baseline-architecture?view=azure-devops" target="_blank">
+    <img src="https://learn.microsoft.com/en-us/azure/devops/pipelines/architectures/media/azure-devops-ci-cd-architecture.svg?view=azure-devops" width="50%" alt="CI/CD baseline architecture">
   </a>
 </p>
 
