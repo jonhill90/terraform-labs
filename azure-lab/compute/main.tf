@@ -78,6 +78,28 @@ resource "azurerm_shared_image" "windows_2025_base" {
     project     = var.project
   }
 }
+
+resource "azurerm_shared_image" "windows_2025_core" {
+  name                = "windows-2025-core"
+  gallery_name        = azurerm_shared_image_gallery.compute_gallery.name
+  resource_group_name = azurerm_resource_group.lab.name
+  location            = azurerm_resource_group.lab.location
+  provider            = azurerm.lab
+
+  os_type            = "Windows"
+  hyper_v_generation = "V1" # Use "V2" if appropriate for your environment
+  identifier {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2025-Datacenter-Core-smalldisk"
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
 /*
 # ----------------------------------------
 # Test VM
