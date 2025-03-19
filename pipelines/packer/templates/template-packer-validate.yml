@@ -22,6 +22,8 @@ parameters:
   - name: dependsOn
     type: object
     default: []  # Default to an empty list if not provided
+  - name: packerTemplateFile
+    type: string  # Required parameter, no default value
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -79,13 +81,13 @@ stages:
                     actionOnMissing: "warn"
                     keepToken: false
 
-                # ✅ Initialize Packer backend
+                # ✅ Initialize Packer backend with parameterized HCL file
                 - script: |
-                    packer init ${{ parameters.workingDirectory }}/base.pkr.hcl
+                    packer init ${{ parameters.workingDirectory }}/${{ parameters.packerTemplateFile }}
                   displayName: "Packer Init"
 
-                # ✅ Validate the Packer template
+                # ✅ Validate the Packer template with parameterized HCL file
                 - script: |
                     cd ${{ parameters.workingDirectory }}
-                    packer validate -var-file=variables/${{ parameters.imageName }}.pkrvars.hcl base.pkr.hcl
+                    packer validate -var-file=variables/${{ parameters.imageName }}.pkrvars.hcl ${{ parameters.packerTemplateFile }}
                   displayName: "Packer Validate"

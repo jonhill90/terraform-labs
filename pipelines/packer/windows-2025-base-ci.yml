@@ -4,7 +4,7 @@ trigger:
       - main  
   paths:
     include:
-      - azure-lab/image-bakery/windows/base.pkr.hcl  
+      - azure-lab/image-bakery/windows/win2025-base.pkr.hcl  
 
 pool:
   name: 'Lab'  

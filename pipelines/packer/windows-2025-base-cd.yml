@@ -25,6 +25,7 @@ stages:
       agentPool: "Lab"
       pipeline: "windows-2025-base-ci"
       dependsOn: []  # Independent execution
+      packerTemplateFile: "win2025-base.pkr.hcl"  # Explicitly defined Packer template file
 
   - template: templates/template-packer-cd.yml
     parameters:
@@ -39,3 +40,4 @@ stages:
       agentPool: "Lab"
       pipeline: "windows-2025-base-ci"
       dependsOn: [labvalidate]  # Dependent on validation
+      packerTemplateFile: "win2025-base.pkr.hcl"  # Explicitly defined Packer template file
