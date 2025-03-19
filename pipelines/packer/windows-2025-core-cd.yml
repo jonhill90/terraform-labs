@@ -1,0 +1,43 @@
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: windows-2025-core-ci
+      source: windows-2025-core-ci
+      trigger:
+        branches:
+          - main
+
+pool:
+  name: 'Lab'
+
+stages:
+  - template: templates/template-packer-validate.yml
+    parameters:
+      imageName: "windows-2025-core"
+      artifactName: "windows-2025-core-artifacts"
+      variableGroup: "Compute"
+      backendServiceArm: "Compute-SC"
+      environmentName: "validate"
+      stageName: "labvalidate"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/windows-2025-core-ci/windows-2025-core-artifacts/azure-lab/image-bakery/windows"
+      agentPool: "Lab"
+      pipeline: "windows-2025-core-ci"
+      dependsOn: []  # Independent execution
+      packerTemplateFile: "win2025-core.pkr.hcl"  # Explicitly defined Packer template file
+
+  - template: templates/template-packer-cd.yml
+    parameters:
+      imageName: "windows-2025-core"
+      artifactName: "windows-2025-core-artifacts"
+      variableGroup: "Compute"
+      backendServiceArm: "Compute-SC"
+      environmentName: "lab"
+      stageName: "lab"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/windows-2025-core-ci/windows-2025-core-artifacts/azure-lab/image-bakery/windows"
+      agentPool: "Lab"
+      pipeline: "windows-2025-core-ci"
+      dependsOn: [labvalidate]  # Dependent on validation
+      packerTemplateFile: "win2025-core.pkr.hcl"  # Explicitly defined Packer template file
