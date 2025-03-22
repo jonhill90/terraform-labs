@@ -11,7 +11,10 @@ if (-not $DomainName -or -not $SafeModeAdminPassword) {
     throw "DomainName and SafeModeAdminPassword must be provided."
 }
 
+# Convert to SecureString and PSCredential
 $securePassword = ConvertTo-SecureString $SafeModeAdminPassword -AsPlainText -Force
+$domainCred = New-Object -TypeName PSCredential -ArgumentList $DomainAdminUsername, $securePassword
+$safemodeCred = New-Object -TypeName PSCredential -ArgumentList "Administrator", $securePassword
 
 $ConfigurationData = @{
     AllNodes = @(
@@ -30,24 +33,21 @@ Configuration SetupDomainController
 
     Node $ServerName
     {
-        # Install the AD DS Role
         WindowsFeature ADDSInstall {
             Name   = "AD-Domain-Services"
             Ensure = "Present"
         }
 
-        # Install the DNS Role
         WindowsFeature DNS {
-            Name   = "DNS"
-            Ensure = "Present"
+            Name      = "DNS"
+            Ensure    = "Present"
             DependsOn = "[WindowsFeature]ADDSInstall"
         }
 
-        # Promote the server to Domain Controller for a new forest
         xADDomain NewForest {
             DomainName                    = $DomainName
-            DomainAdministratorCredential = New-Object -TypeName PSCredential -ArgumentList $DomainAdminUsername, $securePassword
-            SafemodeAdministratorPassword = $securePassword
+            DomainAdministratorCredential = $domainCred
+            SafemodeAdministratorPassword = $safemodeCred
             DependsOn                     = @("[WindowsFeature]ADDSInstall", "[WindowsFeature]DNS")
         }
     }
