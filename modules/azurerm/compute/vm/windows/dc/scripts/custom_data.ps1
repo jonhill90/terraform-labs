@@ -1,14 +1,23 @@
-# Logging setup
-$tmp_dir = "$env:SystemDrive\Windows\temp\Azure DevOps"
-Function Write-Log($message, $level = "INFO") {
+$tmp_dir = "$env:SystemDrive\Windows\Temp\AzureDevOps"
+$log_file = Join-Path $tmp_dir "AzureDevOps-UserData.log"
+
+Function Write-Log {
+    param (
+        [string]$message,
+        [string]$level = "INFO"
+    )
+
     $date_stamp = Get-Date -Format s
     $log_entry = "$date_stamp - $level - $message"
-    if (-not (Test-Path -Path $tmp_dir)) {
-        New-Item -Path $tmp_dir -ItemType Directory > $null
+
+    try {
+        if (-not (Test-Path -Path $tmp_dir)) {
+            New-Item -Path $tmp_dir -ItemType Directory -Force | Out-Null
+        }
+        $log_entry | Out-File -FilePath $log_file -Encoding UTF8 -Append
+    } catch {
+        Write-Host "LOGGING FAILED: $log_entry"
     }
-    $log_file = "$tmp_dir\AzureDevOps-UserData.log"
-    Write-Verbose -Message $log_entry
-    Add-Content -Path $log_file -Value $log_entry
 }
 
 # Enable WinRM (Remote Management)
