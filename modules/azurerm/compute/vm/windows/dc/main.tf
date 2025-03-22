@@ -36,6 +36,37 @@ resource "azurerm_windows_virtual_machine" "vm" {
   source_image_id = data.azurerm_shared_image.custom_image.id
   custom_data = base64encode(file("${path.module}/scripts/custom_data.ps1"))
 
+  provisioner "file" {
+    source      = "${path.module}/scripts/FormatDisks.ps1"
+    destination = "C:/Windows/Temp/FormatDisks.ps1"
+    connection {
+      type     = "winrm"
+      host     = "${self.private_ip_address}"
+      user     = "${var.admin_username}"
+      password = "${var.admin_password}"
+      https    = true
+      port     = 5986
+      timeout  = "10m"
+      insecure = false
+    }
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      type     = "winrm"
+      host     = "${self.private_ip_address}"
+      user     = "${var.admin_username}"
+      password = "${var.admin_password}"
+      https    = true
+      port     = 5986
+      timeout  = "10m"
+      insecure = false
+    }
+    inline = [
+      "powershell -ExecutionPolicy Bypass -File C:\\Windows\\Temp\\FormatDisks.ps1"
+    ]
+  }
+
   provisioner "local-exec" {
     command = "powershell -ExecutionPolicy Bypass -File ./scripts/LCM-Configuration.ps1 -ServerName ${self.name} -LCMOutputPath ${var.LCMOutputPath} -DomainName ${var.domain_name} -SafeModeAdminPassword ${var.da_admin_password}"
   }
