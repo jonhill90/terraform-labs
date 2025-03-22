@@ -99,13 +99,21 @@ stages:
                     commandOptions: "-auto-approve tfplan"
                     workingDirectory: "${{ parameters.workingDirectory }}"
 
-                # ✅ Cleanup Step After Plan
+                # ✅ Cross-platform Cleanup Step
                 - task: Bash@3
-                  displayName: "Force Cleanup of Working Directory Contents"
+                  displayName: "Force Cleanup of Working Directory Contents (Cross-platform)"
                   condition: always()
                   inputs:
                     targetType: "inline"
                     script: |
                       echo "Deleting all contents inside: ${{ parameters.workingDirectory }}"
-                      rm -rf ${{ parameters.workingDirectory }}/* ${{ parameters.workingDirectory }}/.[!.]* ${{ parameters.workingDirectory }}/..?*
+
+                      if [[ "$AGENT_OS" == "Windows_NT" ]]; then
+                        echo "Running on Windows"
+                        powershell -Command "Get-ChildItem -Path '${{ parameters.workingDirectory }}' -Force | Remove-Item -Recurse -Force"
+                      else
+                        echo "Running on Linux"
+                        rm -rf ${{ parameters.workingDirectory }}/* ${{ parameters.workingDirectory }}/.[!.]* ${{ parameters.workingDirectory }}/..?*
+                      fi
+
                       echo "Working directory contents deleted: ${{ parameters.workingDirectory }}"
