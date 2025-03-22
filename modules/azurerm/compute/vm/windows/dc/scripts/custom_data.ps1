@@ -66,6 +66,7 @@ try {
 
         Write-Log "Creating new HTTPS listener with correct certificate..."
         New-Item -Path WSMan:\Localhost\Listener -Transport HTTPS -Address * -CertificateThumbprint $thumbprint -Force
+        Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
     } catch {
         Write-Log "ERROR creating HTTPS listener: $($_.Exception.Message)" "ERROR"
     }
