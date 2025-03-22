@@ -20,12 +20,12 @@ resource "azurerm_network_interface" "vm_nic" {
 
 # Create the Virtual Machine
 resource "azurerm_windows_virtual_machine" "vm" {
-  name                  = var.vm_name
-  resource_group_name   = var.resource_group
-  location              = var.location
-  size                  = var.vm_size
-  admin_username        = var.admin_username
-  admin_password        = var.admin_password
+  name                = var.vm_name
+  resource_group_name = var.resource_group
+  location            = var.location
+  size                = var.vm_size
+  admin_username      = var.admin_username
+  admin_password      = var.admin_password
   network_interface_ids = [azurerm_network_interface.vm_nic.id]
 
   os_disk {
@@ -34,13 +34,17 @@ resource "azurerm_windows_virtual_machine" "vm" {
   }
 
   source_image_id = data.azurerm_shared_image.custom_image.id
-  custom_data     = base64encode(file("${path.module}/scripts/custom_data.ps1"))
+  custom_data = base64encode(file("${path.module}/scripts/custom_data.ps1"))
 
-  boot_diagnostics {
-    storage_account_uri = null
+  provisioner "local-exec" {
+    command = "powershell -ExecutionPolicy Bypass -File ./scripts/LCM-Configuration.ps1 -ServerName ${self.name} -LCMOutputPath ${var.LCMOutputPath}"
   }
 
   provisioner "local-exec" {
-    command = "powershell -ExecutionPolicy Bypass -File .\\dsc\\DSC-Configuration.ps1 -ServerName ${var.vm_name} -DSCOutputPath C:\\Temp\\"
+    command = "powershell -ExecutionPolicy Bypass -File ./scripts/DSC-Configuration.ps1 -ServerName ${self.name} -DSCOutputPath ${var.DSCOutputPath}"
+  }
+
+  boot_diagnostics {
+    storage_account_uri = null
   }
 }

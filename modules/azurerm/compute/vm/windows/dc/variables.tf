@@ -44,3 +44,13 @@ variable "admin_password" {
   type        = string
   sensitive   = true
 }
+
+variable "LCMOutputPath" {
+    type = "string"
+    default = ".\\LCM"
+}
+
+variable "DSCOutputPath" {
+    type = "string"
+    default = ".\\DSC"
+}
