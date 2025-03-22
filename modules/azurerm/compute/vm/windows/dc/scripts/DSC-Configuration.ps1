@@ -15,7 +15,15 @@ $SecurePassword = ConvertTo-SecureString $SafeModeAdminPassword -AsPlainText -Fo
 $DomainCreds = New-Object System.Management.Automation.PSCredential("$DomainName\$DomainAdminUsername", $SecurePassword)
 
 
-$ImportedConfigData = Import-PowerShellDataFile -Path "${PSScriptRoot}\DSCConfigData.psd1"
+$ConfigData = @{
+    AllNodes = @(
+        @{
+            NodeName = "localhost"
+            PSDscAllowPlainTextPassword = $true
+            PSDscAllowDomainUser = $true
+        }
+    )
+}
 
 Configuration SetupDomainController
 {
@@ -44,5 +52,5 @@ Configuration SetupDomainController
     }
 }
 
-SetupDomainController -ConfigurationData $ImportedConfigData -OutputPath $DSCOutputPath
+SetupDomainController -ConfigurationData $ConfigData -OutputPath $DSCOutputPath
 Start-DscConfiguration -Path $DSCOutputPath -ComputerName "localhost" -Force -Verbose -Wait
