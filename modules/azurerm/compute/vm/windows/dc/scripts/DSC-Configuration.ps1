@@ -14,7 +14,6 @@ if (-not $DomainName -or -not $SafeModeAdminPassword) {
 # Convert to SecureString and PSCredential
 $securePassword = ConvertTo-SecureString $SafeModeAdminPassword -AsPlainText -Force
 $domainCred = New-Object -TypeName PSCredential -ArgumentList $DomainAdminUsername, $securePassword
-$safemodeCred = New-Object -TypeName PSCredential -ArgumentList "Administrator", $securePassword
 
 $ConfigurationData = @{
     AllNodes = @(
@@ -47,7 +46,7 @@ Configuration SetupDomainController
         xADDomain NewForest {
             DomainName                    = $DomainName
             DomainAdministratorCredential = $domainCred
-            SafemodeAdministratorPassword = $safemodeCred
+            SafemodeAdministratorPassword = $securePassword
             DependsOn                     = @("[WindowsFeature]ADDSInstall", "[WindowsFeature]DNS")
         }
     }
