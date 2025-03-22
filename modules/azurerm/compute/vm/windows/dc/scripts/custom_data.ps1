@@ -1,5 +1,18 @@
+# Logging setup
+$tmp_dir = "$env:SystemDrive\Windows\temp\Azure DevOps"
+Function Write-Log($message, $level = "INFO") {
+    $date_stamp = Get-Date -Format s
+    $log_entry = "$date_stamp - $level - $message"
+    if (-not (Test-Path -Path $tmp_dir)) {
+        New-Item -Path $tmp_dir -ItemType Directory > $null
+    }
+    $log_file = "$tmp_dir\AzureDevOps-UserData.log"
+    Write-Verbose -Message $log_entry
+    Add-Content -Path $log_file -Value $log_entry
+}
+
 # Enable WinRM (Remote Management)
-Write-Output "Enabling WinRM..."
+Write-Log "Enabling WinRM..."
 winrm quickconfig -q
 winrm set winrm/config/service/auth @{Basic="true"}
 winrm set winrm/config/service @{AllowUnencrypted="true"}
@@ -7,21 +20,24 @@ winrm set winrm/config/client @{AllowUnencrypted="true"}
 Enable-PSRemoting -Force
 
 # Configure WinRM HTTPS with a self-signed certificate
-Write-Output "Configuring WinRM HTTPS..."
+Write-Log "Configuring WinRM HTTPS..."
 $cert = New-SelfSignedCertificate -CertStoreLocation Cert:\LocalMachine\My -DnsName "${WINRM_DNS_NAME}"
 $thumbprint = $cert.Thumbprint
+Write-Log "Generated certificate with Thumbprint: $thumbprint"
 New-Item -Path WSMan:\Localhost\Listener -Transport HTTPS -Address * -CertificateThumbprint $thumbprint -Force
 
 # Restart WinRM to apply changes
+Write-Log "Restarting WinRM service..."
 Restart-Service WinRM
-Write-Output "WinRM configuration complete."
+Write-Log "WinRM configuration complete."
 
 # Enable RDP
-Write-Output "Enabling RDP..."
+Write-Log "Enabling RDP..."
 Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
 Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
-# Set Network Level Authentication (Optional, uncomment to disable)
+# Optional: Disable Network Level Authentication
+# Write-Log "Disabling Network Level Authentication for RDP..."
 # Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
 
-Write-Output "RDP and WinRM are enabled."
+Write-Log "RDP and WinRM are fully enabled."
