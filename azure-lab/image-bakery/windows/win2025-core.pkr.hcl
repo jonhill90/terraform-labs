@@ -42,7 +42,7 @@ source "azure-arm" "win_core" {
     resource_group       = var.resource_group
     gallery_name         = var.gallery_name
     image_name           = var.image_name
-    image_version        = "1.0.0"
+    image_version        = "1.0.1"
     storage_account_type = "Standard_LRS"
 
     target_region {
@@ -53,6 +53,13 @@ source "azure-arm" "win_core" {
 
 build {
   sources = ["source.azure-arm.win_core"]
+
+  provisioner "powershell" {
+    inline = [
+      "Copy-Item -Path './scripts/CustomDataRunner.ps1' -Destination 'C:\\ProgramData\\CustomDataRunner.ps1'",
+      "Register-ScheduledTask -TaskName 'RunCustomData' -Action (New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-ExecutionPolicy Bypass -File C:\\ProgramData\\CustomDataRunner.ps1') -Trigger (New-ScheduledTaskTrigger -AtStartup) -Principal (New-ScheduledTaskPrincipal -UserId 'SYSTEM' -RunLevel Highest) -Force"
+    ]
+  }
 
   provisioner "powershell" {
     script = "./scripts/sysprep.ps1"

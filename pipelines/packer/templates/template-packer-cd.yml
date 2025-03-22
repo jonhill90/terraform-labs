@@ -98,12 +98,23 @@ stages:
                     packer build -var-file=variables/${{ parameters.imageName }}.pkrvars.hcl ${{ parameters.packerTemplateFile }}
                   displayName: "Packer Build"
 
-                # ✅ Cleanup Step
-                - task: Bash@3
-                  displayName: "Cleanup Working Directory"
+                # ✅ Cross-platform Cleanup Step
+                - task: PowerShell@2
+                  displayName: "Force Cleanup of Working Directory Contents (Cross-platform)"
                   condition: always()
                   inputs:
                     targetType: "inline"
                     script: |
-                      echo "Cleaning up: ${{ parameters.workingDirectory }}"
-                      rm -rf ${{ parameters.workingDirectory }}/*
+                      Write-Host "Operating System: $env:AGENT_OS"
+                      Write-Host "Cleaning working directory: '${{ parameters.workingDirectory }}'"
+                
+                      if ($env:AGENT_OS -eq "Windows_NT") {
+                        Write-Host "Running on Windows..."
+                        Get-ChildItem -Path "${{ parameters.workingDirectory }}" -Force | Remove-Item -Recurse -Force
+                      }
+                      else {
+                        Write-Host "Running on Linux/macOS..."
+                        bash -c "rm -rf '${{ parameters.workingDirectory }}'/* '${{ parameters.workingDirectory }}'/.[!.]* '${{ parameters.workingDirectory }}'/..?*" 
+                      }
+                
+                      Write-Host "Cleanup complete."
