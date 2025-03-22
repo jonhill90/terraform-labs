@@ -37,11 +37,11 @@ resource "azurerm_windows_virtual_machine" "vm" {
   custom_data = base64encode(file("${path.module}/scripts/custom_data.ps1"))
 
   provisioner "local-exec" {
-    command = "powershell -ExecutionPolicy Bypass -File ./scripts/LCM-Configuration.ps1 -ServerName ${self.name} -LCMOutputPath ${var.LCMOutputPath}"
+    command = "powershell -ExecutionPolicy Bypass -File ./scripts/LCM-Configuration.ps1 -ServerName ${self.name} -LCMOutputPath ${var.LCMOutputPath} -DomainName ${var.domain_name} -SafeModeAdminPassword ${var.da_admin_password}"
   }
 
   provisioner "local-exec" {
-    command = "powershell -ExecutionPolicy Bypass -File ./scripts/DSC-Configuration.ps1 -ServerName ${self.name} -DSCOutputPath ${var.DSCOutputPath}"
+    command = "powershell -ExecutionPolicy Bypass -File ./scripts/DSC-Configuration.ps1 -ServerName ${self.name} -DSCOutputPath ${var.DSCOutputPath} -DomainName ${var.domain_name} -SafeModeAdminPassword ${var.da_admin_password}"
   }
 
   boot_diagnostics {

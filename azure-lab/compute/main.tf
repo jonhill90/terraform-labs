@@ -128,3 +128,30 @@ module "build_agent" {
     azurerm_shared_image.windows_2025_core
   ]
 }
+
+module "dc01" {
+  source = "../../modules/azurerm/compute/vm/windows/dc"
+
+  vm_name                = "dc01"
+  vm_size                = "Standard_D2s_v3"
+  location              = azurerm_resource_group.lab.location
+  resource_group        = azurerm_resource_group.lab.name
+  gallery_name          = azurerm_shared_image_gallery.compute_gallery.name
+  image_name            = azurerm_shared_image.windows_2025_base.name
+  subnet_id             = data.azurerm_subnet.compute.id
+  admin_username        = "azureuser"
+  admin_password        = var.admin_password
+  domain_name           = var.domain_name
+  da_admin_password     = var.da_admin_password
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
+  depends_on = [
+    data.azurerm_virtual_network.networking,
+    data.azurerm_subnet.compute,
+    azurerm_shared_image_gallery.compute_gallery,
+    azurerm_shared_image.windows_2025_base
+  ]
+}

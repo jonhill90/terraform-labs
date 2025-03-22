@@ -62,3 +62,15 @@ variable "admin_password" {
   type        = string
   sensitive   = true
 }
+
+# ----------------------------------------
+# Domain Controller
+# ----------------------------------------
+variable "domain_name" {
+    type = "string"
+}
+
+variable "da_admin_password" {
+    type = "string"
+    sensitive = true
+}

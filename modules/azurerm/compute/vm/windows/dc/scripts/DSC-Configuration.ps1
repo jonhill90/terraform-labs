@@ -2,9 +2,13 @@ param
 (
     [string]$ServerName,
     [string]$DSCOutputPath,
-    [string]$DomainName = "contoso.local", # Change this as needed
-    [string]$SafeModeAdminPassword = "P@ssw0rd!" # Use a secure method in production
+    [string]$DomainName = $null,
+    [string]$SafeModeAdminPassword = $null
 )
+
+if (-not $DomainName -or -not $SafeModeAdminPassword) {
+    throw "DomainName and SafeModeAdminPassword must be provided."
+}
 
 $securePassword = ConvertTo-SecureString $SafeModeAdminPassword -AsPlainText -Force
 
@@ -29,12 +33,19 @@ Configuration SetupDomainController
             Ensure = "Present"
         }
 
+        # Install the DNS Role
+        WindowsFeature DNS {
+            Name   = "DNS"
+            Ensure = "Present"
+            DependsOn = "[WindowsFeature]ADDSInstall"
+        }
+
         # Promote the server to Domain Controller for a new forest
         xADDomain NewForest {
             DomainName                    = $DomainName
             DomainAdministratorCredential = (New-Object PSCredential("Administrator", $securePassword))
             SafemodeAdministratorPassword = $securePassword
-            DependsOn                     = "[WindowsFeature]ADDSInstall"
+            DependsOn                     = @("[WindowsFeature]ADDSInstall", "[WindowsFeature]DNS")
         }
     }
 }
