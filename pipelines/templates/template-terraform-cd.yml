@@ -100,20 +100,22 @@ stages:
                     workingDirectory: "${{ parameters.workingDirectory }}"
 
                 # ✅ Cross-platform Cleanup Step
-                - task: Bash@3
+                - task: PowerShell@2
                   displayName: "Force Cleanup of Working Directory Contents (Cross-platform)"
                   condition: always()
                   inputs:
                     targetType: "inline"
                     script: |
-                      echo "Deleting all contents inside: ${{ parameters.workingDirectory }}"
-
-                      if [[ "$AGENT_OS" == "Windows_NT" ]]; then
-                        echo "Running on Windows"
-                        powershell -Command "Get-ChildItem -Path '${{ parameters.workingDirectory }}' -Force | Remove-Item -Recurse -Force"
-                      else
-                        echo "Running on Linux"
-                        rm -rf ${{ parameters.workingDirectory }}/* ${{ parameters.workingDirectory }}/.[!.]* ${{ parameters.workingDirectory }}/..?*
-                      fi
-
-                      echo "Working directory contents deleted: ${{ parameters.workingDirectory }}"
+                      Write-Host "Operating System: $env:AGENT_OS"
+                      Write-Host "Cleaning working directory: '${{ parameters.workingDirectory }}'"
+                
+                      if ($env:AGENT_OS -eq "Windows_NT") {
+                        Write-Host "Running on Windows..."
+                        Get-ChildItem -Path "${{ parameters.workingDirectory }}" -Force | Remove-Item -Recurse -Force
+                      }
+                      else {
+                        Write-Host "Running on Linux/macOS..."
+                        bash -c "rm -rf '${{ parameters.workingDirectory }}'/* '${{ parameters.workingDirectory }}'/.[!.]* '${{ parameters.workingDirectory }}'/..?*" 
+                      }
+                
+                      Write-Host "Cleanup complete."
