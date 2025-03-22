@@ -104,6 +104,7 @@ resource "azurerm_shared_image" "windows_2025_core" {
 # ----------------------------------------
 # Virtual Machines
 # ----------------------------------------
+/*
 module "build_agent" {
   source = "../../modules/azurerm/compute/vm/windows/base"
 
@@ -128,6 +129,7 @@ module "build_agent" {
     azurerm_shared_image.windows_2025_core
   ]
 }
+*/
 
 module "dc01" {
   source = "../../modules/azurerm/compute/vm/windows/dc"
