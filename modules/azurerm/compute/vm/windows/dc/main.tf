@@ -47,7 +47,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
   provisioner "local-exec" {
     command = <<EOT
       powershell -Command "
-        \$entry = '${self.private_ip_address} ${var.vm_name}.${var.domain_name}';
+        \$entry = '${self.private_ip_address} ${self.name}';
         \$path = 'C:\\Windows\\System32\\drivers\\etc\\hosts';
         if (-not (Select-String -Path \$path -Pattern [regex]::Escape(\$entry))) {
           Add-Content -Path \$path -Value \"`n\$entry\";
@@ -97,10 +97,10 @@ resource "azurerm_windows_virtual_machine" "vm" {
   }
 
   provisioner "local-exec" {
-    when    = "destroy"
+    when    = destroy
     command = <<EOT
       powershell -Command "
-        \$entry = '${self.private_ip_address} ${var.vm_name}.${var.domain_name}';
+        \$entry = '${self.private_ip_address} ${self.name}';
         \$path = 'C:\\Windows\\System32\\drivers\\etc\\hosts';
         if (Test-Path \$path) {
           \$content = Get-Content \$path | Where-Object { \$_ -notmatch [regex]::Escape(\$entry) };
