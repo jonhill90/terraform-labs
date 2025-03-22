@@ -3,17 +3,16 @@ param
     [string]$ServerName,
     [string]$DSCOutputPath,
     [string]$DomainName = $null,
-    [string]$SafeModeAdminPassword = $null,
-    [string]$DomainAdminUsername = "Administrator"
+    [string]$DomainAdminUsername = "Administrator",
+    [string]$SafeModeAdminPassword
 )
 
-if (-not $DomainName -or -not $SafeModeAdminPassword) {
-    throw "DomainName and SafeModeAdminPassword must be provided."
+if (-not $DomainName) {
+    throw "DomainName must be provided."
 }
 
-# Convert to SecureString and PSCredential
-$securePassword = ConvertTo-SecureString $SafeModeAdminPassword -AsPlainText -Force
-$domainCred = New-Object -TypeName PSCredential -ArgumentList $DomainAdminUsername, $securePassword
+$SecurePassword = ConvertTo-SecureString $SafeModeAdminPassword -AsPlainText -Force
+$DomainCreds = New-Object System.Management.Automation.PSCredential("$DomainName\$DomainAdminUsername", $SecurePassword)
 
 $ConfigurationData = @{
     AllNodes = @(
@@ -45,12 +44,12 @@ Configuration SetupDomainController
 
         xADDomain NewForest {
             DomainName                    = $DomainName
-            DomainAdministratorCredential = $domainCred
-            SafemodeAdministratorPassword = $securePassword
+            DomainAdministratorCredential = $DomainCreds
+            SafemodeAdministratorPassword = $DomainCreds.Password
             DependsOn                     = @("[WindowsFeature]ADDSInstall", "[WindowsFeature]DNS")
         }
     }
 }
 
 SetupDomainController -ConfigurationData $ImportedConfigData -OutputPath $DSCOutputPath
-Start-DscConfiguration -Path $DSCOutputPath -ComputerName $ServerName -Force -Verbose -Wait
+Start-DscConfiguration -Path $DSCOutputPath -ComputerName "localhost" -Force -Verbose -Wait
