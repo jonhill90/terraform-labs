@@ -54,7 +54,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
       password = "${var.admin_password}"
       https    = true
       port     = 5986
-      timeout  = "1m"
+      timeout  = "5m"
       insecure = false
     }
   }
@@ -67,7 +67,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
       password = "${var.admin_password}"
       https    = true
       port     = 5986
-      timeout  = "1m"
+      timeout  = "2m"
       insecure = false
     }
     inline = [
