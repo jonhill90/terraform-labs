@@ -62,16 +62,15 @@ stages:
                         }
 
                         if (-not $packerInstalled) {
-                          Write-Host "Installing Packer on Windows..."
-                          $version = (Invoke-RestMethod -Uri "https://checkpoint-api.hashicorp.com/v1/check/packer").current_version
-                          $zipUrl = "https://releases.hashicorp.com/packer/$version/packer_${version}_windows_amd64.zip"
-                          $zipPath = "$env:TEMP\packer.zip"
-                          $installPath = "C:\HashiCorp\packer"
+                          if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
+                            Write-Host "Chocolatey not found. Installing Chocolatey..."
+                            Set-ExecutionPolicy Bypass -Scope Process -Force
+                            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+                            iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+                          }
 
-                          Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath
-                          Expand-Archive -Path $zipPath -DestinationPath $installPath -Force
-                          $env:PATH = "$installPath;$env:PATH"
-                          Write-Host "Packer installed at $installPath"
+                          Write-Host "Installing Packer via Chocolatey..."
+                          choco install packer -y --no-progress
                         }
                         else {
                           Write-Host "Packer already installed on Windows."
