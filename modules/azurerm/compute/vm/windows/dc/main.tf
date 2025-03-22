@@ -46,16 +46,16 @@ resource "azurerm_windows_virtual_machine" "vm" {
 
   provisioner "local-exec" {
     command = <<EOT
-      powershell -Command "& {
-        `$entry = '${self.private_ip_address} ${self.name}';
-        `$path = 'C:\\Windows\\System32\\drivers\\etc\\hosts';
-        if (-not (Select-String -Path `$path -Pattern [regex]::Escape(`$entry))) {
-          Add-Content -Path `$path -Value \"`n`$entry\"
-        } else {
-          Write-Host 'Hosts entry already exists. Skipping.'
-        }
-      }"
-    EOT
+  powershell -Command "& {
+    `$entry = '${self.private_ip_address} ${self.name}';
+    `$path = 'C:\\Windows\\System32\\drivers\\etc\\hosts';
+    if (-not (Select-String -Path `$path -Pattern [regex]::Escape(`$entry))) {
+      Add-Content -Path `$path -Value '`n`$entry';
+    } else {
+      Write-Host 'Hosts entry already exists. Skipping.';
+    }
+  }"
+  EOT
   }
 
   provisioner "file" {
@@ -107,7 +107,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
           `$content = Get-Content `$path | Where-Object { `$_ -notmatch [regex]::Escape(`$entry) };
           if (`$content) {
             Set-Content -Path `$path -Value `$content;
-            Add-Content -Path 'C:\\Windows\\Temp\\terraform-destroy.log' -Value \"Removed `$entry from hosts file at $(Get-Date)\"
+            Add-Content -Path 'C:\\Windows\\Temp\\terraform-destroy.log' -Value \"Removed `$entry from hosts file at $(Get-Date)\";
           } else {
             Write-Host 'No matching entries to remove. Skipping file update.';
           }
