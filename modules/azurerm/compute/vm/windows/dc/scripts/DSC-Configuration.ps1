@@ -12,7 +12,7 @@ if (-not $DomainName) {
 }
 
 $SecurePassword = ConvertTo-SecureString $SafeModeAdminPassword -AsPlainText -Force
-$DomainCreds = New-Object System.Management.Automation.PSCredential("$DomainName\$DomainAdminUsername", $SecurePassword)
+[System.Management.Automation.PSCredential]$DomainCreds = New-Object System.Management.Automation.PSCredential("$DomainName\$DomainAdminUsername", $SecurePassword)
 
 $ConfigData = @{
     AllNodes = @(
@@ -43,7 +43,7 @@ Configuration SetupDomainController {
         xADDomain NewForest {
             DomainName                    = $DomainName
             DomainAdministratorCredential = $DomainCreds
-            SafemodeAdministratorPassword = $DomainCreds.Password
+            SafemodeAdministratorPassword = $DomainCreds
             DependsOn                     = @("[WindowsFeature]ADDSInstall", "[WindowsFeature]DNS")
         }
     }
