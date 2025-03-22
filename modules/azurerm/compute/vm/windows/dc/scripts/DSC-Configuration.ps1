@@ -14,24 +14,21 @@ if (-not $DomainName) {
 $SecurePassword = ConvertTo-SecureString $SafeModeAdminPassword -AsPlainText -Force
 $DomainCreds = New-Object System.Management.Automation.PSCredential("$DomainName\$DomainAdminUsername", $SecurePassword)
 
-
 $ConfigData = @{
     AllNodes = @(
         @{
-            NodeName = "localhost"
+            NodeName = $ServerName
             PSDscAllowPlainTextPassword = $true
-            PSDscAllowDomainUser = $true
+            PSDscAllowDomainUser        = $true
         }
     )
 }
 
-Configuration SetupDomainController
-{
+Configuration SetupDomainController {
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName xActiveDirectory
 
-    Node $ServerName
-    {
+    Node $ServerName {
         WindowsFeature ADDSInstall {
             Name   = "AD-Domain-Services"
             Ensure = "Present"
@@ -53,4 +50,4 @@ Configuration SetupDomainController
 }
 
 SetupDomainController -ConfigurationData $ConfigData -OutputPath $DSCOutputPath
-Start-DscConfiguration -Path $DSCOutputPath -ComputerName "localhost" -Force -Verbose -Wait
+Start-DscConfiguration -Path $DSCOutputPath -ComputerName $ServerName -Force -Verbose -Wait
