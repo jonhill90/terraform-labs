@@ -100,14 +100,14 @@ resource "azurerm_shared_image" "windows_2025_core" {
     project     = var.project
   }
 }
-/*
-# ----------------------------------------
-# Test VM
-# ----------------------------------------
-module "test_vm" {
-  source = "../../modules/azurerm/compute/vm/windows"
 
-  vm_name                = "TestVM"
+# ----------------------------------------
+# Virtual Machines
+# ----------------------------------------
+module "build_agent" {
+  source = "../../modules/azurerm/compute/vm/windows/base"
+
+  vm_name                = "build-agent"
   vm_size                = "Standard_D2s_v3"
   location              = azurerm_resource_group.lab.location
   resource_group        = azurerm_resource_group.lab.name
@@ -128,4 +128,3 @@ module "test_vm" {
     azurerm_shared_image.windows_2025_core
   ]
 }
-*/
