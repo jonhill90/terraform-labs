@@ -76,11 +76,11 @@ resource "azurerm_windows_virtual_machine" "vm" {
   }
 
   provisioner "local-exec" {
-    command = "powershell -ExecutionPolicy Bypass -File ${path.module}/scripts/LCM-Configuration.ps1 -ServerName ${self.name} -LCMOutputPath ${var.LCMOutputPath} -DomainName ${var.domain_name} -SafeModeAdminPassword ${var.da_admin_password}"
+    command = "powershell -ExecutionPolicy Bypass -File ${path.module}/scripts/LCM-Configuration.ps1 -ServerName ${var.vm_name}.${var.domain_name} -LCMOutputPath ${var.LCMOutputPath} -DomainName ${var.domain_name} -SafeModeAdminPassword ${var.da_admin_password}"
   }
 
   provisioner "local-exec" {
-    command = "powershell -ExecutionPolicy Bypass -File ${path.module}/scripts/DSC-Configuration.ps1 -ServerName ${self.name} -DSCOutputPath ${var.DSCOutputPath} -DomainName ${var.domain_name} -SafeModeAdminPassword ${var.da_admin_password}"
+    command = "powershell -ExecutionPolicy Bypass -File ${path.module}/scripts/DSC-Configuration.ps1 -ServerName ${var.vm_name}.${var.domain_name} -DSCOutputPath ${var.DSCOutputPath} -DomainName ${var.domain_name} -SafeModeAdminPassword ${var.da_admin_password}"
   }
 
   boot_diagnostics {
