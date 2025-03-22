@@ -3,7 +3,8 @@ param
     [string]$ServerName,
     [string]$DSCOutputPath,
     [string]$DomainName = $null,
-    [string]$SafeModeAdminPassword = $null
+    [string]$SafeModeAdminPassword = $null,
+    [string]$DomainAdminUsername = "Administrator"
 )
 
 if (-not $DomainName -or -not $SafeModeAdminPassword) {
@@ -45,7 +46,7 @@ Configuration SetupDomainController
         # Promote the server to Domain Controller for a new forest
         xADDomain NewForest {
             DomainName                    = $DomainName
-            DomainAdministratorCredential = (New-Object PSCredential("Administrator", $securePassword))
+            DomainAdministratorCredential = New-Object -TypeName PSCredential -ArgumentList $DomainAdminUsername, $securePassword
             SafemodeAdministratorPassword = $securePassword
             DependsOn                     = @("[WindowsFeature]ADDSInstall", "[WindowsFeature]DNS")
         }
