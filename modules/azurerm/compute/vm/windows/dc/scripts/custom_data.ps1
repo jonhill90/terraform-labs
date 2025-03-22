@@ -35,14 +35,17 @@ try {
     # Configure WinRM HTTPS with a self-signed certificate
     Write-Log "Starting WinRM HTTPS configuration..."
     try {
-        $existingCert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object { $_.Subject -like "*${WINRM_DNS_NAME}*" }
+        $expectedDns = "${WINRM_DNS_NAME}"
+        $cert = Get-ChildItem -Path Cert:\LocalMachine\My |
+            Where-Object { $_.Subject -eq "CN=$expectedDns" } |
+            Sort-Object NotBefore -Descending |
+            Select-Object -First 1
 
-        if ($existingCert) {
-            Write-Log "Existing certificate found for ${WINRM_DNS_NAME}. Reusing it."
-            $cert = $existingCert | Sort-Object NotBefore -Descending | Select-Object -First 1
+        if (-not $cert) {
+            Write-Log "No matching certificate found for $expectedDns. Creating new one..."
+            $cert = New-SelfSignedCertificate -DnsName $expectedDns -CertStoreLocation Cert:\LocalMachine\My
         } else {
-            Write-Log "No certificate found for ${WINRM_DNS_NAME}. Creating new self-signed certificate."
-            $cert = New-SelfSignedCertificate -CertStoreLocation Cert:\LocalMachine\My -DnsName "${WINRM_DNS_NAME}"
+            Write-Log "Found certificate for $expectedDns. Reusing it."
         }
 
         $thumbprint = $cert.Thumbprint
@@ -51,17 +54,20 @@ try {
         Write-Log "ERROR configuring certificate: $($_.Exception.Message)" "ERROR"
     }
 
+    # Ensure WinRM HTTPS listener is bound to correct cert
     try {
-        $existing = Get-ChildItem -Path WSMan:\Localhost\Listener | Where-Object { $_.Keys -match 'Transport=HTTPS' }
+        $httpsListener = Get-ChildItem -Path WSMan:\Localhost\Listener |
+            Where-Object { $_.Keys -match 'Transport=HTTPS' }
 
-        if (-not $existing) {
-            Write-Log "No existing HTTPS listener found. Creating one..."
-            New-Item -Path WSMan:\Localhost\Listener -Transport HTTPS -Address * -CertificateThumbprint $thumbprint -Force
-        } else {
-            Write-Log "An HTTPS listener already exists. Skipping creation."
+        if ($httpsListener) {
+            Write-Log "Removing existing HTTPS listener to bind correct certificate..."
+            $httpsListener | Remove-Item -Recurse -Force
         }
+
+        Write-Log "Creating new HTTPS listener with correct certificate..."
+        New-Item -Path WSMan:\Localhost\Listener -Transport HTTPS -Address * -CertificateThumbprint $thumbprint -Force
     } catch {
-        Write-Log "ERROR setting up HTTPS listener: $($_.Exception.Message)" "ERROR"
+        Write-Log "ERROR creating HTTPS listener: $($_.Exception.Message)" "ERROR"
     }
 
     # Restart WinRM to apply changes
