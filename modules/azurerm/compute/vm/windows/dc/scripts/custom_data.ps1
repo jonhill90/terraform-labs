@@ -1,4 +1,4 @@
-$tmp_dir = "$env:SystemDrive\Windows\Temp\AzureDevOps"
+$tmp_dir = "$env:SystemDrive\Windows\Temp"
 $log_file = Join-Path $tmp_dir "AzureDevOps-UserData.log"
 
 Function Write-Log {
@@ -11,9 +11,6 @@ Function Write-Log {
     $log_entry = "$date_stamp - $level - $message"
 
     try {
-        if (-not (Test-Path -Path $tmp_dir)) {
-            New-Item -Path $tmp_dir -ItemType Directory -Force | Out-Null
-        }
         $log_entry | Out-File -FilePath $log_file -Encoding UTF8 -Append
     } catch {
         Write-Host "LOGGING FAILED: $log_entry"
