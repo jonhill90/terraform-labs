@@ -67,10 +67,10 @@ variable "admin_password" {
 # Domain Controller
 # ----------------------------------------
 variable "domain_name" {
-    type = "string"
+  type = string
 }
 
 variable "da_admin_password" {
-    type = "string"
-    sensitive = true
+  type      = string
+  sensitive = true
 }
