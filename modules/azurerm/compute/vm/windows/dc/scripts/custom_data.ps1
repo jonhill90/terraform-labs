@@ -1,3 +1,6 @@
+New-Item -Path "C:\Windows\Temp\custom-data-was-here.txt" -ItemType File -Force
+
+
 $tmp_dir = "$env:SystemDrive\Windows\Temp"
 $log_file = Join-Path $tmp_dir "AzureDevOps-UserData.log"
 
