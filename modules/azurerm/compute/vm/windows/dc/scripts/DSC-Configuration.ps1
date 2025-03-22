@@ -14,13 +14,6 @@ if (-not $DomainName) {
 $SecurePassword = ConvertTo-SecureString $SafeModeAdminPassword -AsPlainText -Force
 $DomainCreds = New-Object System.Management.Automation.PSCredential("$DomainName\$DomainAdminUsername", $SecurePassword)
 
-$ConfigurationData = @{
-    AllNodes = @(
-        @{
-            NodeName = $ServerName
-        }
-    )
-}
 
 $ImportedConfigData = Import-PowerShellDataFile -Path "${PSScriptRoot}\DSCConfigData.psd1"
 

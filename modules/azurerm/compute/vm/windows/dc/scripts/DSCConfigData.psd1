@@ -3,6 +3,7 @@
         @{
             NodeName = '*'
             PSDscAllowPlainTextPassword = $true
+            PSDscAllowDomainUser = $true
         }
     )
 }
