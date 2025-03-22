@@ -45,30 +45,77 @@ stages:
               steps:
                 - checkout: self
 
-                # ✅ Install Packer
-                - task: Bash@3
-                  displayName: "Install Packer"
+                # ✅ Install Packer (Cross-platform)
+                - task: PowerShell@2
+                  displayName: "Install Packer (Cross-platform)"
                   inputs:
                     targetType: "inline"
                     script: |
-                      echo "Checking if Packer is installed..."
-                      if ! command -v packer &> /dev/null
-                      then
-                        echo "Packer not found. Installing..."
-                        PACKER_VERSION=$(curl -sL https://checkpoint-api.hashicorp.com/v1/check/packer | jq -r .current_version)
-                        curl -fsSL "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip" -o packer.zip
-                        unzip packer.zip
-                        sudo mv packer /usr/local/bin/
-                        rm packer.zip
-                      else
-                        echo "Packer is already installed."
-                      fi
+                      $packerInstalled = $false
+                      Write-Host "Detecting if Packer is installed..."
+                      if ($env:AGENT_OS -eq "Windows_NT") {
+                        try {
+                          packer -v | Out-Null
+                          $packerInstalled = $true
+                        } catch {
+                          Write-Host "Packer not found on Windows."
+                        }
 
-                # ✅ Verify Packer installation
-                - script: |
-                    export PATH=$PATH:/usr/local/bin
-                    packer version
-                  displayName: "Verify Packer Installation"
+                        if (-not $packerInstalled) {
+                          Write-Host "Installing Packer on Windows..."
+                          $version = (Invoke-RestMethod -Uri "https://checkpoint-api.hashicorp.com/v1/check/packer").current_version
+                          $zipUrl = "https://releases.hashicorp.com/packer/$version/packer_${version}_windows_amd64.zip"
+                          $zipPath = "$env:TEMP\packer.zip"
+                          $installPath = "C:\HashiCorp\packer"
+
+                          Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath
+                          Expand-Archive -Path $zipPath -DestinationPath $installPath -Force
+                          $env:PATH += ";$installPath"
+                          [Environment]::SetEnvironmentVariable("PATH", $env:PATH, [EnvironmentVariableTarget]::Machine)
+                          Write-Host "Packer installed at $installPath"
+                        }
+                        else {
+                          Write-Host "Packer already installed on Windows."
+                        }
+                      }
+                      else {
+                        try {
+                          bash -c "packer -v" | Out-Null
+                          $packerInstalled = $true
+                        } catch {
+                          Write-Host "Packer not found on Linux/macOS."
+                        }
+
+                        if (-not $packerInstalled) {
+                          Write-Host "Installing Packer on Linux/macOS..."
+                          $version = (Invoke-RestMethod -Uri "https://checkpoint-api.hashicorp.com/v1/check/packer").current_version
+                          $zipUrl = "https://releases.hashicorp.com/packer/$version/packer_${version}_linux_amd64.zip"
+                          $zipPath = "./packer.zip"
+
+                          curl -fsSL $zipUrl -o $zipPath
+                          unzip $zipPath
+                          sudo mv packer /usr/local/bin/
+                          rm $zipPath
+                          Write-Host "Packer installed successfully."
+                        }
+                        else {
+                          Write-Host "Packer already installed on Linux/macOS."
+                        }
+                      }
+
+                # ✅ Verify Packer installation (Cross-platform)
+                - task: PowerShell@2
+                  displayName: "Verify Packer Installation (Cross-platform)"
+                  inputs:
+                    targetType: "inline"
+                    script: |
+                      Write-Host "Verifying Packer installation..."
+                      if ($env:AGENT_OS -eq "Windows_NT") {
+                        packer -v
+                      }
+                      else {
+                        bash -c "packer version"
+                      }
 
                 # ✅ Replace Tokens (if applicable)
                 - task: replacetokens@6
