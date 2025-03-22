@@ -34,7 +34,15 @@ resource "azurerm_windows_virtual_machine" "vm" {
   }
 
   source_image_id = data.azurerm_shared_image.custom_image.id
-  custom_data = base64encode(file("${path.module}/scripts/custom_data.ps1"))
+  custom_data = base64encode(templatefile("${path.module}/scripts/custom_data.ps1", {
+    WINRM_DNS_NAME = "${var.vm_name}.${var.domain_name}"
+  }))
+
+  lifecycle {
+    ignore_changes = [
+      custom_data
+    ]
+  }
 
   provisioner "file" {
     source      = "${path.module}/scripts/FormatDisks.ps1"

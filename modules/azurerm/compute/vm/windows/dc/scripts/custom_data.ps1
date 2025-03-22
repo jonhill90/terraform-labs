@@ -8,7 +8,7 @@ Enable-PSRemoting -Force
 
 # Configure WinRM HTTPS with a self-signed certificate
 Write-Output "Configuring WinRM HTTPS..."
-$cert = New-SelfSignedCertificate -CertStoreLocation Cert:\LocalMachine\My -DnsName "winrm.local"
+$cert = New-SelfSignedCertificate -CertStoreLocation Cert:\LocalMachine\My -DnsName "${WINRM_DNS_NAME}"
 $thumbprint = $cert.Thumbprint
 New-Item -Path WSMan:\Localhost\Listener -Transport HTTPS -Address * -CertificateThumbprint $thumbprint -Force
 
