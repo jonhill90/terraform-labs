@@ -100,7 +100,7 @@ resource "azurerm_shared_image" "windows_2025_core" {
     project     = var.project
   }
 }
-/*
+
 # ----------------------------------------
 # Test VM
 # ----------------------------------------
@@ -128,4 +128,3 @@ module "test_vm" {
     azurerm_shared_image.windows_2025_core
   ]
 }
-*/
