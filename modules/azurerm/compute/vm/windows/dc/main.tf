@@ -55,7 +55,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
       https    = true
       port     = 5986
       timeout  = "5m"
-      insecure = false
+      insecure = true
     }
   }
 
@@ -68,7 +68,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
       https    = true
       port     = 5986
       timeout  = "2m"
-      insecure = false
+      insecure = true
     }
     inline = [
       "powershell -ExecutionPolicy Bypass -File C:\\Windows\\Temp\\FormatDisks.ps1"
