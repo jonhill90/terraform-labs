@@ -20,6 +20,8 @@ $ConfigurationData = @{
     )
 }
 
+$ImportedConfigData = Import-PowerShellDataFile -Path "${PSScriptRoot}\DSCConfigData.psd1"
+
 Configuration SetupDomainController
 {
     Import-DscResource -ModuleName PSDesiredStateConfiguration
@@ -50,5 +52,5 @@ Configuration SetupDomainController
     }
 }
 
-SetupDomainController -ConfigurationData $ConfigurationData -OutputPath $DSCOutputPath
+SetupDomainController -ConfigurationData $ImportedConfigData -OutputPath $DSCOutputPath
 Start-DscConfiguration -Path $DSCOutputPath -ComputerName $ServerName -Force -Verbose -Wait
