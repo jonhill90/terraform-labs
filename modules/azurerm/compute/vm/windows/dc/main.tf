@@ -20,12 +20,12 @@ resource "azurerm_network_interface" "vm_nic" {
 
 # Create the Virtual Machine
 resource "azurerm_windows_virtual_machine" "vm" {
-  name                = var.vm_name
-  resource_group_name = var.resource_group
-  location            = var.location
-  size                = var.vm_size
-  admin_username      = var.admin_username
-  admin_password      = var.admin_password
+  name                  = var.vm_name
+  resource_group_name   = var.resource_group
+  location              = var.location
+  size                  = var.vm_size
+  admin_username        = var.admin_username
+  admin_password        = var.admin_password
   network_interface_ids = [azurerm_network_interface.vm_nic.id]
 
   os_disk {
@@ -44,14 +44,27 @@ resource "azurerm_windows_virtual_machine" "vm" {
     ]
   }
 
+  provisioner "local-exec" {
+    command = <<EOT
+      powershell -Command "
+        \$entry = '${self.private_ip_address} ${var.vm_name}.${var.domain_name}';
+        \$path = 'C:\\Windows\\System32\\drivers\\etc\\hosts';
+        if (-not (Select-String -Path \$path -Pattern [regex]::Escape(\$entry))) {
+          Add-Content -Path \$path -Value \"`n\$entry\";
+        } else {
+          Write-Host 'Hosts entry already exists. Skipping.';
+        }"
+    EOT
+  }
+
   provisioner "file" {
     source      = "${path.module}/scripts/FormatDisks.ps1"
     destination = "C:/Windows/Temp/FormatDisks.ps1"
     connection {
       type     = "winrm"
-      host     = "${self.private_ip_address}"
-      user     = "${var.admin_username}"
-      password = "${var.admin_password}"
+      host     = "${var.vm_name}.${var.domain_name}"
+      user     = var.admin_username
+      password = var.admin_password
       https    = true
       port     = 5986
       timeout  = "5m"
@@ -62,9 +75,9 @@ resource "azurerm_windows_virtual_machine" "vm" {
   provisioner "remote-exec" {
     connection {
       type     = "winrm"
-      host     = "${self.private_ip_address}"
-      user     = "${var.admin_username}"
-      password = "${var.admin_password}"
+      host     = "${var.vm_name}.${var.domain_name}"
+      user     = var.admin_username
+      password = var.admin_password
       https    = true
       port     = 5986
       timeout  = "2m"
@@ -81,6 +94,19 @@ resource "azurerm_windows_virtual_machine" "vm" {
 
   provisioner "local-exec" {
     command = "powershell -ExecutionPolicy Bypass -File ./scripts/DSC-Configuration.ps1 -ServerName ${self.name} -DSCOutputPath ${var.DSCOutputPath} -DomainName ${var.domain_name} -SafeModeAdminPassword ${var.da_admin_password}"
+  }
+
+  provisioner "local-exec" {
+    when    = "destroy"
+    command = <<EOT
+      powershell -Command "
+        \$entry = '${self.private_ip_address} ${var.vm_name}.${var.domain_name}';
+        \$path = 'C:\\Windows\\System32\\drivers\\etc\\hosts';
+        if (Test-Path \$path) {
+          \$content = Get-Content \$path | Where-Object { \$_ -notmatch [regex]::Escape(\$entry) };
+          Set-Content -Path \$path -Value \$content;
+        }"
+    EOT
   }
 
   boot_diagnostics {
