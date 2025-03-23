@@ -1,20 +1,22 @@
 param (
-    [string]$ServerName,
-    [string]$Username,
-    [string]$Password
+    [string]$ServerName
 )
 
-# Note: Ensure that when calling this script the password is enclosed in single quotes
-# (or otherwise properly escaped) so that special characters (like &, $) are preserved.
-
-Write-Host "📡 Invoking PreConfig on remote server: $ServerName"
+Write-Host "Invoking PreConfig on remote server: $ServerName"
 
 try {
-    $SecurePassword = ConvertTo-SecureString -String $Password -AsPlainText -Force
+    $Username = $env:PRECONFIG_USERNAME
+    $PlainPassword = $env:PRECONFIG_PASSWORD
+
+    if (-not $Username -or -not $PlainPassword) {
+        throw "Username or Password environment variables not set."
+    }
+
+    $SecurePassword = ConvertTo-SecureString $PlainPassword -AsPlainText -Force
     $Cred = New-Object System.Management.Automation.PSCredential ($Username, $SecurePassword)
 
     Invoke-Command -ComputerName $ServerName -Credential $Cred -Authentication Default -ScriptBlock {
-        Write-Host "⚙️  Running PreConfig script on $env:COMPUTERNAME"
+        Write-Host "Running PreConfig script on $env:COMPUTERNAME"
 
         if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue)) {
             Install-PackageProvider -Name NuGet -Force
@@ -25,10 +27,8 @@ try {
         $modules = @("xActiveDirectory", "PSDesiredStateConfiguration")
         foreach ($module in $modules) {
             if (-not (Get-Module -ListAvailable -Name $module)) {
-                Write-Host "📦 Installing $module..."
+                Write-Host "Installing $module..."
                 Install-Module -Name $module -Force -AllowClobber
-            } else {
-                Write-Host "✅ Module $module already present"
             }
         }
 
@@ -36,6 +36,6 @@ try {
     }
 }
 catch {
-    Write-Error ("❌ PreConfig failed on {0}: {1}" -f $ServerName, $_)
+    Write-Error "❌ PreConfig failed on $ServerName $_"
     exit 1
 }
