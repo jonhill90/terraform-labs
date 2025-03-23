@@ -49,6 +49,7 @@ module "lab_vnet" {
   vnet_location       = azurerm_resource_group.networking.location
   vnet_resource_group = azurerm_resource_group.networking.name
   vnet_address_space  = ["10.100.0.0/16"]
+  dns_servers         = []
 
   subnets = {
     default     = { address_prefixes = ["10.100.1.0/24"] }

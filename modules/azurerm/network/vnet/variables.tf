@@ -30,3 +30,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "dns_servers" {
+  description = "List of custom DNS server IP addresses"
+  type        = list(string)
+  default     = []
+}
