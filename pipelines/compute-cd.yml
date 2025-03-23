@@ -26,7 +26,7 @@ stages:
       pipeline: "Compute-CI"
       dependsOn: []  # Explicitly set to an empty list for independent execution
 
-  - template: templates/template-terraform-cd.yml
+  - template: templates/template-terraform-cd-debug.yml
     parameters:
       team: "compute"
       artifactName: "compute-artifacts"
