@@ -76,7 +76,14 @@ resource "azurerm_windows_virtual_machine" "vm" {
   }
 
   provisioner "local-exec" {
-    command = "powershell -ExecutionPolicy Bypass -File ${path.module}/scripts/PreConfig.ps1 -ServerName ${var.vm_name}.${var.domain_name} -Username ${var.admin_username} -Password ${var.admin_password}"
+    command = <<EOT
+  powershell -ExecutionPolicy Bypass -Command "& {
+    . '${path.module}/scripts/PreConfig.ps1' `
+      -ServerName '${var.vm_name}.${var.domain_name}' `
+      -Username '${var.admin_username}' `
+      -Password '${var.admin_password}'
+  }"
+  EOT
   }
 
   provisioner "local-exec" {
