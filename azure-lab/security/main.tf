@@ -143,6 +143,18 @@ resource "azurerm_resource_group" "security" {
   }
 }
 
+resource "azurerm_resource_group" "security" {
+  name     = "security"
+  location = "eastus"
+  provider = azurerm.management
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
 data "azurerm_resource_group" "devops" {
   name     = "DevOps"
   provider = azurerm.lab
