@@ -33,28 +33,39 @@ module "security_project" {
 }
 
 # --------------------------------------------------
-# Azure DevOps Service Endpoint (AzureRM)
+# Azure DevOps Service Endpoint (Service Principal)
 # --------------------------------------------------
 resource "azuredevops_serviceendpoint_azurerm" "security" {
   project_id                             = module.security_project.devops_project_id
   service_endpoint_name                  = "Security-SC"
-  service_endpoint_authentication_scheme = "ServicePrincipal"
-  azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_management_group_id            = "ImpressiveIT"
-  azurerm_management_group_name          = "ImpressiveIT"
-
-  depends_on = [module.security_project]
-}
-
-resource "azuredevops_serviceendpoint_azurerm" "security_vault" {
-  project_id                             = module.security_project.devops_project_id
-  service_endpoint_name                  = "Security-SC-Vault"
-  service_endpoint_authentication_scheme = "ServicePrincipal"
+  service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
   azurerm_spn_tenantid                   = var.tenant_id
   azurerm_subscription_id                = var.lab_subscription_id
   azurerm_subscription_name              = "Lab"
 
   depends_on = [module.security_project]
+}
+
+data "azuread_service_principal" "security_sp" {
+  client_id = azuredevops_serviceendpoint_azurerm.security.service_principal_id
+  provider  = azuread.impressiveit
+  depends_on = [ azuredevops_serviceendpoint_azurerm.security ]
+}
+
+# --------------------------------------------------
+# Service Principal Role Assignments
+# --------------------------------------------------
+module "security_sp_role_assignment" {
+  source       = "../../modules/azurerm/security/role-assignment"
+  role_scope   = data.azurerm_management_group.mg.id
+  role_name    = "Contributor"
+  principal_id = data.azuread_service_principal.security_sp.object_id
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  depends_on = [data.azuread_service_principal.security_sp]
 }
 
 # --------------------------------------------------
@@ -72,7 +83,6 @@ resource "azuredevops_serviceendpoint_github" "github" {
 
   depends_on = [module.security_project]
 }
-
 
 # --------------------------------------------------
 # Azure DevOps Build Pipeline (CI)
@@ -457,13 +467,6 @@ module "application_vault_access" {
 # --------------------------------------------------
 # Secure Vault Access (Service Principal)
 # --------------------------------------------------
-
-data "azuread_service_principal" "security_sp_vault" {
-  client_id = azuredevops_serviceendpoint_azurerm.security_vault.service_principal_id
-  provider  = azuread.impressiveit
-  depends_on = [ azuredevops_serviceendpoint_azurerm.security ]
-}
-
 module "security_sp_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
   key_vault_id = module.security_vault.key_vault_id
@@ -471,7 +474,7 @@ module "security_sp_vault_access" {
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = data.azuread_service_principal.security_sp_vault.object_id
+      object_id               = data.azuread_service_principal.security_sp.object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
@@ -482,7 +485,7 @@ module "security_sp_vault_access" {
     azurerm = azurerm.lab
   }
 
-  depends_on = [module.security_vault]
+  depends_on = [module.security_vault, data.azuread_service_principal.security_sp]
 }
 
 module "devops_sp_vault_access" {
