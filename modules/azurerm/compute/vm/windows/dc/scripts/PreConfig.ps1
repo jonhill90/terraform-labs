@@ -1,23 +1,33 @@
 param (
-    [string]$ServerName
+    [string]$ServerName,
+    [string]$Username,
+    [string]$Password
 )
 
-Write-Host "Downloading required DSC modules to $env:ProgramFiles\WindowsPowerShell\Modules"
+Write-Host "Invoking PreConfig on remote server: $ServerName"
 
-# Ensure NuGet is available
-if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue)) {
-    Install-PackageProvider -Name NuGet -Force
-}
+$SecurePassword = ConvertTo-SecureString $Password -AsPlainText -Force
+$Cred = New-Object System.Management.Automation.PSCredential ($Username, $SecurePassword)
 
-# Trust PSGallery if not already
-Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+Invoke-Command -ComputerName $ServerName -Credential $Cred -ScriptBlock {
+    Write-Host "Running PreConfig script on $env:COMPUTERNAME"
 
-# Install required modules if not already present
-$modules = @("xActiveDirectory", "PSDesiredStateConfiguration")
-foreach ($module in $modules) {
-    if (-not (Get-Module -ListAvailable -Name $module)) {
-        Install-Module -Name $module -Force -AllowClobber
+    # Ensure NuGet is available
+    if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue)) {
+        Install-PackageProvider -Name NuGet -Force
     }
-}
 
-Write-Host "Required modules installed. PreConfig completed on $ServerName"
+    # Trust PSGallery if not already
+    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+
+    # Install required modules if not already present
+    $modules = @("xActiveDirectory", "PSDesiredStateConfiguration")
+    foreach ($module in $modules) {
+        if (-not (Get-Module -ListAvailable -Name $module)) {
+            Write-Host "Installing $module..."
+            Install-Module -Name $module -Force -AllowClobber
+        }
+    }
+
+    Write-Host "Required modules installed. PreConfig completed."
+}
