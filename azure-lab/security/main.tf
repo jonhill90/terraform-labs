@@ -143,7 +143,7 @@ resource "azurerm_resource_group" "security" {
   }
 }
 
-resource "azurerm_resource_group" "security" {
+resource "azurerm_resource_group" "security_mgmt" {
   name     = "security"
   location = "eastus"
   provider = azurerm.management
