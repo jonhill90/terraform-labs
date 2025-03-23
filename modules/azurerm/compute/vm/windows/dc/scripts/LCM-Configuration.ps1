@@ -7,14 +7,16 @@ param (
 Configuration LCMConfig {
     Node $ServerName {
         Settings {
-            RefreshMode = 'Push'
-            ConfigurationMode = 'ApplyOnly'
-            RebootNodeIfNeeded = $true
+            RefreshMode          = 'Push'
+            ConfigurationMode    = 'ApplyOnly'
+            RebootNodeIfNeeded   = $true
             AllowModuleOverwrite = $true
         }
     }
 }
 
+# Compile MOF
 LCMConfig -OutputPath $LCMOutputPath
 
-Set-DscLocalConfigurationManager -Path $LCMOutputPath -ComputerName $ServerName -Force -Verbose
+# Apply remotely over WinRM
+Set-DscLocalConfigurationManager -ComputerName $ServerName -Path $LCMOutputPath -Force -Verbose
