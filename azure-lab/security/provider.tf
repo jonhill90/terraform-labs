@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.0"
     }
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~> 2.0"
+    }
     azuredevops = {
       source  = "microsoft/azuredevops"
       version = "~> 1.6.0"
@@ -21,6 +25,11 @@ provider "azurerm" {
   alias           = "management"
   subscription_id = var.management_subscription_id
   features {}
+}
+
+provider "azuread" {
+  alias     = "impressiveit"
+  tenant_id = var.tenant_id
 }
 
 provider "azuredevops" {

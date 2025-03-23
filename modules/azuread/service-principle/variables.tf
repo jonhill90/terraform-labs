@@ -15,19 +15,13 @@ variable "tags" {
   default     = {}
 }
 
-variable "key_vault_id" {
-  description = "The ID of the Azure Key Vault where the client secret will be stored"
-  type        = string
-}
-
-variable "store_secret_in_vault" {
-  description = "Whether to store the client secret in Azure Key Vault"
-  type        = bool
-  default     = true
-}
-
 variable "tenant_id" {
   description = "Azure AD Tenant ID"
   type        = string
   sensitive   = true
+}
+
+variable "description" {
+  description = "Description for the Azure AD Application"
+  type        = string
 }

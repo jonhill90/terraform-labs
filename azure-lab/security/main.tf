@@ -3,6 +3,27 @@ terraform {
 }
 
 # --------------------------------------------------
+# Azure Service Principals
+# --------------------------------------------------
+module "security_sp" {
+  source = "../../modules/azuread/service-principle"
+
+  name        = "Security-SP"
+  description = "Service Principal for Security"
+  tags        = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  tenant_id = var.tenant_id
+
+  providers = {
+    azuread = azuread.impressiveit
+  }
+}
+
+# --------------------------------------------------
 # Azure DevOps Project (Security)
 # --------------------------------------------------
 module "security_project" {
