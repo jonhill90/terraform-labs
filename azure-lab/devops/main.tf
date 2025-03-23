@@ -199,9 +199,9 @@ resource "azuredevops_serviceendpoint_azurerm" "storage" {
   service_endpoint_name                  = "Storage-SC"
   service_endpoint_authentication_scheme = "ServicePrincipal"
   azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_subscription_id                = var.lab_subscription_id
-  azurerm_subscription_name              = "Lab"
-
+  azurerm_management_group_id            = "ImpressiveIT"
+  azurerm_management_group_name          = "ImpressiveIT"
+  
   depends_on = [module.storage_project]
 }
 
