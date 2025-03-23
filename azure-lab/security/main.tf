@@ -3,6 +3,14 @@ terraform {
 }
 
 # --------------------------------------------------
+# Management Group
+# --------------------------------------------------
+data "azurerm_management_group" "mg" {
+  name     = "ImpressiveIT"
+  provider = azurerm.management
+}
+
+# --------------------------------------------------
 # Azure Service Principals
 # --------------------------------------------------
 module "security_sp" {
@@ -10,7 +18,7 @@ module "security_sp" {
 
   name        = "Security-SP"
   description = "Service Principal for Security"
-  tags        = {
+  tags = {
     environment = var.environment
     owner       = var.owner
     project     = var.project
@@ -21,6 +29,22 @@ module "security_sp" {
   providers = {
     azuread = azuread.impressiveit
   }
+}
+
+
+# --------------------------------------------------
+# Azure Service Principal Role Assignments
+# --------------------------------------------------
+module "security_sp_role_assignment" {
+  source       = "../../modules/azurerm/security/role-assignment"
+  role_scope   = data.azurerm_management_group.mg.id
+  role_name    = "Contributor"
+  principal_id = module.security_sp.service_principal_id
+
+  providers = {
+    azurerm = azurerm.lab
+  }
+
 }
 
 # --------------------------------------------------
@@ -51,9 +75,13 @@ resource "azuredevops_serviceendpoint_azurerm" "security" {
   project_id                             = module.security_project.devops_project_id
   service_endpoint_name                  = "Security-SC"
   service_endpoint_authentication_scheme = "ServicePrincipal"
-  azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_subscription_id                = var.lab_subscription_id
-  azurerm_subscription_name              = "Lab"
+  credentials {
+    serviceprincipalid  = module.security_sp.client_id
+    serviceprincipalkey = var.client_secret
+  }
+  azurerm_spn_tenantid          = var.tenant_id
+  azurerm_management_group_id   = "ImpressiveIT"
+  azurerm_management_group_name = "ImpressiveIT"
 
   depends_on = [module.security_project]
 }
@@ -465,7 +493,7 @@ module "security_sp_vault_access" {
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = var.security_sp_object_id
+      object_id               = module.security_sp.service_principal_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
