@@ -193,7 +193,7 @@ resource "azuredevops_serviceendpoint_azurerm" "database" {
 
   depends_on = [module.database_project]
 }
-/*
+
 resource "azuredevops_serviceendpoint_azurerm" "storage" {
   project_id                             = module.storage_project.devops_project_id
   service_endpoint_name                  = "Storage-SC"
@@ -204,7 +204,6 @@ resource "azuredevops_serviceendpoint_azurerm" "storage" {
 
   depends_on = [module.storage_project]
 }
-*/
 
 resource "azuredevops_serviceendpoint_azurerm" "application" {
   project_id                             = module.application_project.devops_project_id
