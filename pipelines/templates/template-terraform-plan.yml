@@ -53,7 +53,6 @@ stages:
                   displayName: "Terraform Init - ${{ parameters.stageDisplayName }}"
                   inputs:
                     command: "init"
-                    commandOptions: '-backend-config=subscription_id=${{ parameters.backendSubscriptionId }}'
                     backendType: "azurerm"
                     backendServiceArm: ${{ parameters.backendServiceArm }}
                     backendAzureRmResourceGroupName: "$(backendResourceGroup)"
