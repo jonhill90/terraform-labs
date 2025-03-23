@@ -55,6 +55,7 @@ stages:
                     command: "init"
                     backendType: "azurerm"
                     backendServiceArm: ${{ parameters.backendServiceArm }}
+                    backendAzureRmSubscriptionId: "$(backendSubscriptionId)"
                     backendAzureRmResourceGroupName: "$(backendResourceGroup)"
                     backendAzureRmStorageAccountName: "$(backendStorageAccount)"
                     backendAzureRmContainerName: "$(backendContainer)"
