@@ -4,10 +4,13 @@ param (
     [string]$Password
 )
 
+# Note: Ensure that when calling this script the password is enclosed in single quotes
+# (or otherwise properly escaped) so that special characters (like &, $) are preserved.
+
 Write-Host "📡 Invoking PreConfig on remote server: $ServerName"
 
 try {
-    $SecurePassword = ConvertTo-SecureString $Password -AsPlainText -Force
+    $SecurePassword = ConvertTo-SecureString -String $Password -AsPlainText -Force
     $Cred = New-Object System.Management.Automation.PSCredential ($Username, $SecurePassword)
 
     Invoke-Command -ComputerName $ServerName -Credential $Cred -Authentication Default -ScriptBlock {
