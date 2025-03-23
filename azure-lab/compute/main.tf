@@ -139,7 +139,7 @@ module "dc01" {
   location              = azurerm_resource_group.lab.location
   resource_group        = azurerm_resource_group.lab.name
   gallery_name          = azurerm_shared_image_gallery.compute_gallery.name
-  image_name            = azurerm_shared_image.windows_2025_core.name
+  image_name            = azurerm_shared_image.windows_2025_base.name
   subnet_id             = data.azurerm_subnet.compute.id
   admin_username        = "azureuser"
   admin_password        = var.admin_password
@@ -154,6 +154,6 @@ module "dc01" {
     data.azurerm_virtual_network.networking,
     data.azurerm_subnet.compute,
     azurerm_shared_image_gallery.compute_gallery,
-    azurerm_shared_image.windows_2025_core
+    azurerm_shared_image.windows_2025_base
   ]
 }
