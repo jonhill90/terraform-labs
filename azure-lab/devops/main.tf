@@ -171,6 +171,17 @@ resource "azuredevops_serviceendpoint_azurerm" "networking" {
   depends_on = [module.networking_project]
 }
 
+resource "azuredevops_serviceendpoint_azurerm" "networking2" {
+  project_id                             = module.networking_project.devops_project_id
+  service_endpoint_name                  = "Networking-SC2"
+  service_endpoint_authentication_scheme = "ServicePrincipal"
+  azurerm_spn_tenantid                   = var.tenant_id
+  azurerm_management_group_id            = "ImpressiveIT"
+  azurerm_management_group_name          = "ImpressiveIT"
+
+  depends_on = [module.networking_project]
+}
+
 resource "azuredevops_serviceendpoint_azurerm" "compute" {
   project_id                             = module.compute_project.devops_project_id
   service_endpoint_name                  = "Compute-SC"
