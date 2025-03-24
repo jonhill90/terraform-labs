@@ -2,6 +2,7 @@ terraform {
   backend "azurerm" {}
 }
 
+
 # ----------------------------------------
 # Resource Groups
 # ----------------------------------------
@@ -9,6 +10,18 @@ resource "azurerm_resource_group" "networking_connectivity" {
   name     = "Networking"
   location = "eastus"
   provider = azurerm.connectivity
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
+resource "azurerm_resource_group" "networking_management" {
+  name     = "Networking"
+  location = "eastus"
+  provider = azurerm.management
 
   tags = {
     environment = var.environment
@@ -51,6 +64,25 @@ module "network-watcher-connectivity" {
   depends_on = [azurerm_resource_group.networking_connectivity]
 }
 
+module "network-watcher-management" {
+  source              = "../../modules/azurerm/network/network-watcher"
+  name                = "network-watcher"
+  resource_group_name = azurerm_resource_group.networking_management.name
+  location            = azurerm_resource_group.networking_management.location
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_resource_group.networking_management]
+}
+
 module "network-watcher" {
   source              = "../../modules/azurerm/network/network-watcher"
   name                = "network-watcher"
@@ -83,7 +115,7 @@ module "hub_vnet" {
   dns_servers         = []
 
   subnets = {
-    default     = { address_prefixes = ["10.10.1.0/24"] }
+    default = { address_prefixes = ["10.10.1.0/24"] }
   }
 
   providers = {
@@ -129,16 +161,43 @@ module "lab_vnet" {
   depends_on = [azurerm_resource_group.networking, module.network-watcher]
 }
 
+module "mgmt_vnet" {
+  source = "../../modules/azurerm/network/vnet"
+
+  vnet_name           = "mgmt-vnet"
+  vnet_location       = azurerm_resource_group.networking_management.location
+  vnet_resource_group = azurerm_resource_group.networking_management.name
+  vnet_address_space  = ["10.20.0.0/16"]
+  dns_servers         = []
+
+  subnets = {
+    default = { address_prefixes = ["10.20.1.0/24"] }
+  }
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+  depends_on = [azurerm_resource_group.networking, module.network-watcher]
+}
+
 # ----------------------------------------
 # vNet Peering
 # ----------------------------------------
 module "vnet_peering" {
   source = "../../modules/azurerm/network/peering"
 
-  hub_vnet_name           = module.hub_vnet.vnet_name
-  hub_vnet_resource_group = azurerm_resource_group.networking_connectivity.name
-  hub_vnet_id             = module.hub_vnet.vnet_id
+  hub_to_spoke_peering_name = "hub-to-lab-peering"
+  hub_vnet_name             = module.hub_vnet.vnet_name
+  hub_vnet_resource_group   = azurerm_resource_group.networking_connectivity.name
+  hub_vnet_id               = module.hub_vnet.vnet_id
 
+  spoke_to_hub_peering_name = "lab-to-hub-peering"
   spoke_vnet_name           = module.lab_vnet.vnet_name
   spoke_vnet_resource_group = azurerm_resource_group.networking.name
   spoke_vnet_id             = module.lab_vnet.vnet_id
@@ -150,6 +209,29 @@ module "vnet_peering" {
   providers = {
     azurerm.hub   = azurerm.connectivity
     azurerm.spoke = azurerm.lab
+  }
+}
+
+module "vnet_peering_mgmt" {
+  source = "../../modules/azurerm/network/peering"
+
+  hub_to_spoke_peering_name = "hub-to-mgmt-peering"
+  hub_vnet_name             = module.hub_vnet.vnet_name
+  hub_vnet_resource_group   = azurerm_resource_group.networking_connectivity.name
+  hub_vnet_id               = module.hub_vnet.vnet_id
+
+  spoke_to_hub_peering_name = "mgmt-to-hub-peering"
+  spoke_vnet_name           = module.mgmt_vnet.vnet_name
+  spoke_vnet_resource_group = azurerm_resource_group.networking_management.name
+  spoke_vnet_id             = module.mgmt_vnet.vnet_id
+
+  allow_forwarded_traffic = true
+  allow_gateway_transit   = false
+  use_remote_gateways     = false
+
+  providers = {
+    azurerm.hub   = azurerm.connectivity
+    azurerm.spoke = azurerm.management
   }
 }
 
