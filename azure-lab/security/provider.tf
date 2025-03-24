@@ -28,8 +28,10 @@ provider "azurerm" {
 }
 
 provider "azuread" {
-  alias     = "impressiveit"
-  tenant_id = var.tenant_id
+  alias         = "impressiveit"
+  tenant_id     = var.tenant_id
+  client_id     = var.client_id
+  client_secret = var.client_secret
 }
 
 provider "azuredevops" {
