@@ -259,3 +259,42 @@ resource "azurerm_subnet" "aci" {
     }
   }
 }
+
+# ----------------------------------------
+# DNS
+# ----------------------------------------
+module "dns" {
+  source = "../../modules/azurerm/network/dns"
+
+  dns_zone_name      = "impressiveit.net"
+  dns_resource_group = azurerm_resource_group.networking_connectivity.name
+  dns_location       = azurerm_resource_group.networking_connectivity.location
+
+  dns_records = {
+    a_records = {
+      "@" = { ttl = 3600, values = [] }
+    }
+    ns_records = {
+      ttl = 172800
+      values = [
+        "ns1-01.azure-dns.com.",
+        "ns2-01.azure-dns.net.",
+        "ns3-01.azure-dns.org.",
+        "ns4-01.azure-dns.info."
+      ]
+    }
+    txt_records   = {}
+    cname_records = {
+      "cdnverify"       = { ttl = 3600, value = "cdnverify.impressiveitweb-fd.azureedge.net" }
+      "test"            = { ttl = 3600, value = "" }
+      "cdnverify.test"  = { ttl = 3600, value = "cdnverify.impressiveit-fd.azureedge.net" }
+      "www"             = { ttl = 3600, value = "" }
+    }
+  }
+
+  providers = {
+    azurerm = azurerm.connectivity
+  }
+
+  depends_on = [azurerm_resource_group.networking_connectivity]
+}
