@@ -47,7 +47,21 @@ variable "tenant_id" {
 # Vault
 # ----------------------------------------
 variable "vault_name" {
-  description = "Networking Vault Name"
+  description = "Application Vault Name"
+  type        = string
+}
+
+# ----------------------------------------
+# Twingate
+# ----------------------------------------
+variable "twingate_network" {
+  description = "Twingate Network Name"
+  type        = string
+  sensitive   = true
+}
+
+variable "twingate_api_key" {
+  description = "Twingate API Key"
   type        = string
   sensitive   = true
 }
@@ -58,25 +72,4 @@ variable "vault_name" {
 variable "acr" {
   description = "Azure Container Registry Name"
   type        = string
-}
-
-# ----------------------------------------
-# Admin Password
-# ----------------------------------------
-variable "admin_password" {
-  description = "Admin Password for VMs"
-  type        = string
-  sensitive   = true
-}
-
-# ----------------------------------------
-# Domain Controller
-# ----------------------------------------
-variable "domain_name" {
-  type = string
-}
-
-variable "da_admin_password" {
-  type      = string
-  sensitive = true
 }

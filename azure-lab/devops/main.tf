@@ -401,6 +401,25 @@ resource "azuredevops_build_definition" "win2025_core_ci" {
   depends_on = [azuredevops_serviceendpoint_github.compute]
 }
 
+resource "azuredevops_build_definition" "twingate_ci" {
+  project_id = module.application_project.devops_project_id
+  name       = "Twingate-CI"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/twingate-ci.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.application.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.application]
+}
+
 # Add Agent Pool to the Build Pipeline via DevOps Portal
 # Approve Pipeline to use the Agent Pool vis DevOps Portal
 
@@ -576,4 +595,23 @@ resource "azuredevops_build_definition" "win2025_core_cd" {
     use_yaml = true
   }
   depends_on = [azuredevops_serviceendpoint_github.compute, azuredevops_build_definition.win2025_core_ci]
+}
+
+resource "azuredevops_build_definition" "twingate_cd" {
+  project_id = module.application_project.devops_project_id
+  name       = "Twingate-CD"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/twingate-cd.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.application.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.application, azuredevops_build_definition.twingate_ci]
 }

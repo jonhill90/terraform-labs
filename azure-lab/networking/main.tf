@@ -29,7 +29,6 @@ resource "azurerm_resource_group" "networking" {
   }
 }
 
-
 # ----------------------------------------
 # Network - Watcher
 # ----------------------------------------
@@ -155,35 +154,14 @@ module "vnet_peering" {
 }
 
 # ----------------------------------------
-# Azure Container Registry (ACR)
-# ----------------------------------------
-module "container_registry" {
-  source             = "../../modules/azurerm/container/registry"
-  acr_name           = var.acr
-  acr_resource_group = azurerm_resource_group.networking.name
-  acr_location       = azurerm_resource_group.networking.location
-  acr_sku            = "Basic"
-
-  providers = {
-    azurerm = azurerm.lab
-  }
-
-  tags = {
-    environment = var.environment
-    owner       = var.owner
-    project     = var.project
-  }
-}
-
-# ----------------------------------------
 # Subnet for Azure Container Instances (ACI)
 # ----------------------------------------
 resource "azurerm_subnet" "aci" {
   name                 = "aci"
-  resource_group_name  = azurerm_resource_group.networking.name
-  virtual_network_name = module.lab_vnet.vnet_name
-  address_prefixes     = ["10.100.25.0/24"]
-  provider             = azurerm.lab
+  resource_group_name  = azurerm_resource_group.networking_connectivity.name
+  virtual_network_name = module.hub_vnet.vnet_name
+  address_prefixes     = ["10.10.10.0/24"]
+  provider             = azurerm.connectivity
 
   delegation {
     name = "aci-delegation"
@@ -198,80 +176,4 @@ resource "azurerm_subnet" "aci" {
       ]
     }
   }
-}
-
-
-# ----------------------------------------
-# Twingate
-# ----------------------------------------
-module "twingate_groups" {
-  source = "../../modules/twingate/group"
-
-  groups = {
-    admins = "Admin Team"
-  }
-}
-
-module "twingate_resource" {
-  source = "../../modules/twingate/network"
-
-  providers = {
-    twingate = twingate
-  }
-
-  remote_network_name = "Lab"
-  connector_name      = "lab-connector"
-  subnet_map = {
-    "management" = "10.100.2.0/24"
-    "compute"    = "10.100.5.0/24"
-  }
-  twingate_api_key = var.twingate_api_key
-  twingate_network = var.twingate_network
-
-  # Pass only the group IDs dynamically
-  access_groups = values(module.twingate_groups.group_ids)
-  depends_on    = [module.twingate_groups]
-}
-
-# Twingate Image Push Module (Pushes Docker Image to ACR)
-module "twingate_image_push" {
-  source                = "../../modules/twingate/connector"
-  registry_login_server = module.container_registry.acr_login_server
-  acr_id                = module.container_registry.acr_id
-  connector_id          = module.twingate_resource.connector_id
-  image_name            = "twingate-connector"
-  image_tag             = "latest"
-
-  depends_on = [module.container_registry]
-}
-
-# **Twingate ACG Module (Deploys Azure Container Group)**
-module "twingate_acg" {
-  source                = "../../modules/azurerm/container/group"
-  container_name        = "twingate-connector"
-  location              = azurerm_resource_group.networking.location
-  resource_group        = azurerm_resource_group.networking.name
-  registry_login_server = module.container_registry.acr_login_server
-  registry_username     = module.container_registry.acr_admin_username
-  registry_password     = module.container_registry.acr_admin_password
-  image                 = "twingate-connector"
-  image_tag             = "latest"
-  cpu                   = "1"
-  memory                = "1.5"
-  subnet_id             = azurerm_subnet.aci.id
-
-  providers = {
-    azurerm = azurerm.lab
-  }
-
-  environment_variables = {
-    TWINGATE_NETWORK = module.twingate_resource.twingate_network
-  }
-
-  secure_environment_variables = {
-    TWINGATE_ACCESS_TOKEN  = module.twingate_resource.connector_tokens.access_token
-    TWINGATE_REFRESH_TOKEN = module.twingate_resource.connector_tokens.refresh_token
-  }
-
-  depends_on = [module.twingate_image_push]
 }

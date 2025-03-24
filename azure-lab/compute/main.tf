@@ -3,7 +3,7 @@ terraform {
 }
 
 # ----------------------------------------
-# Resource Groups (local)
+# Resource Groups
 # ----------------------------------------
 resource "azurerm_resource_group" "lab" {
   name     = "Compute"
@@ -17,12 +17,24 @@ resource "azurerm_resource_group" "lab" {
   }
 }
 
+resource "azurerm_resource_group" "compute_connectivity" {
+  name     = "Compute"
+  location = "eastus"
+  provider = azurerm.connectivity
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
 data "azurerm_resource_group" "security" {
   name     = "Security"
   provider = azurerm.lab
 }
 # ----------------------------------------
-# Compute Network
+# Networking
 # ----------------------------------------
 data "azurerm_virtual_network" "networking" {
   name                = "lab-vnet"
@@ -35,6 +47,27 @@ data "azurerm_subnet" "compute" {
   virtual_network_name = data.azurerm_virtual_network.networking.name
   resource_group_name  = "Networking"
   provider             = azurerm.lab
+}
+
+# ----------------------------------------
+# Azure Container Registry (ACR)
+# ----------------------------------------
+module "container_registry" {
+  source             = "../../modules/azurerm/container/registry"
+  acr_name           = var.acr
+  acr_resource_group = azurerm_resource_group.compute_connectivity.name
+  acr_location       = azurerm_resource_group.compute_connectivity.location
+  acr_sku            = "Basic"
+
+  providers = {
+    azurerm = azurerm.connectivity
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
 }
 
 # ----------------------------------------

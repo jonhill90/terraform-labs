@@ -1,0 +1,41 @@
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: Twingate-CI
+      source: Twingate-CI
+      trigger:
+        branches:
+          - main
+
+pool:
+  name: 'Lab'
+
+stages:
+  - template: templates/template-terraform-plan.yml
+    parameters:
+      team: "twingate"
+      artifactName: "twingate-artifacts"
+      variableGroup: "Application"
+      backendServiceArm: "Application-SC"
+      environmentName: "lab"
+      stageName: "labplan"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/Twingate-CI/twingate-artifacts/apps/twingate"
+      agentPool: "Lab"
+      pipeline: "Twingate-CI"
+      dependsOn: []  # Explicitly set to an empty list for independent execution
+
+  - template: templates/template-terraform-cd.yml
+    parameters:
+      team: "twingate"
+      artifactName: "twingate-artifacts"
+      variableGroup: "Application"
+      backendServiceArm: "Application-SC"
+      environmentName: "lab"
+      stageName: "lab"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/Twingate-CI/twingate-artifacts/apps/twingate"
+      agentPool: "Lab"
+      pipeline: "Twingate-CI"
+      dependsOn: [labplan]  # Explicitly set to an empty list for independent execution
