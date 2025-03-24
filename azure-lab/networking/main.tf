@@ -3,8 +3,20 @@ terraform {
 }
 
 # ----------------------------------------
-# Resource Groups (local)
+# Resource Groups
 # ----------------------------------------
+resource "azurerm_resource_group" "networking_connectivity" {
+  name     = "Networking"
+  location = "eastus"
+  provider = azurerm.connectivity
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
 resource "azurerm_resource_group" "networking" {
   name     = "Networking"
   location = "eastus"
@@ -17,9 +29,29 @@ resource "azurerm_resource_group" "networking" {
   }
 }
 
+
 # ----------------------------------------
 # Network - Watcher
 # ----------------------------------------
+module "network-watcher-connectivity" {
+  source              = "../../modules/azurerm/network/network-watcher"
+  name                = "network-watcher"
+  resource_group_name = azurerm_resource_group.networking_connectivity.name
+  location            = azurerm_resource_group.networking_connectivity.location
+
+  providers = {
+    azurerm = azurerm.connectivity
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_resource_group.networking_connectivity]
+}
+
 module "network-watcher" {
   source              = "../../modules/azurerm/network/network-watcher"
   name                = "network-watcher"
@@ -40,7 +72,34 @@ module "network-watcher" {
 }
 
 # ----------------------------------------
-# Network - VNet
+# vNet Hub
+# ----------------------------------------
+module "hub_vnet" {
+  source = "../../modules/azurerm/network/vnet"
+
+  vnet_name           = "hub-vnet"
+  vnet_location       = azurerm_resource_group.networking.location
+  vnet_resource_group = azurerm_resource_group.networking.name
+  vnet_address_space  = ["10.10.0.0/16"]
+  dns_servers         = []
+
+  subnets = {
+    default     = { address_prefixes = ["10.10.1.0/24"] }
+  }
+
+  providers = {
+    azurerm = azurerm.connectivity
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+  depends_on = [azurerm_resource_group.networking_connectivity, module.network-watcher-connectivity]
+}
+# ----------------------------------------
+# vNet Spokes
 # ----------------------------------------
 module "lab_vnet" {
   source = "../../modules/azurerm/network/vnet"
@@ -69,6 +128,30 @@ module "lab_vnet" {
     project     = var.project
   }
   depends_on = [azurerm_resource_group.networking, module.network-watcher]
+}
+
+# ----------------------------------------
+# vNet Peering
+# ----------------------------------------
+module "vnet_peering" {
+  source = "../../modules/azurerm/network/peering"
+
+  hub_vnet_name           = module.hub_vnet.vnet_name
+  hub_vnet_resource_group = azurerm_resource_group.networking_connectivity.name
+  hub_vnet_id             = module.hub_vnet.vnet_id
+
+  spoke_vnet_name           = module.lab_vnet.vnet_name
+  spoke_vnet_resource_group = azurerm_resource_group.networking.name
+  spoke_vnet_id             = module.lab_vnet.vnet_id
+
+  allow_forwarded_traffic = true
+  allow_gateway_transit   = false
+  use_remote_gateways     = false
+
+  providers = {
+    azurerm.hub   = azurerm.connectivity
+    azurerm.spoke = azurerm.lab
+  }
 }
 
 # ----------------------------------------

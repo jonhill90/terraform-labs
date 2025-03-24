@@ -147,11 +147,6 @@ resource "azurerm_resource_group" "devops" {
 }
 
 # --------------------------------------------------
-# Azure DevOps Service Endpoints (AzureRM)
-# --------------------------------------------------
-
-
-# --------------------------------------------------
 # Azure DevOps Service Endpoint (github)
 # --------------------------------------------------
 resource "azuredevops_serviceendpoint_github" "github" {

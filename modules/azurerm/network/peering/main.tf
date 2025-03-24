@@ -1,21 +1,25 @@
-resource "azurerm_virtual_network_peering" "spoke_to_hub" {
-  for_each = var.spoke_vnet_ids
+resource "azurerm_virtual_network_peering" "hub_to_spoke" {
+  name                      = var.hub_to_spoke_peering_name
+  provider                  = azurerm.hub
+  resource_group_name       = var.hub_vnet_resource_group
+  virtual_network_name      = var.hub_vnet_name
+  remote_virtual_network_id = var.spoke_vnet_id
 
-  name                         = "spoke-to-hub-${each.key}"
-  resource_group_name          = var.spoke_resource_groups[each.key]
-  virtual_network_name         = var.spoke_vnet_names[each.key]
-  remote_virtual_network_id    = var.hub_vnet_id
-  allow_forwarded_traffic      = true
   allow_virtual_network_access = true
+  allow_forwarded_traffic      = var.allow_forwarded_traffic
+  allow_gateway_transit        = var.allow_gateway_transit
+  use_remote_gateways          = var.use_remote_gateways
 }
 
-resource "azurerm_virtual_network_peering" "hub_to_spoke" {
-  for_each = var.spoke_vnet_ids
+resource "azurerm_virtual_network_peering" "spoke_to_hub" {
+  name                      = var.spoke_to_hub_peering_name
+  provider                  = azurerm.spoke
+  resource_group_name       = var.spoke_vnet_resource_group
+  virtual_network_name      = var.spoke_vnet_name
+  remote_virtual_network_id = var.hub_vnet_id
 
-  name                         = "hub-to-spoke-${each.key}"
-  resource_group_name          = var.hub_resource_group
-  virtual_network_name         = var.hub_vnet_name
-  remote_virtual_network_id    = each.value
-  allow_forwarded_traffic      = true
   allow_virtual_network_access = true
+  allow_forwarded_traffic      = var.allow_forwarded_traffic
+  allow_gateway_transit        = var.allow_gateway_transit
+  use_remote_gateways          = var.use_remote_gateways
 }

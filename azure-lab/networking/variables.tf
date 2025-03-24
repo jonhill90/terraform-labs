@@ -20,13 +20,19 @@ variable "project" {
 # Azure Settings
 # ----------------------------------------
 variable "lab_subscription_id" {
-  description = "Azure Subscription ID"
+  description = "Sandbox Azure Subscription ID"
   type        = string
   sensitive   = true
 }
 
 variable "management_subscription_id" {
-  description = "Azure Subscription ID"
+  description = "Management Azure Subscription ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "connectivity_subscription_id" {
+  description = "Connectivity Azure Subscription ID"
   type        = string
   sensitive   = true
 }
