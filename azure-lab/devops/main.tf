@@ -149,76 +149,7 @@ resource "azurerm_resource_group" "devops" {
 # --------------------------------------------------
 # Azure DevOps Service Endpoints (AzureRM)
 # --------------------------------------------------
-resource "azuredevops_serviceendpoint_azurerm" "devops" {
-  project_id                             = module.devops_project.devops_project_id
-  service_endpoint_name                  = "DevOps-SC"
-  service_endpoint_authentication_scheme = "ServicePrincipal"
-  azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_subscription_id                = var.lab_subscription_id
-  azurerm_subscription_name              = "Lab"
 
-  depends_on = [module.devops_project]
-}
-
-resource "azuredevops_serviceendpoint_azurerm" "networking" {
-  project_id                             = module.networking_project.devops_project_id
-  service_endpoint_name                  = "Networking-SC"
-  service_endpoint_authentication_scheme = "ServicePrincipal"
-  azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_subscription_id                = var.lab_subscription_id
-  azurerm_subscription_name              = "Lab"
-
-  depends_on = [module.networking_project]
-}
-
-
-resource "azuredevops_serviceendpoint_azurerm" "compute" {
-  project_id                             = module.compute_project.devops_project_id
-  service_endpoint_name                  = "Compute-SC"
-  service_endpoint_authentication_scheme = "ServicePrincipal"
-  azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_subscription_id                = var.lab_subscription_id
-  azurerm_subscription_name              = "Lab"
-
-  depends_on = [module.compute_project]
-}
-
-resource "azuredevops_serviceendpoint_azurerm" "database" {
-  project_id                             = module.database_project.devops_project_id
-  service_endpoint_name                  = "Database-SC"
-  service_endpoint_authentication_scheme = "ServicePrincipal"
-  azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_subscription_id                = var.lab_subscription_id
-  azurerm_subscription_name              = "Lab"
-
-  depends_on = [module.database_project]
-}
-
-resource "azuredevops_serviceendpoint_azurerm" "storage" {
-  project_id                             = module.storage_project.devops_project_id
-  service_endpoint_name                  = "Storage-SC"
-  service_endpoint_authentication_scheme = "ServicePrincipal"
-  azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_management_group_id            = "ImpressiveIT"
-  azurerm_management_group_name          = "ImpressiveIT"
-
-  depends_on = [module.storage_project]
-}
-
-resource "azuredevops_serviceendpoint_azurerm" "application" {
-  project_id                             = module.application_project.devops_project_id
-  service_endpoint_name                  = "Application-SC"
-  service_endpoint_authentication_scheme = "ServicePrincipal"
-  azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_subscription_id                = var.lab_subscription_id
-  azurerm_subscription_name              = "Lab"
-
-  depends_on = [module.application_project]
-}
-# Get ClientID and ID for the Service Principal
-# Currently Getting Service Principal Object ID from Azure Portal by going through the IAM Role Assignment wizard for a vault needed for security to grant the service principal access to the vault.
-# az ad sp list --query "[].{DisplayName:displayName, ClientID:appId, ID:id}" --output table
-# Create Secret for the Service Principal via Portal
 
 # --------------------------------------------------
 # Azure DevOps Service Endpoint (github)

@@ -52,51 +52,11 @@ variable "client_secret" {
   sensitive   = true
 }
 
+# ----------------------------------------
+# Azure Admin Account/Group
+# ----------------------------------------
 variable "admin_object_id" {
-  description = "Admin Account"
-  type        = string
-  sensitive   = true
-}
-
-variable "security_sp_object_id" {
-  description = "Security Service Principal Object ID"
-  type        = string
-  sensitive   = true
-}
-
-variable "devops_sp_object_id" {
-  description = "DevOps Service Principal Object ID"
-  type        = string
-  sensitive   = true
-}
-
-variable "networking_sp_object_id" {
-  description = "Networking Service Principal Object ID"
-  type        = string
-  sensitive   = true
-}
-
-variable "compute_sp_object_id" {
-  description = "Compute Service Principal Object ID"
-  type        = string
-  sensitive   = true
-}
-
-variable "database_sp_object_id" {
-  description = "Database Service Principal Object ID"
-  type        = string
-  sensitive   = true
-}
-
-variable "storage_sp_object_id" {
-  description = "Storage Service Principal Object ID"
-  type        = string
-  sensitive   = true
-  
-}
-
-variable "application_sp_object_id" {
-  description = "Application Service Principal Object ID"
+  description = "Admin Account/Group"
   type        = string
   sensitive   = true
 }

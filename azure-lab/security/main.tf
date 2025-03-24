@@ -12,7 +12,7 @@ data "azurerm_management_group" "mg" {
 }
 
 # --------------------------------------------------
-# Azure DevOps Project (Security)
+# Azure DevOps Projects
 # --------------------------------------------------
 module "security_project" {
   source = "../../modules/azure-devops/project"
@@ -32,8 +32,32 @@ module "security_project" {
   }
 }
 
+data "azuredevops_project" "devops" {
+  name = "DevOps"
+}
+
+data "azuredevops_project" "networking" {
+  name = "Networking"
+}
+
+data "azuredevops_project" "compute" {
+  name = "Compute"
+}
+
+data "azuredevops_project" "database" {
+  name = "Database"
+}
+
+data "azuredevops_project" "storage" {
+  name = "Storage"
+}
+
+data "azuredevops_project" "application" {
+  name = "Applications"
+}
+
 # --------------------------------------------------
-# Azure DevOps Service Endpoint (Service Principal)
+# Azure DevOps Service Endpoints
 # --------------------------------------------------
 resource "azuredevops_serviceendpoint_azurerm" "security" {
   project_id                             = module.security_project.devops_project_id
@@ -52,6 +76,108 @@ data "azuread_service_principal" "security_sp" {
   depends_on = [ azuredevops_serviceendpoint_azurerm.security ]
 }
 
+resource "azuredevops_serviceendpoint_azurerm" "devops" {
+  project_id                             = data.azuredevops_project.devops.id
+  service_endpoint_name                  = "DevOps-SC"
+  service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
+  azurerm_spn_tenantid                   = var.tenant_id
+  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_name              = "Lab"
+
+  depends_on = [data.azuredevops_project.devops]
+}
+
+data "azuread_service_principal" "devops_sp" {
+  client_id = azuredevops_serviceendpoint_azurerm.devops.service_principal_id
+  provider  = azuread.impressiveit
+  depends_on = [azuredevops_serviceendpoint_azurerm.devops]
+}
+
+resource "azuredevops_serviceendpoint_azurerm" "networking" {
+  project_id                             = data.azuredevops_project.networking.id
+  service_endpoint_name                  = "Networking-SC"
+  service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
+  azurerm_spn_tenantid                   = var.tenant_id
+  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_name              = "Lab"
+
+  depends_on = [data.azuredevops_project.networking]
+}
+
+data "azuread_service_principal" "networking_sp" {
+  client_id = azuredevops_serviceendpoint_azurerm.networking.service_principal_id
+  provider  = azuread.impressiveit
+  depends_on = [azuredevops_serviceendpoint_azurerm.networking]
+}
+
+resource "azuredevops_serviceendpoint_azurerm" "compute" {
+  project_id                             = data.azuredevops_project.compute.id
+  service_endpoint_name                  = "Compute-SC"
+  service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
+  azurerm_spn_tenantid                   = var.tenant_id
+  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_name              = "Lab"
+
+  depends_on = [data.azuredevops_project.compute]
+}
+
+data "azuread_service_principal" "compute_sp" {
+  client_id = azuredevops_serviceendpoint_azurerm.compute.service_principal_id
+  provider  = azuread.impressiveit
+  depends_on = [azuredevops_serviceendpoint_azurerm.compute]
+}
+
+resource "azuredevops_serviceendpoint_azurerm" "database" {
+  project_id                             = data.azuredevops_project.database.id
+  service_endpoint_name                  = "Database-SC"
+  service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
+  azurerm_spn_tenantid                   = var.tenant_id
+  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_name              = "Lab"
+
+  depends_on = [data.azuredevops_project.database]
+}
+
+data "azuread_service_principal" "database_sp" {
+  client_id = azuredevops_serviceendpoint_azurerm.database.service_principal_id
+  provider  = azuread.impressiveit
+  depends_on = [azuredevops_serviceendpoint_azurerm.database]
+}
+
+resource "azuredevops_serviceendpoint_azurerm" "storage" {
+  project_id                             = data.azuredevops_project.storage.id
+  service_endpoint_name                  = "Storage-SC"
+  service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
+  azurerm_spn_tenantid                   = var.tenant_id
+  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_name              = "Lab"
+
+  depends_on = [data.azuredevops_project.storage]
+}
+
+data "azuread_service_principal" "storage_sp" {
+  client_id = azuredevops_serviceendpoint_azurerm.storage.service_principal_id
+  provider  = azuread.impressiveit
+  depends_on = [azuredevops_serviceendpoint_azurerm.storage]
+}
+
+resource "azuredevops_serviceendpoint_azurerm" "application" {
+  project_id                             = data.azuredevops_project.application.id
+  service_endpoint_name                  = "Application-SC"
+  service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
+  azurerm_spn_tenantid                   = var.tenant_id
+  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_name              = "Lab"
+
+  depends_on = [data.azuredevops_project.application]
+}
+
+data "azuread_service_principal" "application_sp" {
+  client_id = azuredevops_serviceendpoint_azurerm.application.service_principal_id
+  provider  = azuread.impressiveit
+  depends_on = [azuredevops_serviceendpoint_azurerm.application]
+}
+
 # --------------------------------------------------
 # Service Principal Role Assignments
 # --------------------------------------------------
@@ -66,6 +192,84 @@ module "security_sp_role_assignment" {
   }
 
   depends_on = [data.azuread_service_principal.security_sp]
+}
+
+module "devops_sp_role_assignment" {
+  source       = "../../modules/azurerm/security/role-assignment"
+  role_scope   = data.azurerm_management_group.mg.id
+  role_name    = "Contributor"
+  principal_id = data.azuread_service_principal.devops_sp.object_id
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  depends_on = [data.azuread_service_principal.devops_sp]
+}
+
+module "networking_sp_role_assignment" {
+  source       = "../../modules/azurerm/security/role-assignment"
+  role_scope   = data.azurerm_management_group.mg.id
+  role_name    = "Contributor"
+  principal_id = data.azuread_service_principal.networking_sp.object_id
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  depends_on = [data.azuread_service_principal.networking_sp]
+}
+
+module "compute_sp_role_assignment" {
+  source       = "../../modules/azurerm/security/role-assignment"
+  role_scope   = data.azurerm_management_group.mg.id
+  role_name    = "Contributor"
+  principal_id = data.azuread_service_principal.compute_sp.object_id
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  depends_on = [data.azuread_service_principal.compute_sp]
+}
+
+module "database_sp_role_assignment" {
+  source       = "../../modules/azurerm/security/role-assignment"
+  role_scope   = data.azurerm_management_group.mg.id
+  role_name    = "Contributor"
+  principal_id = data.azuread_service_principal.database_sp.object_id
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  depends_on = [data.azuread_service_principal.database_sp]
+}
+
+module "storage_sp_role_assignment" {
+  source       = "../../modules/azurerm/security/role-assignment"
+  role_scope   = data.azurerm_management_group.mg.id
+  role_name    = "Contributor"
+  principal_id = data.azuread_service_principal.storage_sp.object_id
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  depends_on = [data.azuread_service_principal.storage_sp]
+}
+
+module "application_sp_role_assignment" {
+  source       = "../../modules/azurerm/security/role-assignment"
+  role_scope   = data.azurerm_management_group.mg.id
+  role_name    = "Contributor"
+  principal_id = data.azuread_service_principal.application_sp.object_id
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  depends_on = [data.azuread_service_principal.application_sp]
 }
 
 # --------------------------------------------------
@@ -507,7 +711,7 @@ module "devops_sp_vault_access" {
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = var.devops_sp_object_id
+      object_id               = data.azuread_service_principal.devops_sp.object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
@@ -528,7 +732,7 @@ module "networking_sp_vault_access" {
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = var.networking_sp_object_id
+      object_id               = data.azuread_service_principal.networking_sp.object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
@@ -549,7 +753,7 @@ module "compute_sp_vault_access" {
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = var.compute_sp_object_id
+      object_id               = data.azuread_service_principal.compute_sp.object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
@@ -570,7 +774,7 @@ module "database_sp_vault_access" {
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = var.database_sp_object_id
+      object_id               = data.azuread_service_principal.database_sp.object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
@@ -591,7 +795,7 @@ module "storage_sp_vault_access" {
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = var.storage_sp_object_id
+      object_id               = data.azuread_service_principal.storage_sp.object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
@@ -612,7 +816,7 @@ module "application_sp_vault_access" {
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = var.application_sp_object_id
+      object_id               = data.azuread_service_principal.application_sp.object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
