@@ -1,6 +1,7 @@
 lab_subscription_id          = "__labsubscriptionid__"
 management_subscription_id   = "__managementsubscriptionid__"
 connectivity_subscription_id = "__connectivitysubscriptionid__"
+identity_subscription_id     = "__identitysubscriptionid__"
 tenant_id                    = "__tenantid__"
 environment                  = "Lab"
 owner                        = "networking"

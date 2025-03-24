@@ -2,7 +2,6 @@ terraform {
   backend "azurerm" {}
 }
 
-
 # ----------------------------------------
 # Resource Groups
 # ----------------------------------------
@@ -22,6 +21,18 @@ resource "azurerm_resource_group" "networking_management" {
   name     = "Networking"
   location = "eastus"
   provider = azurerm.management
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
+resource "azurerm_resource_group" "networking_identity" {
+  name     = "Networking"
+  location = "eastus"
+  provider = azurerm.identity
 
   tags = {
     environment = var.environment
@@ -186,6 +197,31 @@ module "mgmt_vnet" {
   depends_on = [azurerm_resource_group.networking, module.network-watcher]
 }
 
+module "identity_vnet" {
+  source = "../../modules/azurerm/network/vnet"
+
+  vnet_name           = "identity-vnet"
+  vnet_location       = azurerm_resource_group.networking_identity.location
+  vnet_resource_group = azurerm_resource_group.networking_identity.name
+  vnet_address_space  = ["10.30.0.0/16"]
+  dns_servers         = []
+
+  subnets = {
+    default = { address_prefixes = ["10.30.1.0/24"] }
+  }
+
+  providers = {
+    azurerm = azurerm.identity
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+  depends_on = [azurerm_resource_group.networking, module.network-watcher]
+}
+
 # ----------------------------------------
 # vNet Peering
 # ----------------------------------------
@@ -232,6 +268,29 @@ module "vnet_peering_mgmt" {
   providers = {
     azurerm.hub   = azurerm.connectivity
     azurerm.spoke = azurerm.management
+  }
+}
+
+module "vnet_peering_identity" {
+  source = "../../modules/azurerm/network/peering"
+
+  hub_to_spoke_peering_name = "hub-to-identity-peering"
+  hub_vnet_name             = module.hub_vnet.vnet_name
+  hub_vnet_resource_group   = azurerm_resource_group.networking_connectivity.name
+  hub_vnet_id               = module.hub_vnet.vnet_id
+
+  spoke_to_hub_peering_name = "identity-to-hub-peering"
+  spoke_vnet_name           = module.identity_vnet.vnet_name
+  spoke_vnet_resource_group = azurerm_resource_group.networking_identity.name
+  spoke_vnet_id             = module.identity_vnet.vnet_id
+
+  allow_forwarded_traffic = true
+  allow_gateway_transit   = false
+  use_remote_gateways     = false
+
+  providers = {
+    azurerm.hub   = azurerm.connectivity
+    azurerm.spoke = azurerm.identity
   }
 }
 
