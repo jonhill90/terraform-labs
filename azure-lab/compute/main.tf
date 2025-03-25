@@ -163,7 +163,7 @@ module "build_agent" {
   ]
 }
 */
-/*
+
 module "dc01" {
   source = "../../modules/azurerm/compute/vm/windows/dc"
 
@@ -190,4 +190,3 @@ module "dc01" {
     azurerm_shared_image.windows_2025_base
   ]
 }
-*/
