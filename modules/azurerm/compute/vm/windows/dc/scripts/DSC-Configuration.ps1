@@ -40,11 +40,23 @@ Configuration SetupDomainController {
             DependsOn = "[WindowsFeature]ADDSInstall"
         }
 
+        WindowsFeature RSAT_AD_Tools {
+            Name      = "RSAT-AD-Tools"
+            Ensure    = "Present"
+            DependsOn = "[WindowsFeature]DNS"
+        }
+
+        WindowsFeature RSAT_DNS_Server {
+            Name      = "RSAT-DNS-Server"
+            Ensure    = "Present"
+            DependsOn = "[WindowsFeature]RSAT_AD_Tools"
+        }
+
         xADDomain NewForest {
             DomainName                    = $DomainName
             DomainAdministratorCredential = $DomainCreds
             SafemodeAdministratorPassword = $DomainCreds
-            DependsOn                     = @("[WindowsFeature]ADDSInstall", "[WindowsFeature]DNS")
+            DependsOn                     = @("[WindowsFeature]ADDSInstall", "[WindowsFeature]DNS", "[WindowsFeature]RSAT_AD_Tools", "[WindowsFeature]RSAT_DNS_Server")
         }
     }
 }
