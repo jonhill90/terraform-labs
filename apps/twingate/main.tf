@@ -1,7 +1,7 @@
 terraform {
   backend "azurerm" {}
 }
-
+/*
 # ----------------------------------------
 # Resource Groups
 # ----------------------------------------
@@ -115,3 +115,4 @@ module "twingate_acg" {
 
   depends_on = [module.twingate_image_push]
 }
+*/
