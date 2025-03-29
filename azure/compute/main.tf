@@ -1,7 +1,8 @@
-terraform {
+/*terraform {
   backend "azurerm" {}
 }
-
+*/
+/*
 # ----------------------------------------
 #region Resource Groups
 # ----------------------------------------
@@ -81,7 +82,7 @@ module "container_registry" {
     project     = var.project
   }
 }
-
+/*
 # ----------------------------------------
 #region Azure Compute Gallery
 # ----------------------------------------

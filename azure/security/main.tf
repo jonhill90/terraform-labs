@@ -1,9 +1,10 @@
-terraform {
+/*terraform {
   backend "azurerm" {}
 }
+*/
 
 # --------------------------------------------------
-# Management Group
+#region Management Group (mg)
 # --------------------------------------------------
 data "azurerm_management_group" "mg" {
   name     = "ImpressiveIT"
@@ -11,7 +12,7 @@ data "azurerm_management_group" "mg" {
 }
 
 # --------------------------------------------------
-# Azure DevOps Projects
+#region Azure DevOps Projects (devops)
 # --------------------------------------------------
 module "security_project" {
   source = "../../modules/azure-devops/project"
@@ -56,14 +57,15 @@ data "azuredevops_project" "application" {
 }
 
 # --------------------------------------------------
-# Azure DevOps Service Endpoints
+#region Azure DevOps Service Endpoints (devops)
 # --------------------------------------------------
+/*
 resource "azuredevops_serviceendpoint_azurerm" "security" {
   project_id                             = module.security_project.devops_project_id
   service_endpoint_name                  = "Security-SC"
   service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
   azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_id                = var.lzp1_subscription_id
   azurerm_subscription_name              = "Lab"
 
   depends_on = [module.security_project]
@@ -80,7 +82,7 @@ resource "azuredevops_serviceendpoint_azurerm" "devops" {
   service_endpoint_name                  = "DevOps-SC"
   service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
   azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_id                = var.lzp1_subscription_id
   azurerm_subscription_name              = "Lab"
 
   depends_on = [data.azuredevops_project.devops]
@@ -97,7 +99,7 @@ resource "azuredevops_serviceendpoint_azurerm" "networking" {
   service_endpoint_name                  = "Networking-SC"
   service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
   azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_id                = var.lzp1_subscription_id
   azurerm_subscription_name              = "Lab"
 
   depends_on = [data.azuredevops_project.networking]
@@ -114,7 +116,7 @@ resource "azuredevops_serviceendpoint_azurerm" "compute" {
   service_endpoint_name                  = "Compute-SC"
   service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
   azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_id                = var.lzp1_subscription_id
   azurerm_subscription_name              = "Lab"
 
   depends_on = [data.azuredevops_project.compute]
@@ -131,7 +133,7 @@ resource "azuredevops_serviceendpoint_azurerm" "database" {
   service_endpoint_name                  = "Database-SC"
   service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
   azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_id                = var.lzp1_subscription_id
   azurerm_subscription_name              = "Lab"
 
   depends_on = [data.azuredevops_project.database]
@@ -148,7 +150,7 @@ resource "azuredevops_serviceendpoint_azurerm" "storage" {
   service_endpoint_name                  = "Storage-SC"
   service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
   azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_id                = var.lzp1_subscription_id
   azurerm_subscription_name              = "Lab"
 
   depends_on = [data.azuredevops_project.storage]
@@ -165,7 +167,7 @@ resource "azuredevops_serviceendpoint_azurerm" "application" {
   service_endpoint_name                  = "Application-SC"
   service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
   azurerm_spn_tenantid                   = var.tenant_id
-  azurerm_subscription_id                = var.lab_subscription_id
+  azurerm_subscription_id                = var.lzp1_subscription_id
   azurerm_subscription_name              = "Lab"
 
   depends_on = [data.azuredevops_project.application]
@@ -176,9 +178,10 @@ data "azuread_service_principal" "application_sp" {
   provider  = azuread.impressiveit
   depends_on = [azuredevops_serviceendpoint_azurerm.application]
 }
+*/
 
 # --------------------------------------------------
-# Service Principal Role Assignments
+#region Service Principal Role Assignments (rc)
 # --------------------------------------------------
 module "security_sp_role_assignment" {
   source       = "../../modules/azurerm/security/role-assignment"
@@ -272,7 +275,7 @@ module "application_sp_role_assignment" {
 }
 
 # --------------------------------------------------
-# Azure DevOps Service Endpoint (github)
+#region Azure DevOps Service Endpoint (github)
 # --------------------------------------------------
 resource "azuredevops_serviceendpoint_github" "github" {
   project_id            = module.security_project.devops_project_id
@@ -288,8 +291,9 @@ resource "azuredevops_serviceendpoint_github" "github" {
 }
 
 # --------------------------------------------------
-# Azure DevOps Build Pipeline (CI)
+#region Azure DevOps Build Pipeline (ci)
 # --------------------------------------------------
+/*
 resource "azuredevops_build_definition" "security_ci" {
   project_id = module.security_project.devops_project_id
   name       = "Security-CI"
@@ -308,10 +312,11 @@ resource "azuredevops_build_definition" "security_ci" {
   }
   depends_on = [azuredevops_serviceendpoint_github.github]
 }
-
+*/
 # --------------------------------------------------
-# Azure DevOps Release Pipeline (CD)
+#region Azure DevOps Release Pipeline (cd)
 # --------------------------------------------------
+/*
 resource "azuredevops_build_definition" "security_cd" {
   project_id = module.security_project.devops_project_id
   name       = "Security-CD"
@@ -330,9 +335,9 @@ resource "azuredevops_build_definition" "security_cd" {
   }
   depends_on = [azuredevops_serviceendpoint_github.github]
 }
-
+*/
 # ----------------------------------------
-# Resource Groups
+#region Resource Groups (rg)
 # ----------------------------------------
 resource "azurerm_resource_group" "security" {
   name     = "security"
@@ -369,7 +374,7 @@ data "azurerm_resource_group" "networking" {
 }
 
 # ----------------------------------------
-# Storage Accounts
+#region Storage Accounts (sa)
 # ----------------------------------------
 resource "azurerm_storage_account" "tfstate" {
   name                     = var.storage_account
@@ -389,7 +394,7 @@ resource "azurerm_storage_account" "tfstate" {
 }
 
 # ----------------------------------------
-# Storage Account Container
+#region Storage Account Container (blob)
 # ----------------------------------------
 resource "azurerm_storage_container" "tfstate" {
   name                  = "tfstate"
@@ -401,7 +406,7 @@ resource "azurerm_storage_container" "tfstate" {
 }
 
 # --------------------------------------------------
-# Secure Vault
+#region Key Vaults (kv)
 # --------------------------------------------------
 module "security_vault" {
   source                     = "../../modules/azurerm/security/vault"
@@ -415,7 +420,7 @@ module "security_vault" {
   tenant_id = var.tenant_id
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [azurerm_resource_group.security]
@@ -433,7 +438,7 @@ module "devops_vault" {
   tenant_id = var.tenant_id
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [azurerm_resource_group.security]
@@ -451,7 +456,7 @@ module "networking_vault" {
   tenant_id = var.tenant_id
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [azurerm_resource_group.security]
@@ -469,7 +474,7 @@ module "compute_vault" {
   tenant_id = var.tenant_id
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [azurerm_resource_group.security]
@@ -487,7 +492,7 @@ module "database_vault" {
   tenant_id = var.tenant_id
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [azurerm_resource_group.security]
@@ -505,7 +510,7 @@ module "storage_vault" {
   tenant_id = var.tenant_id
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [azurerm_resource_group.security]
@@ -523,14 +528,14 @@ module "application_vault" {
   tenant_id = var.tenant_id
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [azurerm_resource_group.security]
 }
 
 # --------------------------------------------------
-# Secure Vault Access (Azure Admin Account)
+#regions Secure Vault Access (pol)
 # --------------------------------------------------
 module "security_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
@@ -547,7 +552,7 @@ module "security_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [module.security_vault]
@@ -568,7 +573,7 @@ module "security_devops_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [module.devops_vault]
@@ -589,7 +594,7 @@ module "networking_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [module.networking_vault]
@@ -610,7 +615,7 @@ module "compute_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [module.compute_vault]
@@ -631,7 +636,7 @@ module "database_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [module.database_vault]
@@ -652,7 +657,7 @@ module "storage_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [module.storage_vault]
@@ -673,14 +678,14 @@ module "application_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [module.application_vault]
 }
 
 # --------------------------------------------------
-# Secure Vault Access (Service Principal)
+#region Secure Vault Access (pol)
 # --------------------------------------------------
 module "security_sp_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
@@ -697,7 +702,7 @@ module "security_sp_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [module.security_vault, data.azuread_service_principal.security_sp]
@@ -718,7 +723,7 @@ module "devops_sp_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [module.security_vault]
@@ -739,7 +744,7 @@ module "networking_sp_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [module.networking_vault]
@@ -760,7 +765,7 @@ module "compute_sp_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [module.compute_vault]
@@ -781,7 +786,7 @@ module "database_sp_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [module.database_vault]
@@ -802,7 +807,7 @@ module "storage_sp_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [module.storage_vault]
@@ -823,7 +828,7 @@ module "application_sp_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   depends_on = [module.application_vault]
