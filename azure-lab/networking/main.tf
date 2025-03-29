@@ -3,7 +3,7 @@ terraform {
 }
 
 # ----------------------------------------
-# Resource Groups
+#region Resource Groups
 # ----------------------------------------
 resource "azurerm_resource_group" "networking_connectivity" {
   name     = "Networking"
@@ -54,7 +54,7 @@ resource "azurerm_resource_group" "networking" {
 }
 
 # ----------------------------------------
-# Network - Watcher
+#region Network - Watchers
 # ----------------------------------------
 module "network-watcher-connectivity" {
   source              = "../../modules/azurerm/network/network-watcher"
@@ -94,6 +94,25 @@ module "network-watcher-management" {
   depends_on = [azurerm_resource_group.networking_management]
 }
 
+module "network-watcher-identity" {
+  source              = "../../modules/azurerm/network/network-watcher"
+  name                = "network-watcher"
+  resource_group_name = azurerm_resource_group.networking_identity.name
+  location            = azurerm_resource_group.networking_identity.location
+
+  providers = {
+    azurerm = azurerm.identity
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_resource_group.networking_identity]
+}
+
 module "network-watcher" {
   source              = "../../modules/azurerm/network/network-watcher"
   name                = "network-watcher"
@@ -114,7 +133,7 @@ module "network-watcher" {
 }
 
 # ----------------------------------------
-# vNet Hub
+#region vNet Hub
 # ----------------------------------------
 module "hub_vnet" {
   source = "../../modules/azurerm/network/vnet"
@@ -141,7 +160,7 @@ module "hub_vnet" {
   depends_on = [azurerm_resource_group.networking_connectivity, module.network-watcher-connectivity]
 }
 # ----------------------------------------
-# vNet Spokes
+#region vNet Spokes
 # ----------------------------------------
 module "lab_vnet" {
   source = "../../modules/azurerm/network/vnet"
@@ -183,6 +202,7 @@ module "mgmt_vnet" {
 
   subnets = {
     default = { address_prefixes = ["10.20.1.0/24"] }
+    compute = { address_prefixes = ["10.20.5.0/24"] }
   }
 
   providers = {
@@ -223,7 +243,7 @@ module "identity_vnet" {
 }
 
 # ----------------------------------------
-# vNet Peering
+#region vNet Peering
 # ----------------------------------------
 module "vnet_peering" {
   source = "../../modules/azurerm/network/peering"
@@ -295,7 +315,7 @@ module "vnet_peering_identity" {
 }
 
 # ----------------------------------------
-# Subnet for Azure Container Instances (ACI)
+#region Subnets with Service Delegation
 # ----------------------------------------
 resource "azurerm_subnet" "aci" {
   name                 = "aci"
@@ -319,8 +339,30 @@ resource "azurerm_subnet" "aci" {
   }
 }
 
+resource "azurerm_subnet" "aci_mgmt" {
+  name                 = "aci"
+  resource_group_name  = azurerm_resource_group.networking_management.name
+  virtual_network_name = module.mgmt_vnet.vnet_name
+  address_prefixes     = ["10.20.10.0/24"]
+  provider             = azurerm.management
+
+  delegation {
+    name = "aci-delegation"
+
+    service_delegation {
+      name = "Microsoft.ContainerInstance/containerGroups"
+
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/action",
+        "Microsoft.Network/virtualNetworks/subnets/join/action",
+        "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action",
+      ]
+    }
+  }
+}
+
 # ----------------------------------------
-# DNS
+#region DNS
 # ----------------------------------------
 module "dns" {
   source = "../../modules/azurerm/network/dns"
@@ -342,12 +384,12 @@ module "dns" {
         "ns4-01.azure-dns.info."
       ]
     }
-    txt_records   = {}
+    txt_records = {}
     cname_records = {
-      "cdnverify"       = { ttl = 3600, value = "cdnverify.impressiveitweb-fd.azureedge.net" }
-      "test"            = { ttl = 3600, value = "" }
-      "cdnverify.test"  = { ttl = 3600, value = "cdnverify.impressiveit-fd.azureedge.net" }
-      "www"             = { ttl = 3600, value = "" }
+      "cdnverify"      = { ttl = 3600, value = "cdnverify.impressiveitweb-fd.azureedge.net" }
+      "test"           = { ttl = 3600, value = "" }
+      "cdnverify.test" = { ttl = 3600, value = "cdnverify.impressiveit-fd.azureedge.net" }
+      "www"            = { ttl = 3600, value = "" }
     }
   }
 
