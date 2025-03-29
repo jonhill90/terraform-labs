@@ -16,7 +16,7 @@ resource "azurerm_resource_group" "networking_connectivity" {
     project     = var.project
   }
 }
-
+/*
 resource "azurerm_resource_group" "networking_management" {
   name     = "Networking"
   location = "eastus"
@@ -28,7 +28,7 @@ resource "azurerm_resource_group" "networking_management" {
     project     = var.project
   }
 }
-
+*/
 resource "azurerm_resource_group" "networking_identity" {
   name     = "Networking"
   location = "eastus"
@@ -74,7 +74,7 @@ module "network-watcher-connectivity" {
 
   depends_on = [azurerm_resource_group.networking_connectivity]
 }
-
+/*
 module "network-watcher-management" {
   source              = "../../modules/azurerm/network/network-watcher"
   name                = "network-watcher"
@@ -93,7 +93,7 @@ module "network-watcher-management" {
 
   depends_on = [azurerm_resource_group.networking_management]
 }
-
+*/
 module "network-watcher-identity" {
   source              = "../../modules/azurerm/network/network-watcher"
   name                = "network-watcher"
@@ -190,7 +190,7 @@ module "lab_vnet" {
   }
   depends_on = [azurerm_resource_group.networking, module.network-watcher]
 }
-
+/*
 module "mgmt_vnet" {
   source = "../../modules/azurerm/network/vnet"
 
@@ -216,7 +216,7 @@ module "mgmt_vnet" {
   }
   depends_on = [azurerm_resource_group.networking, module.network-watcher]
 }
-
+*/
 module "identity_vnet" {
   source = "../../modules/azurerm/network/vnet"
 
@@ -267,7 +267,7 @@ module "vnet_peering" {
     azurerm.spoke = azurerm.lab
   }
 }
-
+/*
 module "vnet_peering_mgmt" {
   source = "../../modules/azurerm/network/peering"
 
@@ -290,7 +290,7 @@ module "vnet_peering_mgmt" {
     azurerm.spoke = azurerm.management
   }
 }
-
+*/
 module "vnet_peering_identity" {
   source = "../../modules/azurerm/network/peering"
 
@@ -338,7 +338,7 @@ resource "azurerm_subnet" "aci" {
     }
   }
 }
-
+/*
 resource "azurerm_subnet" "aci_mgmt" {
   name                 = "aci"
   resource_group_name  = azurerm_resource_group.networking_management.name
@@ -360,7 +360,7 @@ resource "azurerm_subnet" "aci_mgmt" {
     }
   }
 }
-
+*/
 # ----------------------------------------
 #region DNS
 # ----------------------------------------
