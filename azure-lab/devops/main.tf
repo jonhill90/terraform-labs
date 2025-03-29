@@ -3,7 +3,7 @@ terraform {
 }
 
 # ----------------------------------------
-# GitHub Repository
+#region Repositories
 # ----------------------------------------
 module "github_repo" {
   source = "../../modules/github/repo"
@@ -21,7 +21,7 @@ module "github_repo" {
 }
 
 # --------------------------------------------------
-# Azure DevOps Projects
+#region Azure DevOps Projects
 # --------------------------------------------------
 module "devops_project" {
   source = "../../modules/azure-devops/project"
@@ -132,7 +132,7 @@ module "application_project" {
 }
 
 # ----------------------------------------
-# Resource Groups
+#region Resource Groups
 # ----------------------------------------
 resource "azurerm_resource_group" "devops" {
   name     = "DevOps"
@@ -147,7 +147,7 @@ resource "azurerm_resource_group" "devops" {
 }
 
 # --------------------------------------------------
-# Azure DevOps Service Endpoint (github)
+#region Azure DevOps Service Endpoints (github)
 # --------------------------------------------------
 resource "azuredevops_serviceendpoint_github" "github" {
   project_id            = module.devops_project.devops_project_id
@@ -228,7 +228,7 @@ resource "azuredevops_serviceendpoint_github" "application" {
 }
 
 # --------------------------------------------------
-# Azure DevOps Build Pipeline (CI)
+#region Azure DevOps Build Pipeline (CI)
 # --------------------------------------------------
 resource "azuredevops_build_definition" "devops_ci" {
   project_id = module.devops_project.devops_project_id
@@ -424,7 +424,7 @@ resource "azuredevops_build_definition" "twingate_ci" {
 # Approve Pipeline to use the Agent Pool vis DevOps Portal
 
 # --------------------------------------------------
-# Azure DevOps Release Pipeline (CD)
+#region Azure DevOps Release Pipeline (CD)
 # --------------------------------------------------
 resource "azuredevops_build_definition" "devops_cd" {
   project_id = module.devops_project.devops_project_id
