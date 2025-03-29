@@ -21,7 +21,7 @@ stages:
       environmentName: "lab"
       stageName: "labplan"
       stageDisplayName: "Development"
-      workingDirectory: "$(Pipeline.Workspace)/Storage-CI/storage-artifacts/azure-lab/storage"
+      workingDirectory: "$(Pipeline.Workspace)/Storage-CI/storage-artifacts/azure/storage"
       agentPool: "Lab"
       pipeline: "Storage-CI"
       dependsOn: []  # Explicitly set to an empty list for independent execution
@@ -35,7 +35,7 @@ stages:
       environmentName: "lab"
       stageName: "lab"
       stageDisplayName: "Development"
-      workingDirectory: "$(Pipeline.Workspace)/Storage-CI/storage-artifacts/azure-lab/storage"
+      workingDirectory: "$(Pipeline.Workspace)/Storage-CI/storage-artifacts/azure/storage"
       agentPool: "Lab"
       pipeline: "Storage-CI"
       dependsOn: [labplan]  # Explicitly set to an empty list for independent execution

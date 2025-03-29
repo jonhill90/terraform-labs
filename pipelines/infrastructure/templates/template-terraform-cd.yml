@@ -19,18 +19,22 @@ parameters:
     type: string
   - name: pipeline
     type: string
+  - name: dependsOn
+    type: object
+    default: []  # Default to an empty list if not provided
 
 stages:
   - stage: ${{ parameters.stageName }}
     displayName: "Terraform Plan - ${{ parameters.stageDisplayName }}"
+    dependsOn: ${{ parameters.dependsOn }} # ✅ Dynamically set dependencies
     pool:
       name: ${{ parameters.agentPool }} # ✅ Uses the passed-in agent pool
     variables:
       - group: ${{ parameters.variableGroup }} # ✅ Pull secrets from Key Vault
 
     jobs:
-      - deployment: Terraform_Plan
-        displayName: "Terraform Init & Plan - ${{ parameters.stageDisplayName }}"
+      - deployment: Terraform_Apply
+        displayName: "Terraform Apply - ${{ parameters.stageDisplayName }}"
         environment: ${{ parameters.environmentName }}
         strategy:
           runOnce:
@@ -84,3 +88,34 @@ stages:
                     environmentServiceNameAzureRM: ${{ parameters.backendServiceArm }}
                     commandOptions: "-var-file=${{ parameters.workingDirectory }}/env/${{ parameters.environmentName }}.tfvars -out=tfplan"
                     workingDirectory: "${{ parameters.workingDirectory }}"
+                    
+                # ✅ Apply Terraform changes
+                - task: TerraformTaskV4@4
+                  displayName: "Terraform Apply - ${{ parameters.stageDisplayName }}"
+                  inputs:
+                    command: "apply"
+                    provider: "azurerm"
+                    environmentServiceNameAzureRM: ${{ parameters.backendServiceArm }}
+                    commandOptions: "-auto-approve tfplan"
+                    workingDirectory: "${{ parameters.workingDirectory }}"
+
+                # ✅ Cross-platform Cleanup Step
+                - task: PowerShell@2
+                  displayName: "Force Cleanup of Working Directory Contents (Cross-platform)"
+                  condition: always()
+                  inputs:
+                    targetType: "inline"
+                    script: |
+                      Write-Host "Operating System: $env:AGENT_OS"
+                      Write-Host "Cleaning working directory: '${{ parameters.workingDirectory }}'"
+                
+                      if ($env:AGENT_OS -eq "Windows_NT") {
+                        Write-Host "Running on Windows..."
+                        Get-ChildItem -Path "${{ parameters.workingDirectory }}" -Force | Remove-Item -Recurse -Force
+                      }
+                      else {
+                        Write-Host "Running on Linux/macOS..."
+                        bash -c "rm -rf '${{ parameters.workingDirectory }}'/* '${{ parameters.workingDirectory }}'/.[!.]* '${{ parameters.workingDirectory }}'/..?*" 
+                      }
+                
+                      Write-Host "Cleanup complete."

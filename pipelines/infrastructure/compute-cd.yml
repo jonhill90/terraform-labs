@@ -2,8 +2,8 @@ trigger: none
 
 resources:
   pipelines:
-    - pipeline: Security-CI
-      source: Security-CI
+    - pipeline: Compute-CI
+      source: Compute-CI
       trigger:
         branches:
           - main
@@ -14,28 +14,28 @@ pool:
 stages:
   - template: templates/template-terraform-plan.yml
     parameters:
-      team: "security"
-      artifactName: "security-artifacts"
-      variableGroup: "Security"
-      backendServiceArm: "Security-SC"
+      team: "compute"
+      artifactName: "compute-artifacts"
+      variableGroup: "Compute"
+      backendServiceArm: "Compute-SC"
       environmentName: "lab"
       stageName: "labplan"
       stageDisplayName: "Development"
-      workingDirectory: "$(Pipeline.Workspace)/Security-CI/security-artifacts/azure-lab/security"
+      workingDirectory: "$(Pipeline.Workspace)/Compute-CI/compute-artifacts/azure/compute"
       agentPool: "Lab"
-      pipeline: "Security-CI"
+      pipeline: "Compute-CI"
       dependsOn: []  # Explicitly set to an empty list for independent execution
 
   - template: templates/template-terraform-cd.yml
     parameters:
-      team: "security"
-      artifactName: "security-artifacts"
-      variableGroup: "Security"
-      backendServiceArm: "Security-SC"
+      team: "compute"
+      artifactName: "compute-artifacts"
+      variableGroup: "Compute"
+      backendServiceArm: "Compute-SC"
       environmentName: "lab"
       stageName: "lab"
       stageDisplayName: "Development"
-      workingDirectory: "$(Pipeline.Workspace)/Security-CI/security-artifacts/azure-lab/security"
+      workingDirectory: "$(Pipeline.Workspace)/Compute-CI/compute-artifacts/azure/compute"
       agentPool: "Lab"
-      pipeline: "Security-CI"
+      pipeline: "Compute-CI"
       dependsOn: [labplan]  # Explicitly set to an empty list for independent execution

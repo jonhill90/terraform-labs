@@ -21,7 +21,7 @@ stages:
       environmentName: "lab"
       stageName: "labplan"
       stageDisplayName: "Development"
-      workingDirectory: "$(Pipeline.Workspace)/Networking-CI/networking-artifacts/azure-lab/networking"
+      workingDirectory: "$(Pipeline.Workspace)/Networking-CI/networking-artifacts/azure/networking"
       agentPool: "Lab"
       pipeline: "Networking-CI"
       dependsOn: []  # Explicitly set to an empty list for independent execution
@@ -35,7 +35,7 @@ stages:
       environmentName: "lab"
       stageName: "lab"
       stageDisplayName: "Development"
-      workingDirectory: "$(Pipeline.Workspace)/Networking-CI/networking-artifacts/azure-lab/networking"
+      workingDirectory: "$(Pipeline.Workspace)/Networking-CI/networking-artifacts/azure/networking"
       agentPool: "Lab"
       pipeline: "Networking-CI"
       dependsOn: [labplan]

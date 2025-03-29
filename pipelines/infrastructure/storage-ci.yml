@@ -4,7 +4,7 @@ trigger:
       - main  
   paths:
     include:
-      - azure-lab/storage/**  
+      - azure/storage/**  
 
 pool:
   name: 'Lab'  

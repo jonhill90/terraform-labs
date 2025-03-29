@@ -2,8 +2,8 @@ trigger: none
 
 resources:
   pipelines:
-    - pipeline: DevOps-CI
-      source: DevOps-CI
+    - pipeline: Security-CI
+      source: Security-CI
       trigger:
         branches:
           - main
@@ -14,28 +14,28 @@ pool:
 stages:
   - template: templates/template-terraform-plan.yml
     parameters:
-      team: "devops"
-      artifactName: "devops-artifacts"
-      variableGroup: "DevOps"
-      backendServiceArm: "DevOps-SC"
+      team: "security"
+      artifactName: "security-artifacts"
+      variableGroup: "Security"
+      backendServiceArm: "Security-SC"
       environmentName: "lab"
       stageName: "labplan"
       stageDisplayName: "Development"
-      workingDirectory: "$(Pipeline.Workspace)/DevOps-CI/devops-artifacts/azure-lab/devops"
+      workingDirectory: "$(Pipeline.Workspace)/Security-CI/security-artifacts/azure/security"
       agentPool: "Lab"
-      pipeline: "DevOps-CI"
+      pipeline: "Security-CI"
       dependsOn: []  # Explicitly set to an empty list for independent execution
 
   - template: templates/template-terraform-cd.yml
     parameters:
-      team: "devops"
-      artifactName: "devops-artifacts"
-      variableGroup: "DevOps"
-      backendServiceArm: "DevOps-SC"
+      team: "security"
+      artifactName: "security-artifacts"
+      variableGroup: "Security"
+      backendServiceArm: "Security-SC"
       environmentName: "lab"
       stageName: "lab"
       stageDisplayName: "Development"
-      workingDirectory: "$(Pipeline.Workspace)/DevOps-CI/devops-artifacts/azure-lab/devops"
+      workingDirectory: "$(Pipeline.Workspace)/Security-CI/security-artifacts/azure/security"
       agentPool: "Lab"
-      pipeline: "DevOps-CI"
+      pipeline: "Security-CI"
       dependsOn: [labplan]  # Explicitly set to an empty list for independent execution

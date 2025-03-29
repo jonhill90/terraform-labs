@@ -2,8 +2,8 @@ trigger: none
 
 resources:
   pipelines:
-    - pipeline: Database-CI
-      source: Database-CI
+    - pipeline: DevOps-CI
+      source: DevOps-CI
       trigger:
         branches:
           - main
@@ -14,28 +14,28 @@ pool:
 stages:
   - template: templates/template-terraform-plan.yml
     parameters:
-      team: "database"
-      artifactName: "database-artifacts"
-      variableGroup: "Database"
-      backendServiceArm: "Database-SC"
+      team: "devops"
+      artifactName: "devops-artifacts"
+      variableGroup: "DevOps"
+      backendServiceArm: "DevOps-SC"
       environmentName: "lab"
       stageName: "labplan"
       stageDisplayName: "Development"
-      workingDirectory: "$(Pipeline.Workspace)/Database-CI/database-artifacts/azure-lab/database"
+      workingDirectory: "$(Pipeline.Workspace)/DevOps-CI/devops-artifacts/azure/devops"
       agentPool: "Lab"
-      pipeline: "Database-CI"
+      pipeline: "DevOps-CI"
       dependsOn: []  # Explicitly set to an empty list for independent execution
 
   - template: templates/template-terraform-cd.yml
     parameters:
-      team: "database"
-      artifactName: "database-artifacts"
-      variableGroup: "Database"
-      backendServiceArm: "Database-SC"
+      team: "devops"
+      artifactName: "devops-artifacts"
+      variableGroup: "DevOps"
+      backendServiceArm: "DevOps-SC"
       environmentName: "lab"
       stageName: "lab"
       stageDisplayName: "Development"
-      workingDirectory: "$(Pipeline.Workspace)/Database-CI/database-artifacts/azure-lab/database"
+      workingDirectory: "$(Pipeline.Workspace)/DevOps-CI/devops-artifacts/azure/devops"
       agentPool: "Lab"
-      pipeline: "Database-CI"
+      pipeline: "DevOps-CI"
       dependsOn: [labplan]  # Explicitly set to an empty list for independent execution

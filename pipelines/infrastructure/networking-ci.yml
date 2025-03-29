@@ -4,7 +4,7 @@ trigger:
       - main  
   paths:
     include:
-      - azure-lab/database/**  
+      - azure/networking/**  
 
 pool:
   name: 'Lab'  
@@ -12,6 +12,6 @@ pool:
 extends:
   template: templates/template-terraform-ci.yml  
   parameters:
-    artifactName: "database-artifacts"
-    team: "database"
+    artifactName: "networking-artifacts"
+    team: "networking"
     agentPool: "Lab"

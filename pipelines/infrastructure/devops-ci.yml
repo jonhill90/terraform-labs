@@ -4,7 +4,7 @@ trigger:
       - main  
   paths:
     include:
-      - azure-lab/security/**  
+      - azure/devops/**  
 
 pool:
   name: 'Lab'  
@@ -12,6 +12,6 @@ pool:
 extends:
   template: templates/template-terraform-ci.yml  
   parameters:
-    artifactName: "security-artifacts"
-    team: "security"
+    artifactName: "devops-artifacts"
+    team: "devops"
     agentPool: "Lab"
