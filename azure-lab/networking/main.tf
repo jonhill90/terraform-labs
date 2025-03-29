@@ -241,7 +241,7 @@ module "identity_vnet" {
   }
   depends_on = [azurerm_resource_group.networking, module.network-watcher]
 }
-
+/*
 # ----------------------------------------
 #region vNet Peering
 # ----------------------------------------
@@ -313,7 +313,7 @@ module "vnet_peering_identity" {
     azurerm.spoke = azurerm.identity
   }
 }
-
+/*
 # ----------------------------------------
 #region Subnets with Service Delegation
 # ----------------------------------------
