@@ -3,7 +3,7 @@ terraform {
 }
 
 # ----------------------------------------
-#region Resource Groups
+#region Resource Groups (rg)
 # ----------------------------------------
 resource "azurerm_resource_group" "networking_connectivity" {
   name     = "Networking"
@@ -54,7 +54,7 @@ resource "azurerm_resource_group" "networking" {
 }
 
 # ----------------------------------------
-#region Network - Watchers
+#region Network Watchers (nw)
 # ----------------------------------------
 module "network-watcher-connectivity" {
   source              = "../../modules/azurerm/network/network-watcher"
@@ -74,12 +74,12 @@ module "network-watcher-connectivity" {
 
   depends_on = [azurerm_resource_group.networking_connectivity]
 }
-/*
-module "network-watcher-management" {
+
+module "nw_management" {
   source              = "../../modules/azurerm/network/network-watcher"
-  name                = "network-watcher"
-  resource_group_name = azurerm_resource_group.networking_management.name
-  location            = azurerm_resource_group.networking_management.location
+  name                = "nw-management"
+  resource_group_name = azurerm_resource_group.rg_networking_management.name
+  location            = azurerm_resource_group.rg_networking_management.location
 
   providers = {
     azurerm = azurerm.management
@@ -91,9 +91,9 @@ module "network-watcher-management" {
     project     = var.project
   }
 
-  depends_on = [azurerm_resource_group.networking_management]
+  depends_on = [azurerm_resource_group.rg_networking_management]
 }
-*/
+
 module "network-watcher-identity" {
   source              = "../../modules/azurerm/network/network-watcher"
   name                = "network-watcher"
