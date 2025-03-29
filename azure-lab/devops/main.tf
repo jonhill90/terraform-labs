@@ -1,6 +1,7 @@
-terraform {
+/*terraform {
   backend "azurerm" {}
 }
+*/
 
 # ----------------------------------------
 #region Repositories
@@ -226,7 +227,7 @@ resource "azuredevops_serviceendpoint_github" "application" {
 
   depends_on = [module.application_project]
 }
-
+/*
 # --------------------------------------------------
 #region Azure DevOps Build Pipeline (CI)
 # --------------------------------------------------
@@ -615,3 +616,4 @@ resource "azuredevops_build_definition" "twingate_cd" {
   }
   depends_on = [azuredevops_serviceendpoint_github.application, azuredevops_build_definition.twingate_ci]
 }
+*/

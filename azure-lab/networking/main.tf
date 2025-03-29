@@ -217,6 +217,7 @@ module "mgmt_vnet" {
   depends_on = [azurerm_resource_group.networking, module.network-watcher]
 }
 */
+/*
 module "identity_vnet" {
   source = "../../modules/azurerm/network/vnet"
 
@@ -241,6 +242,7 @@ module "identity_vnet" {
   }
   depends_on = [azurerm_resource_group.networking, module.network-watcher]
 }
+*/
 /*
 # ----------------------------------------
 #region vNet Peering
@@ -290,7 +292,7 @@ module "vnet_peering_mgmt" {
     azurerm.spoke = azurerm.management
   }
 }
-*/
+/*
 module "vnet_peering_identity" {
   source = "../../modules/azurerm/network/peering"
 
@@ -313,6 +315,7 @@ module "vnet_peering_identity" {
     azurerm.spoke = azurerm.identity
   }
 }
+*/
 /*
 # ----------------------------------------
 #region Subnets with Service Delegation
