@@ -3,7 +3,7 @@ terraform {
 }
 
 # ----------------------------------------
-# Resource Groups
+#region Resource Groups
 # ----------------------------------------
 resource "azurerm_resource_group" "lab" {
   name     = "Compute"
@@ -29,12 +29,24 @@ resource "azurerm_resource_group" "compute_connectivity" {
   }
 }
 
+resource "azurerm_resource_group" " rg-compute-mgmt" {
+  name     = "rg-compute-mgmt"
+  location = "eastus"
+  provider = azurerm.management
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
 data "azurerm_resource_group" "security" {
   name     = "Security"
   provider = azurerm.lab
 }
 # ----------------------------------------
-# Networking
+#region Networking
 # ----------------------------------------
 data "azurerm_virtual_network" "networking" {
   name                = "lab-vnet"
@@ -71,7 +83,7 @@ module "container_registry" {
 }
 
 # ----------------------------------------
-# Azure Compute Gallery
+#region Azure Compute Gallery
 # ----------------------------------------
 resource "azurerm_shared_image_gallery" "compute_gallery" {
   name                = "ComputeGallery"
@@ -88,7 +100,7 @@ resource "azurerm_shared_image_gallery" "compute_gallery" {
 }
 
 # ----------------------------------------
-# Azure Compute Gallery Image Definitions
+#region Azure Compute Gallery Image Definitions
 # ----------------------------------------
 resource "azurerm_shared_image" "windows_2025_base" {
   name                = "windows-2025-base"
@@ -135,9 +147,9 @@ resource "azurerm_shared_image" "windows_2025_core" {
 }
 
 # ----------------------------------------
-# Virtual Machines
+#region Virtual Machines
 # ----------------------------------------
-/*
+
 module "build_agent" {
   source = "../../modules/azurerm/compute/vm/windows/base"
 
@@ -152,7 +164,7 @@ module "build_agent" {
   admin_password        = var.admin_password
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.management
   }
 
   depends_on = [
@@ -162,7 +174,6 @@ module "build_agent" {
     azurerm_shared_image.windows_2025_core
   ]
 }
-*/
 
 /*
 module "dc01" {
