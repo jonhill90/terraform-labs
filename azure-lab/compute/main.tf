@@ -149,7 +149,7 @@ resource "azurerm_shared_image" "windows_2025_core" {
 # ----------------------------------------
 #region Virtual Machines
 # ----------------------------------------
-
+/*
 module "build_agent" {
   source = "../../modules/azurerm/compute/vm/windows/base"
 
