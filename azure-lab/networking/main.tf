@@ -16,9 +16,9 @@ resource "azurerm_resource_group" "networking_connectivity" {
     project     = var.project
   }
 }
-/*
-resource "azurerm_resource_group" "networking_management" {
-  name     = "Networking"
+
+resource "azurerm_resource_group" "rg_networking_management" {
+  name     = "rg-networking-management"
   location = "eastus"
   provider = azurerm.management
 
@@ -28,7 +28,7 @@ resource "azurerm_resource_group" "networking_management" {
     project     = var.project
   }
 }
-*/
+
 resource "azurerm_resource_group" "networking_identity" {
   name     = "Networking"
   location = "eastus"

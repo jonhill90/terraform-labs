@@ -29,8 +29,8 @@ resource "azurerm_resource_group" "compute_connectivity" {
   }
 }
 
-resource "azurerm_resource_group" "rg_compute_mgmt" {
-  name     = "rg-compute-mgmt"
+resource "azurerm_resource_group" "rg_compute_management" {
+  name     = "rg-compute-management"
   location = "eastus"
   provider = azurerm.management
 
