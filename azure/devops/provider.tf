@@ -20,8 +20,8 @@ provider "github" {
 }
 
 provider "azurerm" {
-  alias           = "lab"
-  subscription_id = var.lab_subscription_id
+  alias           = "lzp1"
+  subscription_id = var.lzp1_subscription_id
   features {}
 }
 

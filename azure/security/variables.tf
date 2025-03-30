@@ -1,5 +1,5 @@
 # ----------------------------------------
-# Tags
+#region Tags
 # ----------------------------------------
 variable "environment" {
   description = "Environment Name (e.g., dev, prod)"
@@ -17,16 +17,34 @@ variable "project" {
 }
 
 # ----------------------------------------
-# Azure Settings
+#region Azure Settings
 # ----------------------------------------
 variable "lzp1_subscription_id" {
-  description = "Azure Landing zone P1 Subscription ID"
+  description = "Landing zone P1 Azure Subscription ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "lza2_subscription_id" {
+  description = "Landing zone A2 Azure Subscription ID"
   type        = string
   sensitive   = true
 }
 
 variable "management_subscription_id" {
-  description = "Azure Subscription ID"
+  description = "Management Azure Subscription ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "connectivity_subscription_id" {
+  description = "Connectivity Azure Subscription ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "identity_subscription_id" {
+  description = "Identity Azure Subscription ID"
   type        = string
   sensitive   = true
 }
@@ -38,7 +56,7 @@ variable "tenant_id" {
 }
 
 # ----------------------------------------
-# Azure Service Principal
+#region Azure Service Principal
 # ----------------------------------------
 variable "client_id" {
   description = "Azure Service Principal Client ID"
@@ -53,7 +71,7 @@ variable "client_secret" {
 }
 
 # ----------------------------------------
-# Azure Admin Account/Group
+#region Azure Admin Account/Group
 # ----------------------------------------
 variable "admin_object_id" {
   description = "Admin Account/Group"
@@ -62,7 +80,7 @@ variable "admin_object_id" {
 }
 
 # ----------------------------------------
-# Storage Account
+#region Storage Account
 # ----------------------------------------
 variable "storage_account" {
   description = "Storage Account"
@@ -71,7 +89,7 @@ variable "storage_account" {
 }
 
 # ----------------------------------------
-# Vault
+#region Vaults
 # ----------------------------------------
 variable "security_vault_name" {
   description = "Security Vault Name"
@@ -116,7 +134,7 @@ variable "application_vault_name" {
 }
 
 # ----------------------------------------
-# Azure DevOps Settings
+#region Azure DevOps Settings
 # ----------------------------------------
 variable "devops_org_name" {
   description = "The name of the Azure DevOps Organization"
@@ -137,7 +155,7 @@ variable "devops_pat" {
 }
 
 # ----------------------------------------
-# GitHub Settings
+#region GitHub Settings
 # ----------------------------------------
 variable "github_token" {
   description = "GitHub Personal Access Token"

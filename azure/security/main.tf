@@ -183,6 +183,7 @@ data "azuread_service_principal" "application_sp" {
 # --------------------------------------------------
 #region Service Principal Role Assignments (rc)
 # --------------------------------------------------
+/*
 module "security_sp_role_assignment" {
   source       = "../../modules/azurerm/security/role-assignment"
   role_scope   = data.azurerm_management_group.mg.id
@@ -273,7 +274,7 @@ module "application_sp_role_assignment" {
 
   depends_on = [data.azuread_service_principal.application_sp]
 }
-
+*/
 # --------------------------------------------------
 #region Azure DevOps Service Endpoint (github)
 # --------------------------------------------------
@@ -342,7 +343,7 @@ resource "azuredevops_build_definition" "security_cd" {
 resource "azurerm_resource_group" "security" {
   name     = "security"
   location = "eastus"
-  provider = azurerm.lab
+  provider = azurerm.lzp1
 
   tags = {
     environment = var.environment
@@ -351,8 +352,8 @@ resource "azurerm_resource_group" "security" {
   }
 }
 
-resource "azurerm_resource_group" "security_mgmt" {
-  name     = "security"
+resource "azurerm_resource_group" "rg_security_management" {
+  name     = "rg-security-management"
   location = "eastus"
   provider = azurerm.management
 
@@ -363,14 +364,14 @@ resource "azurerm_resource_group" "security_mgmt" {
   }
 }
 
-data "azurerm_resource_group" "devops" {
-  name     = "DevOps"
-  provider = azurerm.lab
+data "azurerm_resource_group" "rg_devops_management" {
+  name     = "rg-devops-management"
+  provider = azurerm.management
 }
 
-data "azurerm_resource_group" "networking" {
-  name     = "Networking"
-  provider = azurerm.lab
+data "azurerm_resource_group" "rg_networking_connectivity" {
+  name     = "rg-networking-connectivity"
+  provider = azurerm.connectivity
 }
 
 # ----------------------------------------
@@ -378,9 +379,9 @@ data "azurerm_resource_group" "networking" {
 # ----------------------------------------
 resource "azurerm_storage_account" "tfstate" {
   name                     = var.storage_account
-  resource_group_name      = azurerm_resource_group.security.name
-  location                 = azurerm_resource_group.security.location
-  provider                 = azurerm.lab
+  resource_group_name      = azurerm_resource_group.rg_security_management.name
+  location                 = azurerm_resource_group.rg_security_management.location
+  provider                 = azurerm.management
   account_tier             = "Standard"
   account_replication_type = "LRS"
 
@@ -390,7 +391,7 @@ resource "azurerm_storage_account" "tfstate" {
     project     = var.project
   }
 
-  depends_on = [azurerm_resource_group.security]
+  depends_on = [azurerm_resource_group.rg_security_management]
 }
 
 # ----------------------------------------
@@ -400,7 +401,7 @@ resource "azurerm_storage_container" "tfstate" {
   name                  = "tfstate"
   storage_account_name  = azurerm_storage_account.tfstate.name
   container_access_type = "private"
-  provider              = azurerm.lab
+  provider              = azurerm.management
 
   depends_on = [azurerm_storage_account.tfstate]
 }
@@ -411,7 +412,7 @@ resource "azurerm_storage_container" "tfstate" {
 module "security_vault" {
   source                     = "../../modules/azurerm/security/vault"
   key_vault_name             = var.security_vault_name
-  resource_group_name        = azurerm_resource_group.security.name
+  resource_group_name        = azurerm_resource_group.rg_security_management.name
   location                   = "eastus"
   sku_name                   = "standard"
   purge_protection           = false
@@ -420,46 +421,22 @@ module "security_vault" {
   tenant_id = var.tenant_id
 
   providers = {
-    azurerm = azurerm.lzp1
+    azurerm = azurerm.management
   }
 
   depends_on = [azurerm_resource_group.security]
 }
 
-module "devops_vault" {
-  source                     = "../../modules/azurerm/security/vault"
-  key_vault_name             = var.devops_vault_name
-  resource_group_name        = azurerm_resource_group.security.name
-  location                   = "eastus"
-  sku_name                   = "standard"
-  purge_protection           = false
-  soft_delete_retention_days = 90
-
-  tenant_id = var.tenant_id
-
-  providers = {
-    azurerm = azurerm.lzp1
-  }
-
-  depends_on = [azurerm_resource_group.security]
+data "azurerm_key_vault" "devops" {
+  name                = var.devops_vault_name
+  resource_group_name = data.azurerm_resource_group.rg_devops_management.name
+  provider            = azurerm.management
 }
 
-module "networking_vault" {
-  source                     = "../../modules/azurerm/security/vault"
-  key_vault_name             = var.networking_vault_name
-  resource_group_name        = azurerm_resource_group.security.name
-  location                   = "eastus"
-  sku_name                   = "standard"
-  purge_protection           = false
-  soft_delete_retention_days = 90
-
-  tenant_id = var.tenant_id
-
-  providers = {
-    azurerm = azurerm.lzp1
-  }
-
-  depends_on = [azurerm_resource_group.security]
+data "azurerm_key_vault" "networking" {
+  name                = var.networking_vault_name
+  resource_group_name = data.azurerm_resource_group.rg_networking_connectivity.name
+  provider            = azurerm.connectivity
 }
 
 module "compute_vault" {
@@ -535,6 +512,131 @@ module "application_vault" {
 }
 
 # --------------------------------------------------
+#region Azure Entra Users (ad)
+# --------------------------------------------------
+data "azuread_users" "security_admins" {
+  object_ids = [var.admin_object_id]
+}
+
+data "azuread_users" "devops_admins" {
+  object_ids = [var.admin_object_id]
+}
+
+data "azuread_users" "networking_admins" {
+  object_ids = [var.admin_object_id]
+}
+
+data "azuread_users" "compute_admins" {
+  object_ids = [var.admin_object_id]
+}
+
+data "azuread_users" "database_admins" {
+  object_ids = [var.admin_object_id]
+}
+
+data "azuread_users" "storage_admins" {
+  object_ids = [var.admin_object_id]
+}
+
+data "azuread_users" "application_admins" {
+  object_ids = [var.admin_object_id]
+}
+
+# --------------------------------------------------
+#region Azure Entra Groups (ad)
+# --------------------------------------------------
+resource "azuread_group" "security_admins" {
+  display_name     = "Security Admins"
+  mail_enabled     = true
+  mail_nickname    = "SecurityAdmins"
+  security_enabled = true
+  types            = ["Unified"]
+
+  owners  = data.azuread_users.security_admins.object_ids
+  members = data.azuread_users.security_admins.object_ids
+
+  depends_on = [data.azuread_users.security_admins]
+}
+
+resource "azuread_group" "devops_admins" {
+  display_name     = "DevOps Admins"
+  mail_enabled     = true
+  mail_nickname    = "DevOpsAdmins"
+  security_enabled = true
+  types            = ["Unified"]
+
+  owners  = data.azuread_users.devops_admins.object_ids
+  members = data.azuread_users.devops_admins.object_ids
+
+  depends_on = [data.azuread_users.devops_admins]
+}
+
+resource "azuread_group" "networking_admins" {
+  display_name     = "Networking Admins"
+  mail_enabled     = true
+  mail_nickname    = "NetworkingAdmins"
+  security_enabled = true
+  types            = ["Unified"]
+
+  owners  = data.azuread_users.networking_admins.object_ids
+  members = data.azuread_users.networking_admins.object_ids
+
+  depends_on = [data.azuread_users.networking_admins]
+}
+
+resource "azuread_group" "compute_admins" {
+  display_name     = "Compute Admins"
+  mail_enabled     = true
+  mail_nickname    = "ComputeAdmins"
+  security_enabled = true
+  types            = ["Unified"]
+
+  owners  = data.azuread_users.compute_admins.object_ids
+  members = data.azuread_users.compute_admins.object_ids
+
+  depends_on = [data.azuread_users.compute_admins]
+}
+
+resource "azuread_group" "database_admins" {
+  display_name     = "Database Admins"
+  mail_enabled     = true
+  mail_nickname    = "DatabaseAdmins"
+  security_enabled = true
+  types            = ["Unified"]
+
+  owners  = data.azuread_users.database_admins.object_ids
+  members = data.azuread_users.database_admins.object_ids
+
+  depends_on = [data.azuread_users.database_admins]
+}
+
+resource "azuread_group" "storage_admins" {
+  display_name     = "Storage Admins"
+  mail_enabled     = true
+  mail_nickname    = "StorageAdmins"
+  security_enabled = true
+  types            = ["Unified"]
+
+  owners  = data.azuread_users.storage_admins.object_ids
+  members = data.azuread_users.storage_admins.object_ids
+
+  depends_on = [data.azuread_users.storage_admins]
+}
+
+resource "azuread_group" "application_admins" {
+  display_name     = "Application Admins"
+  mail_enabled     = true
+  mail_nickname    = "ApplicationAdmins"
+  security_enabled = true
+  types            = ["Unified"]
+
+  owners  = data.azuread_users.application_admins.object_ids
+  members = data.azuread_users.application_admins.object_ids
+
+  depends_on = [data.azuread_users.application_admins]
+}
+
+# --------------------------------------------------
 #regions Secure Vault Access (pol)
 # --------------------------------------------------
 module "security_vault_access" {
@@ -544,7 +646,7 @@ module "security_vault_access" {
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = var.admin_object_id
+      object_id               = resource.azuread_group.security_admins.object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
@@ -552,20 +654,20 @@ module "security_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lzp1
+    azurerm = azurerm.management
   }
 
-  depends_on = [module.security_vault]
+  depends_on = [module.security_vault, resource.azuread_group.security_admins]
 }
 
-module "security_devops_vault_access" {
+module "devops_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
-  key_vault_id = module.devops_vault.key_vault_id
+  key_vault_id = data.azurerm_key_vault.devops.id
 
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = var.admin_object_id
+      object_id               = resource.azuread_group.devops_admins.object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
@@ -573,20 +675,20 @@ module "security_devops_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lzp1
+    azurerm = azurerm.management
   }
 
-  depends_on = [module.devops_vault]
+  depends_on = [data.azurerm_key_vault.devops, resource.azuread_group.devops_admins]
 }
 
 module "networking_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
-  key_vault_id = module.networking_vault.key_vault_id
+  key_vault_id = data.azurerm_key_vault.networking.id
 
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = var.admin_object_id
+      object_id               = resource.azuread_group.networking_admins.object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
@@ -594,12 +696,12 @@ module "networking_vault_access" {
   ]
 
   providers = {
-    azurerm = azurerm.lzp1
+    azurerm = azurerm.connectivity
   }
 
-  depends_on = [module.networking_vault]
+  depends_on = [data.azurerm_key_vault.networking, resource.azuread_group.networking_admins]
 }
-
+/*
 module "compute_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
   key_vault_id = module.compute_vault.key_vault_id
@@ -683,10 +785,11 @@ module "application_vault_access" {
 
   depends_on = [module.application_vault]
 }
-
+*/
 # --------------------------------------------------
 #region Secure Vault Access (pol)
 # --------------------------------------------------
+/*
 module "security_sp_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
   key_vault_id = module.security_vault.key_vault_id
@@ -833,3 +936,4 @@ module "application_sp_vault_access" {
 
   depends_on = [module.application_vault]
 }
+*/

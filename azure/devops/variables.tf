@@ -1,5 +1,5 @@
 # ----------------------------------------
-# Tags
+#region Tags
 # ----------------------------------------
 variable "environment" {
   description = "Environment Name (e.g., dev, prod)"
@@ -17,7 +17,7 @@ variable "project" {
 }
 
 # ----------------------------------------
-# GitHub Settings
+#region GitHub Settings
 # ----------------------------------------
 variable "github_token" {
   description = "GitHub Personal Access Token"
@@ -31,9 +31,9 @@ variable "github_repo_id" {
 }
 
 # ----------------------------------------
-# Azure Settings
+#region Azure Settings
 # ----------------------------------------
-variable "lab_subscription_id" {
+variable "lzp1_subscription_id" {
   description = "Azure Subscription ID"
   type        = string
   sensitive   = true
@@ -52,7 +52,7 @@ variable "tenant_id" {
 }
 
 # ----------------------------------------
-# Azure DevOps Settings
+#region Azure DevOps Settings
 # ----------------------------------------
 variable "devops_org_name" {
   description = "The name of the Azure DevOps Organization"
@@ -73,7 +73,7 @@ variable "devops_pat" {
 }
 
 # ----------------------------------------
-# Azure Service Principal
+#region Azure Service Principal
 # ----------------------------------------
 variable "client_id" {
   description = "Azure Service Principal Client ID"
@@ -88,40 +88,9 @@ variable "client_secret" {
 }
 
 # ----------------------------------------
-# Vault
+#region Azure Key Vault Settings
 # ----------------------------------------
 variable "devops_vault_name" {
-  description = "DevOps Vault Name"
+  description = "Name of the Azure Key Vault for DevOps"
   type        = string
-  sensitive   = true
-}
-
-variable "networking_vault_name" {
-  description = "Networking Vault Name"
-  type        = string
-  sensitive   = true
-}
-
-variable "compute_vault_name" {
-  description = "Compute Vault Name"
-  type        = string
-  sensitive   = true
-}
-
-variable "database_vault_name" {
-  description = "Database Vault Name"
-  type        = string
-  sensitive   = true
-}
-
-variable "storage_vault_name" {
-  description = "Storage Vault Name"
-  type        = string
-  sensitive   = true
-}
-
-variable "application_vault_name" {
-  description = "Application Vault Name"
-  type        = string
-  sensitive   = true
 }

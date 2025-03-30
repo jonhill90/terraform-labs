@@ -135,10 +135,10 @@ module "application_project" {
 # ----------------------------------------
 #region Resource Groups
 # ----------------------------------------
-resource "azurerm_resource_group" "devops" {
-  name     = "DevOps"
+resource "azurerm_resource_group" "rg_devops_management" {
+  name     = "rg-devops-management"
   location = "eastus"
-  provider = azurerm.lab
+  provider = azurerm.management
 
   tags = {
     environment = var.environment
@@ -227,6 +227,28 @@ resource "azuredevops_serviceendpoint_github" "application" {
 
   depends_on = [module.application_project]
 }
+
+# --------------------------------------------------
+#region Key Vault (kv)
+# --------------------------------------------------
+module "devops_vault" {
+  source                     = "../../modules/azurerm/security/vault"
+  key_vault_name             = var.devops_vault_name
+  resource_group_name        = azurerm_resource_group.rg_devops_management.name
+  location                   = "eastus"
+  sku_name                   = "standard"
+  purge_protection           = false
+  soft_delete_retention_days = 90
+
+  tenant_id = var.tenant_id
+
+  providers = {
+    azurerm = azurerm.management
+  }
+
+  depends_on = [azurerm_resource_group.rg_devops_management]
+}
+
 /*
 # --------------------------------------------------
 #region Azure DevOps Build Pipeline (CI)

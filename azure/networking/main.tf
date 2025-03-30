@@ -1,12 +1,12 @@
-terraform {
+/*terraform {
   backend "azurerm" {}
 }
-
+*/
 # ----------------------------------------
 #region Resource Groups (rg)
 # ----------------------------------------
-resource "azurerm_resource_group" "networking_connectivity" {
-  name     = "Networking"
+resource "azurerm_resource_group" "rg_networking_connectivity" {
+  name     = "rg-networking-connectivity"
   location = "eastus"
   provider = azurerm.connectivity
 
@@ -29,8 +29,8 @@ resource "azurerm_resource_group" "rg_networking_management" {
   }
 }
 
-resource "azurerm_resource_group" "networking_identity" {
-  name     = "Networking"
+resource "azurerm_resource_group" "rg_networking_identity" {
+  name     = "rg-networking-identity"
   location = "eastus"
   provider = azurerm.identity
 
@@ -41,10 +41,22 @@ resource "azurerm_resource_group" "networking_identity" {
   }
 }
 
-resource "azurerm_resource_group" "networking" {
-  name     = "Networking"
+resource "azurerm_resource_group" "rg_networking_lzp1" {
+  name     = "rg-networking-lzp1"
   location = "eastus"
-  provider = azurerm.lab
+  provider = azurerm.lzp1
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
+resource "azurerm_resource_group" "rg_networking_lza2" {
+  name     = "rg-networking-lza2"
+  location = "eastus"
+  provider = azurerm.lza2
 
   tags = {
     environment = var.environment
@@ -54,13 +66,34 @@ resource "azurerm_resource_group" "networking" {
 }
 
 # ----------------------------------------
+#region Key Vaults (kv)
+# ----------------------------------------
+module "networking_vault" {
+  source                     = "../../modules/azurerm/security/vault"
+  key_vault_name             = var.networking_vault_name
+  resource_group_name        = azurerm_resource_group.rg_networking_connectivity.name
+  location                   = "eastus"
+  sku_name                   = "standard"
+  purge_protection           = false
+  soft_delete_retention_days = 90
+
+  tenant_id = var.tenant_id
+
+  providers = {
+    azurerm = azurerm.connectivity
+  }
+
+  depends_on = [azurerm_resource_group.rg_networking_connectivity]
+}
+
+# ----------------------------------------
 #region Network Watchers (nw)
 # ----------------------------------------
-module "network-watcher-connectivity" {
+module "nw_connectivity" {
   source              = "../../modules/azurerm/network/network-watcher"
-  name                = "network-watcher"
-  resource_group_name = azurerm_resource_group.networking_connectivity.name
-  location            = azurerm_resource_group.networking_connectivity.location
+  name                = "nw-connectivity"
+  resource_group_name = azurerm_resource_group.rg_networking_connectivity.name
+  location            = azurerm_resource_group.rg_networking_connectivity.location
 
   providers = {
     azurerm = azurerm.connectivity
@@ -72,7 +105,7 @@ module "network-watcher-connectivity" {
     project     = var.project
   }
 
-  depends_on = [azurerm_resource_group.networking_connectivity]
+  depends_on = [azurerm_resource_group.rg_networking_connectivity]
 }
 
 module "nw_management" {
@@ -94,11 +127,11 @@ module "nw_management" {
   depends_on = [azurerm_resource_group.rg_networking_management]
 }
 
-module "network-watcher-identity" {
+module "nw_identity" {
   source              = "../../modules/azurerm/network/network-watcher"
-  name                = "network-watcher"
-  resource_group_name = azurerm_resource_group.networking_identity.name
-  location            = azurerm_resource_group.networking_identity.location
+  name                = "nw-identity"
+  resource_group_name = azurerm_resource_group.rg_networking_identity.name
+  location            = azurerm_resource_group.rg_networking_identity.location
 
   providers = {
     azurerm = azurerm.identity
@@ -110,17 +143,17 @@ module "network-watcher-identity" {
     project     = var.project
   }
 
-  depends_on = [azurerm_resource_group.networking_identity]
+  depends_on = [azurerm_resource_group.rg_networking_identity]
 }
 
-module "network-watcher" {
+module "nw_lzp1" {
   source              = "../../modules/azurerm/network/network-watcher"
-  name                = "network-watcher"
-  resource_group_name = azurerm_resource_group.networking.name
-  location            = azurerm_resource_group.networking.location
+  name                = "nw-lzp1"
+  resource_group_name = azurerm_resource_group.rg_networking_lzp1.name
+  location            = azurerm_resource_group.rg_networking_lzp1.location
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lzp1
   }
 
   tags = {
@@ -129,23 +162,51 @@ module "network-watcher" {
     project     = var.project
   }
 
-  depends_on = [azurerm_resource_group.networking]
+  depends_on = [azurerm_resource_group.rg_networking_lzp1]
+}
+
+module "nw_lza2" {
+  source              = "../../modules/azurerm/network/network-watcher"
+  name                = "nw-lza2"
+  resource_group_name = azurerm_resource_group.rg_networking_lza2.name
+  location            = azurerm_resource_group.rg_networking_lza2.location
+
+  providers = {
+    azurerm = azurerm.lza2
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_resource_group.rg_networking_lza2]
 }
 
 # ----------------------------------------
-#region vNet Hub
+#region vNet Hub (vnet)
 # ----------------------------------------
-module "hub_vnet" {
+module "vnet_hub" {
   source = "../../modules/azurerm/network/vnet"
 
-  vnet_name           = "hub-vnet"
-  vnet_location       = azurerm_resource_group.networking.location
-  vnet_resource_group = azurerm_resource_group.networking.name
+  vnet_name           = "vnet-hub-connectivity"
+  vnet_location       = azurerm_resource_group.rg_networking_connectivity.location
+  vnet_resource_group = azurerm_resource_group.rg_networking_connectivity.name
   vnet_address_space  = ["10.10.0.0/16"]
   dns_servers         = []
 
   subnets = {
-    default = { address_prefixes = ["10.10.1.0/24"] }
+    snet-default = {
+      address_prefixes = ["10.10.1.0/24"]
+    }
+
+    snet-aci = {
+      address_prefixes   = ["10.10.10.0/24"]
+      delegation_name    = "aciDelegation"
+      delegation_service = "Microsoft.ContainerInstance/containerGroups"
+      delegation_actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
   }
 
   providers = {
@@ -157,52 +218,25 @@ module "hub_vnet" {
     owner       = var.owner
     project     = var.project
   }
-  depends_on = [azurerm_resource_group.networking_connectivity, module.network-watcher-connectivity]
+
+  depends_on = [azurerm_resource_group.rg_networking_connectivity, module.nw_connectivity]
 }
+
 # ----------------------------------------
-#region vNet Spokes
+#region vNet Spokes (vnet)
 # ----------------------------------------
-module "lab_vnet" {
+module "vnet_spoke_management" {
   source = "../../modules/azurerm/network/vnet"
-
-  vnet_name           = "lab-vnet"
-  vnet_location       = azurerm_resource_group.networking.location
-  vnet_resource_group = azurerm_resource_group.networking.name
-  vnet_address_space  = ["10.100.0.0/16"]
-  dns_servers         = []
-
-  subnets = {
-    default     = { address_prefixes = ["10.100.1.0/24"] }
-    compute     = { address_prefixes = ["10.100.5.0/24"] }
-    database    = { address_prefixes = ["10.100.10.0/24"] }
-    storage     = { address_prefixes = ["10.100.15.0/24"] }
-    application = { address_prefixes = ["10.100.20.0/24"] }
-  }
-
-  providers = {
-    azurerm = azurerm.lab
-  }
-
-  tags = {
-    environment = var.environment
-    owner       = var.owner
-    project     = var.project
-  }
-  depends_on = [azurerm_resource_group.networking, module.network-watcher]
-}
-/*
-module "mgmt_vnet" {
-  source = "../../modules/azurerm/network/vnet"
-
-  vnet_name           = "mgmt-vnet"
-  vnet_location       = azurerm_resource_group.networking_management.location
-  vnet_resource_group = azurerm_resource_group.networking_management.name
+  vnet_name           = "vnet-spoke-management"
+  vnet_location       = azurerm_resource_group.rg_networking_management.location
+  vnet_resource_group = azurerm_resource_group.rg_networking_management.name
   vnet_address_space  = ["10.20.0.0/16"]
   dns_servers         = []
 
   subnets = {
-    default = { address_prefixes = ["10.20.1.0/24"] }
-    compute = { address_prefixes = ["10.20.5.0/24"] }
+    snet-default = {
+      address_prefixes = ["10.20.1.0/24"]
+    }
   }
 
   providers = {
@@ -214,21 +248,22 @@ module "mgmt_vnet" {
     owner       = var.owner
     project     = var.project
   }
-  depends_on = [azurerm_resource_group.networking, module.network-watcher]
-}
-*/
-/*
-module "identity_vnet" {
-  source = "../../modules/azurerm/network/vnet"
 
-  vnet_name           = "identity-vnet"
-  vnet_location       = azurerm_resource_group.networking_identity.location
-  vnet_resource_group = azurerm_resource_group.networking_identity.name
+  depends_on = [azurerm_resource_group.rg_networking_management, module.nw_management]
+}
+
+module "vnet_spoke_identity" {
+  source = "../../modules/azurerm/network/vnet"
+  vnet_name = "vnet-spoke-identity"
+  vnet_location = azurerm_resource_group.rg_networking_identity.location
+  vnet_resource_group = azurerm_resource_group.rg_networking_identity.name
   vnet_address_space  = ["10.30.0.0/16"]
-  dns_servers         = []
+  dns_servers = []
 
   subnets = {
-    default = { address_prefixes = ["10.30.1.0/24"] }
+    snet-default = {
+      address_prefixes = ["10.30.1.0/24"]
+    }
   }
 
   providers = {
@@ -240,48 +275,79 @@ module "identity_vnet" {
     owner       = var.owner
     project     = var.project
   }
-  depends_on = [azurerm_resource_group.networking, module.network-watcher]
+
+  depends_on = [azurerm_resource_group.rg_networking_identity, module.nw_identity]
 }
-*/
-/*
+
+module "vnet_spoke_lzp1" {
+  source = "../../modules/azurerm/network/vnet"
+  vnet_name = "vnet-spoke-lzp1"
+  vnet_location = azurerm_resource_group.rg_networking_lzp1.location
+  vnet_resource_group = azurerm_resource_group.rg_networking_lzp1.name
+  vnet_address_space = ["10.40.0.0/16"]
+  dns_servers = []
+
+  subnets = {
+    snet-default = {
+      address_prefixes = ["10.40.1.0/24"]
+    }
+  }
+
+  providers = {
+    azurerm = azurerm.lzp1
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_resource_group.rg_networking_lzp1, module.nw_lzp1]
+}
+
+module "vnet_spoke_lza2" {
+  source = "../../modules/azurerm/network/vnet"
+  vnet_name = "vnet-spoke-lza2"
+  vnet_location = azurerm_resource_group.rg_networking_lza2.location
+  vnet_resource_group = azurerm_resource_group.rg_networking_lza2.name
+  vnet_address_space = ["10.50.0.0/16"]
+  dns_servers = []
+
+  subnets = {
+    snet-default = {
+      address_prefixes = ["10.50.1.0/24"]
+    }
+  }
+
+  providers = {
+    azurerm = azurerm.lza2
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_resource_group.rg_networking_lza2, module.nw_lza2]
+}
+
 # ----------------------------------------
 #region vNet Peering
 # ----------------------------------------
-module "vnet_peering" {
+module "vnet_peering_management" {
   source = "../../modules/azurerm/network/peering"
 
-  hub_to_spoke_peering_name = "hub-to-lab-peering"
-  hub_vnet_name             = module.hub_vnet.vnet_name
-  hub_vnet_resource_group   = azurerm_resource_group.networking_connectivity.name
-  hub_vnet_id               = module.hub_vnet.vnet_id
+  hub_to_spoke_peering_name = "hub-to-management-peering"
+  hub_vnet_name             = module.vnet_hub.vnet_name
+  hub_vnet_resource_group   = azurerm_resource_group.rg_networking_connectivity.name
+  hub_vnet_id               = module.vnet_hub.vnet_id
 
-  spoke_to_hub_peering_name = "lab-to-hub-peering"
-  spoke_vnet_name           = module.lab_vnet.vnet_name
-  spoke_vnet_resource_group = azurerm_resource_group.networking.name
-  spoke_vnet_id             = module.lab_vnet.vnet_id
-
-  allow_forwarded_traffic = true
-  allow_gateway_transit   = false
-  use_remote_gateways     = false
-
-  providers = {
-    azurerm.hub   = azurerm.connectivity
-    azurerm.spoke = azurerm.lab
-  }
-}
-/*
-module "vnet_peering_mgmt" {
-  source = "../../modules/azurerm/network/peering"
-
-  hub_to_spoke_peering_name = "hub-to-mgmt-peering"
-  hub_vnet_name             = module.hub_vnet.vnet_name
-  hub_vnet_resource_group   = azurerm_resource_group.networking_connectivity.name
-  hub_vnet_id               = module.hub_vnet.vnet_id
-
-  spoke_to_hub_peering_name = "mgmt-to-hub-peering"
-  spoke_vnet_name           = module.mgmt_vnet.vnet_name
-  spoke_vnet_resource_group = azurerm_resource_group.networking_management.name
-  spoke_vnet_id             = module.mgmt_vnet.vnet_id
+  spoke_to_hub_peering_name = "management-to-hub-peering"
+  spoke_vnet_name           = module.vnet_spoke_management.vnet_name
+  spoke_vnet_resource_group = azurerm_resource_group.rg_networking_management.name
+  spoke_vnet_id             = module.vnet_spoke_management.vnet_id
 
   allow_forwarded_traffic = true
   allow_gateway_transit   = false
@@ -291,20 +357,22 @@ module "vnet_peering_mgmt" {
     azurerm.hub   = azurerm.connectivity
     azurerm.spoke = azurerm.management
   }
+
+  depends_on = [module.vnet_hub, module.vnet_spoke_management]
 }
-/*
+
 module "vnet_peering_identity" {
   source = "../../modules/azurerm/network/peering"
 
   hub_to_spoke_peering_name = "hub-to-identity-peering"
-  hub_vnet_name             = module.hub_vnet.vnet_name
-  hub_vnet_resource_group   = azurerm_resource_group.networking_connectivity.name
-  hub_vnet_id               = module.hub_vnet.vnet_id
+  hub_vnet_name             = module.vnet_hub.vnet_name
+  hub_vnet_resource_group   = azurerm_resource_group.rg_networking_connectivity.name
+  hub_vnet_id               = module.vnet_hub.vnet_id
 
   spoke_to_hub_peering_name = "identity-to-hub-peering"
-  spoke_vnet_name           = module.identity_vnet.vnet_name
-  spoke_vnet_resource_group = azurerm_resource_group.networking_identity.name
-  spoke_vnet_id             = module.identity_vnet.vnet_id
+  spoke_vnet_name           = module.vnet_spoke_identity.vnet_name
+  spoke_vnet_resource_group = azurerm_resource_group.rg_networking_identity.name
+  spoke_vnet_id             = module.vnet_spoke_identity.vnet_id
 
   allow_forwarded_traffic = true
   allow_gateway_transit   = false
@@ -314,59 +382,63 @@ module "vnet_peering_identity" {
     azurerm.hub   = azurerm.connectivity
     azurerm.spoke = azurerm.identity
   }
+
+  depends_on = [module.vnet_hub, module.vnet_spoke_identity]
 }
-*/
-/*
-# ----------------------------------------
-#region Subnets with Service Delegation
-# ----------------------------------------
-resource "azurerm_subnet" "aci" {
-  name                 = "aci"
-  resource_group_name  = azurerm_resource_group.networking_connectivity.name
-  virtual_network_name = module.hub_vnet.vnet_name
-  address_prefixes     = ["10.10.10.0/24"]
-  provider             = azurerm.connectivity
 
-  delegation {
-    name = "aci-delegation"
+module "vnet_peering_lzp1" {
+  source = "../../modules/azurerm/network/peering"
 
-    service_delegation {
-      name = "Microsoft.ContainerInstance/containerGroups"
+  hub_to_spoke_peering_name = "hub-to-lzp1-peering"
+  hub_vnet_name             = module.vnet_hub.vnet_name
+  hub_vnet_resource_group   = azurerm_resource_group.rg_networking_connectivity.name
+  hub_vnet_id               = module.vnet_hub.vnet_id
 
-      actions = [
-        "Microsoft.Network/virtualNetworks/subnets/action",
-        "Microsoft.Network/virtualNetworks/subnets/join/action",
-        "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action",
-      ]
-    }
+  spoke_to_hub_peering_name = "lzp1-to-hub-peering"
+  spoke_vnet_name           = module.vnet_spoke_lzp1.vnet_name
+  spoke_vnet_resource_group = azurerm_resource_group.rg_networking_lzp1.name
+  spoke_vnet_id             = module.vnet_spoke_lzp1.vnet_id
+
+  allow_forwarded_traffic = true
+  allow_gateway_transit   = false
+  use_remote_gateways     = false
+
+  providers = {
+    azurerm.hub   = azurerm.connectivity
+    azurerm.spoke = azurerm.lzp1
   }
+
+  depends_on = [module.vnet_hub, module.vnet_spoke_lzp1]
 }
-/*
-resource "azurerm_subnet" "aci_mgmt" {
-  name                 = "aci"
-  resource_group_name  = azurerm_resource_group.networking_management.name
-  virtual_network_name = module.mgmt_vnet.vnet_name
-  address_prefixes     = ["10.20.10.0/24"]
-  provider             = azurerm.management
 
-  delegation {
-    name = "aci-delegation"
+module "vnet_peering_lza2" {
+  source = "../../modules/azurerm/network/peering"
 
-    service_delegation {
-      name = "Microsoft.ContainerInstance/containerGroups"
+  hub_to_spoke_peering_name = "hub-to-lza2-peering"
+  hub_vnet_name             = module.vnet_hub.vnet_name
+  hub_vnet_resource_group   = azurerm_resource_group.rg_networking_connectivity.name
+  hub_vnet_id               = module.vnet_hub.vnet_id
 
-      actions = [
-        "Microsoft.Network/virtualNetworks/subnets/action",
-        "Microsoft.Network/virtualNetworks/subnets/join/action",
-        "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action",
-      ]
-    }
+  spoke_to_hub_peering_name = "lza2-to-hub-peering"
+  spoke_vnet_name           = module.vnet_spoke_lza2.vnet_name
+  spoke_vnet_resource_group = azurerm_resource_group.rg_networking_lza2.name
+  spoke_vnet_id             = module.vnet_spoke_lza2.vnet_id
+
+  allow_forwarded_traffic = true
+  allow_gateway_transit   = false
+  use_remote_gateways     = false
+
+  providers = {
+    azurerm.hub   = azurerm.connectivity
+    azurerm.spoke = azurerm.lza2
   }
+
+  depends_on = [module.vnet_hub, module.vnet_spoke_lza2]
 }
-*/
 # ----------------------------------------
 #region DNS
 # ----------------------------------------
+/*
 module "dns" {
   source = "../../modules/azurerm/network/dns"
 
@@ -402,3 +474,4 @@ module "dns" {
 
   depends_on = [azurerm_resource_group.networking_connectivity]
 }
+*/
