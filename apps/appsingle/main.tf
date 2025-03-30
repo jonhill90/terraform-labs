@@ -1,14 +1,14 @@
-terraform {
+/*terraform {
   backend "azurerm" {}
 }
-
+*/
 # ----------------------------------------
-# Resource Groups
+#region Resource Groups
 # ----------------------------------------
-resource "azurerm_resource_group" "lab" {
-  name     = "AppSingle-Lab"
+resource "azurerm_resource_group" "rg_appsingle_lza2" {
+  name     = "rg-appsingle-lab"
   location = "eastus"
-  provider = azurerm.lab
+  provider = azurerm.lza2
 
   tags = {
     environment = var.environment
@@ -17,51 +17,23 @@ resource "azurerm_resource_group" "lab" {
   }
 }
 
-resource "azurerm_resource_group" "labtest" {
-  name     = "AppSingle-Lab-Test"
-  location = "eastus"
-  provider = azurerm.lab
+# ----------------------------------------
+#region Key Vault (kv)
+# ----------------------------------------
+module "appsingle_vault" {
+  source                     = "../../modules/azurerm/security/vault"
+  key_vault_name             = var.appsingle_vault_name
+  resource_group_name        = azurerm_resource_group.rg_appsingle_lza2.name
+  location                   = "eastus"
+  sku_name                   = "standard"
+  purge_protection           = false
+  soft_delete_retention_days = 90
 
-  tags = {
-    environment = var.environment
-    owner       = var.owner
-    project     = var.project
-  }
-}
-
-data "azurerm_resource_group" "security" {
-  name     = "Security"
-  provider = azurerm.lab
-}
-
-# --------------------------------------------------
-# Secure Vault
-# --------------------------------------------------
-data "azurerm_key_vault" "application" {
-  name                = var.vault_name
-  resource_group_name = data.azurerm_resource_group.security.name
-  provider            = azurerm.lab
-}
-
-# --------------------------------------------------
-# Create Empty Secrets
-# --------------------------------------------------
-module "application_secrets" {
-  source       = "../../modules/azurerm/security/secret"
-  key_vault_id = data.azurerm_key_vault.application.id
-  secrets = {
-    "backendContainer"         = ""
-    "backendResourceGroup"     = ""
-    "backendStorageAccount"    = ""
-    "labsubscriptionid"        = ""
-    "managementsubscriptionid" = ""
-    "tenantid"                 = ""
-    "vaultname"                = ""
-  }
+  tenant_id = var.tenant_id
 
   providers = {
-    azurerm = azurerm.lab
+    azurerm = azurerm.lza2
   }
 
-  depends_on = [data.azurerm_key_vault.application]
+  depends_on = [azurerm_resource_group.rg_appsingle_lza2]
 }

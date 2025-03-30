@@ -374,6 +374,26 @@ data "azurerm_resource_group" "rg_networking_connectivity" {
   provider = azurerm.connectivity
 }
 
+data "azurerm_resource_group" "rg_compute_lzp1" {
+  name     = "rg-compute-lzp1"
+  provider = azurerm.lzp1
+}
+
+data "azurerm_resource_group" "rg_database_lzp1" {
+  name     = "rg-database-lzp1"
+  provider = azurerm.lzp1
+}
+
+data "azurerm_resource_group" "rg_storage_lzp1" {
+  name     = "rg-storage-lzp1"
+  provider = azurerm.lzp1
+}
+
+data "azurerm_resource_group" "rg_appsingle_lab" {
+  name     = "rg-appsingle-lab"
+  provider = azurerm.lza2
+}
+
 # ----------------------------------------
 #region Storage Accounts (sa)
 # ----------------------------------------
@@ -439,76 +459,28 @@ data "azurerm_key_vault" "networking" {
   provider            = azurerm.connectivity
 }
 
-module "compute_vault" {
-  source                     = "../../modules/azurerm/security/vault"
-  key_vault_name             = var.compute_vault_name
-  resource_group_name        = azurerm_resource_group.security.name
-  location                   = "eastus"
-  sku_name                   = "standard"
-  purge_protection           = false
-  soft_delete_retention_days = 90
-
-  tenant_id = var.tenant_id
-
-  providers = {
-    azurerm = azurerm.lzp1
-  }
-
-  depends_on = [azurerm_resource_group.security]
+data "azurerm_key_vault" "compute" {
+  name                = var.compute_vault_name
+  resource_group_name = data.azurerm_resource_group.rg_compute_lzp1.name
+  provider            = azurerm.lzp1
 }
 
-module "database_vault" {
-  source                     = "../../modules/azurerm/security/vault"
-  key_vault_name             = var.database_vault_name
-  resource_group_name        = azurerm_resource_group.security.name
-  location                   = "eastus"
-  sku_name                   = "standard"
-  purge_protection           = false
-  soft_delete_retention_days = 90
-
-  tenant_id = var.tenant_id
-
-  providers = {
-    azurerm = azurerm.lzp1
-  }
-
-  depends_on = [azurerm_resource_group.security]
+data "azurerm_key_vault" "database" {
+  name                = var.database_vault_name
+  resource_group_name = data.azurerm_resource_group.rg_database_lzp1.name
+  provider            = azurerm.lzp1
 }
 
-module "storage_vault" {
-  source                     = "../../modules/azurerm/security/vault"
-  key_vault_name             = var.storage_vault_name
-  resource_group_name        = azurerm_resource_group.security.name
-  location                   = "eastus"
-  sku_name                   = "standard"
-  purge_protection           = false
-  soft_delete_retention_days = 90
-
-  tenant_id = var.tenant_id
-
-  providers = {
-    azurerm = azurerm.lzp1
-  }
-
-  depends_on = [azurerm_resource_group.security]
+data "azurerm_key_vault" "storage" {
+  name                = var.storage_vault_name
+  resource_group_name = data.azurerm_resource_group.rg_storage_lzp1.name
+  provider            = azurerm.lzp1
 }
 
-module "application_vault" {
-  source                     = "../../modules/azurerm/security/vault"
-  key_vault_name             = var.application_vault_name
-  resource_group_name        = azurerm_resource_group.security.name
-  location                   = "eastus"
-  sku_name                   = "standard"
-  purge_protection           = false
-  soft_delete_retention_days = 90
-
-  tenant_id = var.tenant_id
-
-  providers = {
-    azurerm = azurerm.lzp1
-  }
-
-  depends_on = [azurerm_resource_group.security]
+data "azurerm_key_vault" "appsingle" {
+  name                = var.appsingle_vault_name
+  resource_group_name = data.azurerm_resource_group.rg_appsingle_lab.name
+  provider            = azurerm.lza2
 }
 
 # --------------------------------------------------
@@ -538,7 +510,7 @@ data "azuread_users" "storage_admins" {
   object_ids = [var.admin_object_id]
 }
 
-data "azuread_users" "application_admins" {
+data "azuread_users" "appsingle_admins" {
   object_ids = [var.admin_object_id]
 }
 
@@ -623,17 +595,17 @@ resource "azuread_group" "storage_admins" {
   depends_on = [data.azuread_users.storage_admins]
 }
 
-resource "azuread_group" "application_admins" {
-  display_name     = "Application Admins"
+resource "azuread_group" "appsingle_admins" {
+  display_name     = "AppSingle Admins"
   mail_enabled     = true
-  mail_nickname    = "ApplicationAdmins"
+  mail_nickname    = "AppSingleAdmins"
   security_enabled = true
   types            = ["Unified"]
 
-  owners  = data.azuread_users.application_admins.object_ids
-  members = data.azuread_users.application_admins.object_ids
+  owners  = data.azuread_users.appsingle_admins.object_ids
+  members = data.azuread_users.appsingle_admins.object_ids
 
-  depends_on = [data.azuread_users.application_admins]
+  depends_on = [data.azuread_users.appsingle_admins]
 }
 
 # --------------------------------------------------
@@ -701,15 +673,15 @@ module "networking_vault_access" {
 
   depends_on = [data.azurerm_key_vault.networking, resource.azuread_group.networking_admins]
 }
-/*
+
 module "compute_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
-  key_vault_id = module.compute_vault.key_vault_id
+  key_vault_id = data.azurerm_key_vault.compute.id
 
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = var.admin_object_id
+      object_id               = resource.azuread_group.compute_admins.object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
@@ -720,17 +692,17 @@ module "compute_vault_access" {
     azurerm = azurerm.lzp1
   }
 
-  depends_on = [module.compute_vault]
+  depends_on = [data.azurerm_key_vault.compute, resource.azuread_group.compute_admins]
 }
 
 module "database_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
-  key_vault_id = module.database_vault.key_vault_id
+  key_vault_id = data.azurerm_key_vault.database.id
 
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = var.admin_object_id
+      object_id               = resource.azuread_group.database_admins.object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
@@ -741,17 +713,17 @@ module "database_vault_access" {
     azurerm = azurerm.lzp1
   }
 
-  depends_on = [module.database_vault]
+  depends_on = [data.azurerm_key_vault.database, resource.azuread_group.database_admins]
 }
 
 module "storage_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
-  key_vault_id = module.storage_vault.key_vault_id
+  key_vault_id = data.azurerm_key_vault.storage.id
 
   access_policies = [
     {
       tenant_id               = var.tenant_id
-      object_id               = var.admin_object_id
+      object_id               = resource.azuread_group.storage_admins.object_id
       key_permissions         = ["Get", "List"]
       secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
       certificate_permissions = ["Get", "List"]
@@ -762,9 +734,11 @@ module "storage_vault_access" {
     azurerm = azurerm.lzp1
   }
 
-  depends_on = [module.storage_vault]
+  depends_on = [data.azurerm_key_vault.storage, resource.azuread_group.storage_admins]
 }
 
+
+/*
 module "application_vault_access" {
   source       = "../../modules/azurerm/security/vault-access"
   key_vault_id = module.application_vault.key_vault_id

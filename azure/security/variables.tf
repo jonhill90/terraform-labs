@@ -133,6 +133,12 @@ variable "application_vault_name" {
   sensitive   = true
 }
 
+variable "appsingle_vault_name" {
+  description = "AppSingle Vault Name"
+  type        = string
+  sensitive   = true
+}
+
 # ----------------------------------------
 #region Azure DevOps Settings
 # ----------------------------------------

@@ -1,5 +1,5 @@
 # ----------------------------------------
-# Tags
+#region Tags
 # ----------------------------------------
 variable "environment" {
   description = "Environment Name (e.g., dev, prod)"
@@ -17,16 +17,34 @@ variable "project" {
 }
 
 # ----------------------------------------
-# Azure Settings
+#region Azure Settings
 # ----------------------------------------
-variable "lab_subscription_id" {
-  description = "Azure Subscription ID"
+variable "lzp1_subscription_id" {
+  description = "Landing zone P1 Azure Subscription ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "lza2_subscription_id" {
+  description = "Landing zone A2 Azure Subscription ID"
   type        = string
   sensitive   = true
 }
 
 variable "management_subscription_id" {
-  description = "Azure Subscription ID"
+  description = "Management Azure Subscription ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "connectivity_subscription_id" {
+  description = "Connectivity Azure Subscription ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "identity_subscription_id" {
+  description = "Identity Azure Subscription ID"
   type        = string
   sensitive   = true
 }
@@ -38,9 +56,9 @@ variable "tenant_id" {
 }
 
 # ----------------------------------------
-# Vault
+#region Vault
 # ----------------------------------------
-variable "vault_name" {
+variable "database_vault_name" {
   description = "Database Vault Name"
   type        = string
   sensitive   = true

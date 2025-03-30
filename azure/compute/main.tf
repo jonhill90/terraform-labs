@@ -2,14 +2,14 @@
   backend "azurerm" {}
 }
 */
-/*
+
 # ----------------------------------------
 #region Resource Groups
 # ----------------------------------------
-resource "azurerm_resource_group" "lab" {
-  name     = "Compute"
+resource "azurerm_resource_group" "rg_compute_lzp1" {
+  name     = "rg-compute-lzp1"
   location = "eastus"
-  provider = azurerm.lab
+  provider = azurerm.lzp1
 
   tags = {
     environment = var.environment
@@ -18,37 +18,31 @@ resource "azurerm_resource_group" "lab" {
   }
 }
 
-resource "azurerm_resource_group" "compute_connectivity" {
-  name     = "Compute"
-  location = "eastus"
-  provider = azurerm.connectivity
+# ----------------------------------------
+#region Vault (kv)
+# ----------------------------------------
+module "compute_vault" {
+  source                     = "../../modules/azurerm/security/vault"
+  key_vault_name             = var.compute_vault_name
+  resource_group_name        = azurerm_resource_group.rg_compute_lzp1.name
+  location                   = "eastus"
+  sku_name                   = "standard"
+  purge_protection           = false
+  soft_delete_retention_days = 90
 
-  tags = {
-    environment = var.environment
-    owner       = var.owner
-    project     = var.project
+  tenant_id = var.tenant_id
+
+  providers = {
+    azurerm = azurerm.lzp1
   }
+
+  depends_on = [azurerm_resource_group.rg_compute_lzp1]
 }
 
-resource "azurerm_resource_group" "rg_compute_management" {
-  name     = "rg-compute-management"
-  location = "eastus"
-  provider = azurerm.management
-
-  tags = {
-    environment = var.environment
-    owner       = var.owner
-    project     = var.project
-  }
-}
-
-data "azurerm_resource_group" "security" {
-  name     = "Security"
-  provider = azurerm.lab
-}
 # ----------------------------------------
 #region Networking
 # ----------------------------------------
+/*
 data "azurerm_virtual_network" "networking" {
   name                = "lab-vnet"
   resource_group_name = "Networking"
