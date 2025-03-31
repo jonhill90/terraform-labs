@@ -1,9 +1,9 @@
-/*terraform {
+terraform {
   backend "azurerm" {}
 }
-*/
+
 # ----------------------------------------
-# Resource Groups (local)
+#region Resource Groups (local)
 # ----------------------------------------
 resource "azurerm_resource_group" "rg_storage_lzp1" {
   name     = "rg-storage-lzp1"
@@ -18,7 +18,7 @@ resource "azurerm_resource_group" "rg_storage_lzp1" {
 }
 
 # ----------------------------------------
-# Key Vault (kv)
+#region Key Vault (kv)
 # ----------------------------------------
 module "storage_vault" {
   source                     = "../../modules/azurerm/security/vault"
