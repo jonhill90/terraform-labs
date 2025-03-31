@@ -1,15 +1,10 @@
-lab_subscription_id        = "__labsubscriptionid__"
+lzp1_subscription_id       = "__lzp1subscriptionid__"
 management_subscription_id = "__managementsubscriptionid__"
 tenant_id                  = "__tenantid__"
 environment                = "Lab"
 owner                      = "devops"
 project                    = "DevOps"
 devops_vault_name          = "__devopsvaultname__"
-networking_vault_name      = "__networkingvaultname__"
-compute_vault_name         = "__computevaultname__"
-database_vault_name        = "__databasevaultname__"
-storage_vault_name         = "__storagevaultname__"
-application_vault_name     = "__applicationvaultname__"
 client_id                  = "__clientid__" # Application (client) ID
 client_secret              = "__clientsecret__" # Service Principal Secret created in Azure AD
 devops_org_name            = "__devopsorgname__"

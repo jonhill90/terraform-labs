@@ -1,7 +1,7 @@
-/*terraform {
+terraform {
   backend "azurerm" {}
 }
-*/
+
 
 # ----------------------------------------
 #region Repositories
@@ -249,7 +249,7 @@ module "devops_vault" {
   depends_on = [azurerm_resource_group.rg_devops_management]
 }
 
-/*
+
 # --------------------------------------------------
 #region Azure DevOps Build Pipeline (CI)
 # --------------------------------------------------
@@ -262,7 +262,7 @@ resource "azuredevops_build_definition" "devops_ci" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/devops-ci.yml"
+    yml_path              = "pipelines/infrastructure/devops-ci.yml"
     service_connection_id = azuredevops_serviceendpoint_github.github.id
   }
 
@@ -271,7 +271,7 @@ resource "azuredevops_build_definition" "devops_ci" {
   }
   depends_on = [azuredevops_serviceendpoint_github.github]
 }
-
+/*
 resource "azuredevops_build_definition" "networking_ci" {
   project_id = module.networking_project.devops_project_id
   name       = "Networking-CI"
@@ -445,7 +445,7 @@ resource "azuredevops_build_definition" "twingate_ci" {
 
 # Add Agent Pool to the Build Pipeline via DevOps Portal
 # Approve Pipeline to use the Agent Pool vis DevOps Portal
-
+*/
 # --------------------------------------------------
 #region Azure DevOps Release Pipeline (CD)
 # --------------------------------------------------
@@ -458,7 +458,7 @@ resource "azuredevops_build_definition" "devops_cd" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/devops-cd.yml"
+    yml_path              = "pipelines/infrastructure/devops-cd.yml"
     service_connection_id = azuredevops_serviceendpoint_github.github.id
   }
 
@@ -467,7 +467,7 @@ resource "azuredevops_build_definition" "devops_cd" {
   }
   depends_on = [azuredevops_serviceendpoint_github.github, azuredevops_build_definition.devops_ci]
 }
-
+/*
 resource "azuredevops_build_definition" "networking_cd" {
   project_id = module.networking_project.devops_project_id
   name       = "Networking-CD"
