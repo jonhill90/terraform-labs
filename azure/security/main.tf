@@ -1,7 +1,6 @@
-/*terraform {
+terraform {
   backend "azurerm" {}
 }
-*/
 
 # --------------------------------------------------
 #region Management Group (mg)
@@ -320,7 +319,6 @@ resource "azuredevops_serviceendpoint_github" "github" {
 # --------------------------------------------------
 #region Azure DevOps Build Pipeline (ci)
 # --------------------------------------------------
-/*
 resource "azuredevops_build_definition" "security_ci" {
   project_id = module.security_project.devops_project_id
   name       = "Security-CI"
@@ -330,7 +328,7 @@ resource "azuredevops_build_definition" "security_ci" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/security-ci.yml"
+    yml_path              = "pipelines/infrastructure/security-ci.yml"
     service_connection_id = azuredevops_serviceendpoint_github.github.id
   }
 
@@ -339,11 +337,10 @@ resource "azuredevops_build_definition" "security_ci" {
   }
   depends_on = [azuredevops_serviceendpoint_github.github]
 }
-*/
+
 # --------------------------------------------------
 #region Azure DevOps Release Pipeline (cd)
 # --------------------------------------------------
-/*
 resource "azuredevops_build_definition" "security_cd" {
   project_id = module.security_project.devops_project_id
   name       = "Security-CD"
@@ -353,7 +350,7 @@ resource "azuredevops_build_definition" "security_cd" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/security-cd.yml"
+    yml_path              = "pipelines/infrastructure/security-cd.yml"
     service_connection_id = azuredevops_serviceendpoint_github.github.id
   }
 
@@ -362,7 +359,7 @@ resource "azuredevops_build_definition" "security_cd" {
   }
   depends_on = [azuredevops_serviceendpoint_github.github]
 }
-*/
+
 # ----------------------------------------
 #region Resource Groups (rg)
 # ----------------------------------------

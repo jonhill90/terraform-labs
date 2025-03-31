@@ -28,9 +28,9 @@ stages:
           - task: CopyFiles@2
             displayName: 'Copy Terraform Files for $(team)'
             inputs:
-              SourceFolder: '$(Build.SourcesDirectory)/azure-lab/$(team)'
+              SourceFolder: '$(Build.SourcesDirectory)/azure/$(team)'
               Contents: '**'
-              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/azure-lab/$(team)'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/azure/$(team)'
 
           - task: CopyFiles@2
             displayName: 'Copy Shared Terraform Modules'
