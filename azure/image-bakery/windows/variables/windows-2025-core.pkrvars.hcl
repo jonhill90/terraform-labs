@@ -4,6 +4,6 @@ client_id        = "__clientid__"       # Token replaced by pipeline
 client_secret    = "__clientsecret__"   # Token replaced by pipeline
 resource_group   = "Compute"
 location         = "eastus"
-gallery_name     = "ComputeGallery"
+gallery_name     = "SharedImageGallary"
 image_name       = "windows-2025-core"
 windows_version  = "2025-datacenter-core"
