@@ -347,7 +347,7 @@ resource "azuredevops_build_definition" "storage_ci" {
   }
   depends_on = [azuredevops_serviceendpoint_github.storage]
 }
-/*
+
 resource "azuredevops_build_definition" "appsingle_ci" {
   project_id = module.application_project.devops_project_id
   name       = "AppSingle-CI"
@@ -357,7 +357,7 @@ resource "azuredevops_build_definition" "appsingle_ci" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/app-single-ci.yml"
+    yml_path              = "pipelines/infrastructure/app-single-ci.yml"
     service_connection_id = azuredevops_serviceendpoint_github.application.id
   }
 
@@ -366,7 +366,7 @@ resource "azuredevops_build_definition" "appsingle_ci" {
   }
   depends_on = [azuredevops_serviceendpoint_github.application]
 }
-
+/*
 resource "azuredevops_build_definition" "appmulti_ci" {
   project_id = module.application_project.devops_project_id
   name       = "AppMulti-CI"
@@ -543,7 +543,7 @@ resource "azuredevops_build_definition" "storage_cd" {
   }
   depends_on = [azuredevops_serviceendpoint_github.storage, azuredevops_build_definition.storage_ci]
 }
-/*
+
 resource "azuredevops_build_definition" "appsingle_cd" {
   project_id = module.application_project.devops_project_id
   name       = "AppSingle-CD"
@@ -553,7 +553,7 @@ resource "azuredevops_build_definition" "appsingle_cd" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/app-single-cd.yml"
+    yml_path              = "pipelines/infrastructure/app-single-cd.yml"
     service_connection_id = azuredevops_serviceendpoint_github.application.id
   }
 
@@ -562,7 +562,7 @@ resource "azuredevops_build_definition" "appsingle_cd" {
   }
   depends_on = [azuredevops_serviceendpoint_github.application, azuredevops_build_definition.appsingle_ci]
 }
-
+/*
 resource "azuredevops_build_definition" "appmulti_cd" {
   project_id = module.application_project.devops_project_id
   name       = "AppMulti-CD"
