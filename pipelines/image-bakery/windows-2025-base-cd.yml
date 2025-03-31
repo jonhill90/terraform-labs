@@ -21,7 +21,7 @@ stages:
       environmentName: "validate"
       stageName: "labvalidate"
       stageDisplayName: "Development"
-      workingDirectory: "$(Pipeline.Workspace)/windows-2025-base-ci/windows-2025-base-artifacts/azure-lab/image-bakery/windows"
+      workingDirectory: "$(Pipeline.Workspace)/windows-2025-base-ci/windows-2025-base-artifacts/azure/image-bakery/windows"
       agentPool: "Lab"
       pipeline: "windows-2025-base-ci"
       dependsOn: []  # Independent execution
@@ -36,7 +36,7 @@ stages:
       environmentName: "lab"
       stageName: "lab"
       stageDisplayName: "Development"
-      workingDirectory: "$(Pipeline.Workspace)/windows-2025-base-ci/windows-2025-base-artifacts/azure-lab/image-bakery/windows"
+      workingDirectory: "$(Pipeline.Workspace)/windows-2025-base-ci/windows-2025-base-artifacts/azure/image-bakery/windows"
       agentPool: "Lab"
       pipeline: "windows-2025-base-ci"
       dependsOn: [labvalidate]  # Dependent on validation

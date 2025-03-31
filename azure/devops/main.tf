@@ -366,7 +366,7 @@ resource "azuredevops_build_definition" "appsingle_ci" {
   }
   depends_on = [azuredevops_serviceendpoint_github.application]
 }
-/*
+
 resource "azuredevops_build_definition" "appmulti_ci" {
   project_id = module.application_project.devops_project_id
   name       = "AppMulti-CI"
@@ -376,7 +376,7 @@ resource "azuredevops_build_definition" "appmulti_ci" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/app-multi-ci.yml"
+    yml_path              = "pipelines/application/app-multi-ci.yml"
     service_connection_id = azuredevops_serviceendpoint_github.application.id
   }
 
@@ -386,7 +386,7 @@ resource "azuredevops_build_definition" "appmulti_ci" {
   depends_on = [azuredevops_serviceendpoint_github.application]
 }
 
-resource "azuredevops_build_definition" "image_bakery_ci" {
+resource "azuredevops_build_definition" "win2025_base_ci" {
   project_id = module.compute_project.devops_project_id
   name       = "windows-2025-base-ci"
   path       = "\\"
@@ -395,7 +395,7 @@ resource "azuredevops_build_definition" "image_bakery_ci" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/packer/windows-2025-base-ci.yml"
+    yml_path              = "pipelines/image-bakery/windows-2025-base-ci.yml"
     service_connection_id = azuredevops_serviceendpoint_github.compute.id
   }
 
@@ -404,7 +404,7 @@ resource "azuredevops_build_definition" "image_bakery_ci" {
   }
   depends_on = [azuredevops_serviceendpoint_github.compute]
 }
-
+/*
 resource "azuredevops_build_definition" "win2025_core_ci" {
   project_id = module.compute_project.devops_project_id
   name       = "windows-2025-core-ci"
@@ -562,7 +562,7 @@ resource "azuredevops_build_definition" "appsingle_cd" {
   }
   depends_on = [azuredevops_serviceendpoint_github.application, azuredevops_build_definition.appsingle_ci]
 }
-/*
+
 resource "azuredevops_build_definition" "appmulti_cd" {
   project_id = module.application_project.devops_project_id
   name       = "AppMulti-CD"
@@ -572,7 +572,7 @@ resource "azuredevops_build_definition" "appmulti_cd" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/app-multi-cd.yml"
+    yml_path              = "pipelines/application/app-multi-cd.yml"
     service_connection_id = azuredevops_serviceendpoint_github.application.id
   }
 
@@ -582,7 +582,7 @@ resource "azuredevops_build_definition" "appmulti_cd" {
   depends_on = [azuredevops_serviceendpoint_github.application, azuredevops_build_definition.appmulti_ci]
 }
 
-resource "azuredevops_build_definition" "image_bakery_cd" {
+resource "azuredevops_build_definition" "win2025_base_cd" {
   project_id = module.compute_project.devops_project_id
   name       = "windows-2025-base-cd"
   path       = "\\"
@@ -591,16 +591,16 @@ resource "azuredevops_build_definition" "image_bakery_cd" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/packer/windows-2025-base-cd.yml"
+    yml_path              = "pipelines/image-bakery/windows-2025-base-cd.yml"
     service_connection_id = azuredevops_serviceendpoint_github.compute.id
   }
 
   ci_trigger {
     use_yaml = true
   }
-  depends_on = [azuredevops_serviceendpoint_github.compute, azuredevops_build_definition.image_bakery_ci]
+  depends_on = [azuredevops_serviceendpoint_github.compute, azuredevops_build_definition.win2025_base_ci]
 }
-
+/*
 resource "azuredevops_build_definition" "win2025_core_cd" {
   project_id = module.compute_project.devops_project_id
   name       = "windows-2025-core-cd"

@@ -29,9 +29,9 @@ stages:
           - task: CopyFiles@2
             displayName: 'Copy Packer Files for $(imageName)'
             inputs:
-              SourceFolder: '$(Build.SourcesDirectory)/azure-lab/image-bakery/windows'
+              SourceFolder: '$(Build.SourcesDirectory)/azure/image-bakery/windows'
               Contents: '**'
-              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/azure-lab/image-bakery/windows'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/$(artifactName)/azure/image-bakery/windows'
 
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Packer Artifacts'
