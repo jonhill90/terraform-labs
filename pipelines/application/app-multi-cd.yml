@@ -16,7 +16,7 @@ stages:
     parameters:
       team: "appmulti"
       artifactName: "appmulti-artifacts"
-      variableGroup: "Application"
+      variableGroup: "AppMulti"
       backendServiceArm: "Application-SC"
       environmentName: "dev"
       stageName: "dev"
@@ -30,7 +30,7 @@ stages:
     parameters:
       team: "appmulti"
       artifactName: "appmulti-artifacts"
-      variableGroup: "Application"
+      variableGroup: "AppMulti"
       backendServiceArm: "Application-SC"
       environmentName: "test"
       stageName: "test"
@@ -44,7 +44,7 @@ stages:
     parameters:
       team: "appmulti"
       artifactName: "appmulti-artifacts"
-      variableGroup: "Application"
+      variableGroup: "AppMulti"
       backendServiceArm: "Application-SC"
       environmentName: "prod"
       stageName: "prod"
