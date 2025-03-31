@@ -1,5 +1,5 @@
 # ----------------------------------------
-# Tags
+#region Tags
 # ----------------------------------------
 variable "environment" {
   description = "Environment Name (e.g., dev, prod)"
@@ -17,22 +17,16 @@ variable "project" {
 }
 
 # ----------------------------------------
-# Azure Settings
+#region Azure Settings
 # ----------------------------------------
-variable "lab_subscription_id" {
-  description = "Azure Subscription ID"
-  type        = string
-  sensitive   = true
-}
-
-variable "management_subscription_id" {
-  description = "Azure Subscription ID"
+variable "lzp1_subscription_id" {
+  description = "Landing zone P1 Azure Subscription ID"
   type        = string
   sensitive   = true
 }
 
 variable "connectivity_subscription_id" {
-  description = "Azure Subscription ID"
+  description = "Connectivity Azure Subscription ID"
   type        = string
   sensitive   = true
 }
@@ -44,15 +38,7 @@ variable "tenant_id" {
 }
 
 # ----------------------------------------
-# Vault
-# ----------------------------------------
-variable "vault_name" {
-  description = "Application Vault Name"
-  type        = string
-}
-
-# ----------------------------------------
-# Twingate
+#region Twingate
 # ----------------------------------------
 variable "twingate_network" {
   description = "Twingate Network Name"
@@ -67,7 +53,7 @@ variable "twingate_api_key" {
 }
 
 # ----------------------------------------
-# Azure Container Registry
+#region Azure Container Registry
 # ----------------------------------------
 variable "acr" {
   description = "Azure Container Registry Name"

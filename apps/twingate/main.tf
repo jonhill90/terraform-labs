@@ -1,34 +1,39 @@
-terraform {
+/*terraform {
   backend "azurerm" {}
 }
-/*
+*/
+
 # ----------------------------------------
 # Resource Groups
 # ----------------------------------------
-data "azurerm_resource_group" "networking" {
-  name     = "Networking"
+data "azurerm_resource_group" "rg_networking_connectivity" {
+  name     = "rg-networking-connectivity"
   provider = azurerm.connectivity
 }
 
-data "azurerm_resource_group" "compute_connectivity" {
-  name     = "Compute"
-  provider = azurerm.connectivity
+data "azurerm_resource_group" "rg_compute_lzp1" {
+  name     = "rg-compute-lzp1"
+  provider = azurerm.lzp1
 }
 
 # ----------------------------------------
 # Networking
 # ----------------------------------------
-data "azurerm_virtual_network" "networking" {
-  name                = "hub-vnet"
-  resource_group_name = data.azurerm_resource_group.networking.name
+data "azurerm_virtual_network" "vnet_hub_connectivity" {
+  name                = "vnet-hub-connectivity"
+  resource_group_name = data.azurerm_resource_group.rg_networking_connectivity.name
   provider            = azurerm.connectivity
+
+  depends_on = [data.azurerm_resource_group.rg_networking_connectivity]
 }
 
-data "azurerm_subnet" "aci" {
-  name                 = "aci"
-  virtual_network_name = data.azurerm_virtual_network.networking.name
-  resource_group_name  = data.azurerm_resource_group.networking.name
+data "azurerm_subnet" "snet_aci" {
+  name                 = "snet-aci"
+  virtual_network_name = data.azurerm_virtual_network.vnet_hub_connectivity.name
+  resource_group_name  = data.azurerm_resource_group.rg_networking_connectivity.name
   provider             = azurerm.connectivity
+
+  depends_on = [data.azurerm_virtual_network.vnet_hub_connectivity]
 }
 
 # ----------------------------------------
@@ -36,10 +41,10 @@ data "azurerm_subnet" "aci" {
 # ----------------------------------------
 data "azurerm_container_registry" "acr" {
   name                = var.acr
-  resource_group_name = data.azurerm_resource_group.compute_connectivity.name
-  provider            = azurerm.connectivity
+  resource_group_name = data.azurerm_resource_group.rg_compute_lzp1.name
+  provider            = azurerm.lzp1
 
-  depends_on = [data.azurerm_resource_group.compute_connectivity]
+  depends_on = [data.azurerm_resource_group.rg_compute_lzp1]
 }
 
 # ----------------------------------------
@@ -54,23 +59,23 @@ module "twingate_groups" {
 }
 
 module "twingate_resource" {
-  source = "../../modules/twingate/network"
+  source              = "../../modules/twingate/network"
+  remote_network_name = "Lab"
+  connector_name      = "lab-connector"
+  twingate_api_key    = var.twingate_api_key
+  twingate_network    = var.twingate_network
+
+  subnet_map = {
+    "compute" = "10.40.5.0/24"
+  }
+
+  access_groups = values(module.twingate_groups.group_ids)
 
   providers = {
     twingate = twingate
   }
 
-  remote_network_name = "Lab"
-  connector_name      = "lab-connector"
-  subnet_map = {
-    "compute" = "10.100.5.0/24"
-  }
-  twingate_api_key = var.twingate_api_key
-  twingate_network = var.twingate_network
-
-  # Pass only the group IDs dynamically
-  access_groups = values(module.twingate_groups.group_ids)
-  depends_on    = [module.twingate_groups]
+  depends_on = [data.azurerm_container_registry.acr, module.twingate_groups]
 }
 
 # Twingate Image Push Module (Pushes Docker Image to ACR)
@@ -89,8 +94,8 @@ module "twingate_image_push" {
 module "twingate_acg" {
   source                = "../../modules/azurerm/container/group"
   container_name        = "twingate-connector"
-  location              = data.azurerm_resource_group.networking.location
-  resource_group        = data.azurerm_resource_group.networking.name
+  location              = data.azurerm_resource_group.rg_networking_connectivity.location
+  resource_group        = data.azurerm_resource_group.rg_networking_connectivity.name
   registry_login_server = data.azurerm_container_registry.acr.login_server
   registry_username     = data.azurerm_container_registry.acr.admin_username
   registry_password     = data.azurerm_container_registry.acr.admin_password
@@ -98,7 +103,7 @@ module "twingate_acg" {
   image_tag             = "latest"
   cpu                   = "1"
   memory                = "1.5"
-  subnet_id             = data.azurerm_subnet.aci.id
+  subnet_id             = data.azurerm_subnet.snet_aci.id
 
   providers = {
     azurerm = azurerm.connectivity
@@ -115,4 +120,3 @@ module "twingate_acg" {
 
   depends_on = [module.twingate_image_push]
 }
-*/

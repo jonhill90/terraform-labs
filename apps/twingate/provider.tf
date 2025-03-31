@@ -17,6 +17,12 @@ provider "azurerm" {
   features {}
 }
 
+provider "azurerm" {
+  alias           = "lzp1"
+  subscription_id = var.lzp1_subscription_id
+  features {}
+}
+
 provider "twingate" {
   api_token = var.twingate_api_key
   network   = var.twingate_network

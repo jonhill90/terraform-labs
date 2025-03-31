@@ -18,6 +18,11 @@ resource "azurerm_resource_group" "rg_compute_lzp1" {
   }
 }
 
+data "azurerm_resource_group" "rg_networking_lzp1" {
+  name     = "rg-networking-lzp1"
+  provider = azurerm.lzp1
+}
+
 # ----------------------------------------
 #region Vault (kv)
 # ----------------------------------------
@@ -42,32 +47,34 @@ module "compute_vault" {
 # ----------------------------------------
 #region Networking
 # ----------------------------------------
-/*
-data "azurerm_virtual_network" "networking" {
-  name                = "lab-vnet"
-  resource_group_name = "Networking"
-  provider            = azurerm.lab
+data "azurerm_virtual_network" "vnet_spoke_lzp1" {
+  name                = "vnet-spoke-lzp1"
+  resource_group_name = data.azurerm_resource_group.rg_networking_lzp1.name
+  provider            = azurerm.lzp1
+
+  depends_on = [data.azurerm_resource_group.rg_networking_lzp1]
 }
 
-data "azurerm_subnet" "compute" {
-  name                 = "compute"
-  virtual_network_name = data.azurerm_virtual_network.networking.name
-  resource_group_name  = "Networking"
-  provider             = azurerm.lab
+data "azurerm_subnet" "snet_compute" {
+  name                 = "snet-compute"
+  virtual_network_name = data.azurerm_virtual_network.vnet_spoke_lzp1.name
+  resource_group_name  = data.azurerm_resource_group.rg_networking_lzp1.name
+  provider             = azurerm.lzp1
+
+  depends_on = [data.azurerm_virtual_network.vnet_spoke_lzp1]
 }
 
 # ----------------------------------------
-# Azure Container Registry (ACR)
+#region Azure Container Registry (ACR)
 # ----------------------------------------
 module "container_registry" {
   source             = "../../modules/azurerm/container/registry"
   acr_name           = var.acr
-  acr_resource_group = azurerm_resource_group.compute_connectivity.name
-  acr_location       = azurerm_resource_group.compute_connectivity.location
-  acr_sku            = "Basic"
+  acr_resource_group = azurerm_resource_group.rg_compute_lzp1.name
+  acr_location       = azurerm_resource_group.rg_compute_lzp1.location
 
   providers = {
-    azurerm = azurerm.connectivity
+    azurerm = azurerm.lzp1
   }
 
   tags = {
@@ -76,15 +83,15 @@ module "container_registry" {
     project     = var.project
   }
 }
-/*
+
 # ----------------------------------------
-#region Azure Compute Gallery
+#region Azure Compute Gallery (gal)
 # ----------------------------------------
-resource "azurerm_shared_image_gallery" "compute_gallery" {
-  name                = "ComputeGallery"
-  resource_group_name = azurerm_resource_group.lab.name
-  location            = azurerm_resource_group.lab.location
-  provider            = azurerm.lab
+resource "azurerm_shared_image_gallery" "gal_compute" {
+  name                = "SharedImageGallary"
+  resource_group_name = azurerm_resource_group.rg_compute_lzp1.name
+  location            = azurerm_resource_group.rg_compute_lzp1.location
+  provider            = azurerm.lzp1
   description         = "Production image gallery for compute resources"
 
   tags = {
@@ -99,10 +106,10 @@ resource "azurerm_shared_image_gallery" "compute_gallery" {
 # ----------------------------------------
 resource "azurerm_shared_image" "windows_2025_base" {
   name                = "windows-2025-base"
-  gallery_name        = azurerm_shared_image_gallery.compute_gallery.name
-  resource_group_name = azurerm_resource_group.lab.name
-  location            = azurerm_resource_group.lab.location
-  provider            = azurerm.lab
+  gallery_name        = azurerm_shared_image_gallery.gal_compute.name
+  resource_group_name = azurerm_resource_group.rg_compute_lzp1.name
+  location            = azurerm_resource_group.rg_compute_lzp1.location
+  provider            = azurerm.lzp1
 
   os_type            = "Windows"
   hyper_v_generation = "V1" # Use "V2" if appropriate for your environment
@@ -121,10 +128,10 @@ resource "azurerm_shared_image" "windows_2025_base" {
 
 resource "azurerm_shared_image" "windows_2025_core" {
   name                = "windows-2025-core"
-  gallery_name        = azurerm_shared_image_gallery.compute_gallery.name
-  resource_group_name = azurerm_resource_group.lab.name
-  location            = azurerm_resource_group.lab.location
-  provider            = azurerm.lab
+  gallery_name        = azurerm_shared_image_gallery.gal_compute.name
+  resource_group_name = azurerm_resource_group.rg_compute_lzp1.name
+  location            = azurerm_resource_group.rg_compute_lzp1.location
+  provider            = azurerm.lzp1
 
   os_type            = "Windows"
   hyper_v_generation = "V1" # Use "V2" if appropriate for your environment
@@ -140,7 +147,7 @@ resource "azurerm_shared_image" "windows_2025_core" {
     project     = var.project
   }
 }
-
+/*
 # ----------------------------------------
 #region Virtual Machines
 # ----------------------------------------

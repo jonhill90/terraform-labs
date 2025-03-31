@@ -127,14 +127,14 @@ variable "storage_vault_name" {
   sensitive   = true
 }
 
-variable "application_vault_name" {
-  description = "Application Vault Name"
+variable "appsingle_vault_name" {
+  description = "AppSingle Vault Name"
   type        = string
   sensitive   = true
 }
 
-variable "appsingle_vault_name" {
-  description = "AppSingle Vault Name"
+variable "appmulti_vault_name" {
+  description = "AppMulti Vault Name"
   type        = string
   sensitive   = true
 }

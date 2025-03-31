@@ -291,6 +291,9 @@ module "vnet_spoke_lzp1" {
     snet-default = {
       address_prefixes = ["10.40.1.0/24"]
     }
+    snet-compute = {
+      address_prefixes = ["10.40.5.0/24"]
+    }
   }
 
   providers = {
