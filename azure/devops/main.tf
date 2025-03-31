@@ -1,7 +1,6 @@
-/*terraform {
+terraform {
   backend "azurerm" {}
 }
-*/
 
 # ----------------------------------------
 #region Repositories
@@ -425,7 +424,7 @@ resource "azuredevops_build_definition" "win2025_core_ci" {
 }
 
 resource "azuredevops_build_definition" "twingate_ci" {
-  project_id = module.application_project.devops_project_id
+  project_id = module.networking_project.devops_project_id
   name       = "Twingate-CI"
   path       = "\\"
 
@@ -434,7 +433,7 @@ resource "azuredevops_build_definition" "twingate_ci" {
     repo_id               = var.github_repo_id
     branch_name           = "main"
     yml_path              = "pipelines/application/twingate-ci.yml"
-    service_connection_id = azuredevops_serviceendpoint_github.application.id
+    service_connection_id = azuredevops_serviceendpoint_github.networking.id
   }
 
   ci_trigger {
@@ -621,7 +620,7 @@ resource "azuredevops_build_definition" "win2025_core_cd" {
 }
 
 resource "azuredevops_build_definition" "twingate_cd" {
-  project_id = module.application_project.devops_project_id
+  project_id = module.networking_project.devops_project_id
   name       = "Twingate-CD"
   path       = "\\"
 
@@ -630,11 +629,11 @@ resource "azuredevops_build_definition" "twingate_cd" {
     repo_id               = var.github_repo_id
     branch_name           = "main"
     yml_path              = "pipelines/application/twingate-cd.yml"
-    service_connection_id = azuredevops_serviceendpoint_github.application.id
+    service_connection_id = azuredevops_serviceendpoint_github.networking.id
   }
 
   ci_trigger {
     use_yaml = true
   }
-  depends_on = [azuredevops_serviceendpoint_github.application, azuredevops_build_definition.twingate_ci]
+  depends_on = [azuredevops_serviceendpoint_github.networking, azuredevops_build_definition.twingate_ci]
 }
