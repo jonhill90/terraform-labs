@@ -41,7 +41,7 @@
 | Team | Plan | Apply |
 |---|:-----:|:-----:|
 | AppSingle | [![Build Status](https://dev.azure.com/ImpressiveIT/Applications/_apis/build/status%2FAppSingle-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Applications/_build/latest?definitionId=63&branchName=main) | [![Build Status](https://dev.azure.com/ImpressiveIT/Applications/_apis/build/status%2FAppSingle-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Applications/_build/latest?definitionId=63&branchName=main) |
-| Twingate | [![Build Status](https://dev.azure.com/ImpressiveIT/Applications/_apis/build/status%2FTwingate-CD?branchName=main&stageName=Terraform%20Plan%20-%20Development&jobName=Terraform%20Init%20%26%20Plan%20-%20Development)](https://dev.azure.com/ImpressiveIT/Applications/_build/latest?definitionId=45&branchName=main) | [![Build Status](https://dev.azure.com/ImpressiveIT/Applications/_apis/build/status%2FTwingate-CD?branchName=main&stageName=Terraform%20Plan%20-%20Development&jobName=Terraform%20Apply%20-%20Development)](https://dev.azure.com/ImpressiveIT/Applications/_build/latest?definitionId=45&branchName=main) |
+| Twingate | [![Build Status](https://dev.azure.com/ImpressiveIT/Networking/_apis/build/status%2FTwingate-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Networking/_build/latest?definitionId=73&branchName=main) | [![Build Status](https://dev.azure.com/ImpressiveIT/Networking/_apis/build/status%2FTwingate-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Networking/_build/latest?definitionId=73&branchName=main) |
 | blackglass | In Progress | In Progress |
 
 ### Staged Application Pipelines:
