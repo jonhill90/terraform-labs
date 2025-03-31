@@ -1,7 +1,6 @@
-/*terraform {
+terraform {
   backend "azurerm" {}
 }
-*/
 
 # ----------------------------------------
 # Resource Groups

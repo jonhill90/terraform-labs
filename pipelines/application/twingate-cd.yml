@@ -16,8 +16,8 @@ stages:
     parameters:
       team: "twingate"
       artifactName: "twingate-artifacts"
-      variableGroup: "Application"
-      backendServiceArm: "Application-SC"
+      variableGroup: "Networking"
+      backendServiceArm: "Networking-SC"
       environmentName: "lab"
       stageName: "labplan"
       stageDisplayName: "Development"
@@ -30,8 +30,8 @@ stages:
     parameters:
       team: "twingate"
       artifactName: "twingate-artifacts"
-      variableGroup: "Application"
-      backendServiceArm: "Application-SC"
+      variableGroup: "Networking"
+      backendServiceArm: "Networking-SC"
       environmentName: "lab"
       stageName: "lab"
       stageDisplayName: "Development"

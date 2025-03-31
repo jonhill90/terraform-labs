@@ -404,7 +404,7 @@ resource "azuredevops_build_definition" "win2025_base_ci" {
   }
   depends_on = [azuredevops_serviceendpoint_github.compute]
 }
-/*
+
 resource "azuredevops_build_definition" "win2025_core_ci" {
   project_id = module.compute_project.devops_project_id
   name       = "windows-2025-core-ci"
@@ -414,7 +414,7 @@ resource "azuredevops_build_definition" "win2025_core_ci" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/packer/windows-2025-core-ci.yml"
+    yml_path              = "pipelines/image-bakery/windows-2025-core-ci.yml"
     service_connection_id = azuredevops_serviceendpoint_github.compute.id
   }
 
@@ -433,7 +433,7 @@ resource "azuredevops_build_definition" "twingate_ci" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/twingate-ci.yml"
+    yml_path              = "pipelines/application/twingate-ci.yml"
     service_connection_id = azuredevops_serviceendpoint_github.application.id
   }
 
@@ -445,7 +445,7 @@ resource "azuredevops_build_definition" "twingate_ci" {
 
 # Add Agent Pool to the Build Pipeline via DevOps Portal
 # Approve Pipeline to use the Agent Pool vis DevOps Portal
-*/
+
 # --------------------------------------------------
 #region Azure DevOps Release Pipeline (CD)
 # --------------------------------------------------
@@ -600,7 +600,7 @@ resource "azuredevops_build_definition" "win2025_base_cd" {
   }
   depends_on = [azuredevops_serviceendpoint_github.compute, azuredevops_build_definition.win2025_base_ci]
 }
-/*
+
 resource "azuredevops_build_definition" "win2025_core_cd" {
   project_id = module.compute_project.devops_project_id
   name       = "windows-2025-core-cd"
@@ -610,7 +610,7 @@ resource "azuredevops_build_definition" "win2025_core_cd" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/packer/windows-2025-core-cd.yml"
+    yml_path              = "pipelines/image-bakery/windows-2025-core-cd.yml"
     service_connection_id = azuredevops_serviceendpoint_github.compute.id
   }
 
@@ -629,7 +629,7 @@ resource "azuredevops_build_definition" "twingate_cd" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/twingate-cd.yml"
+    yml_path              = "pipelines/application/twingate-cd.yml"
     service_connection_id = azuredevops_serviceendpoint_github.application.id
   }
 
@@ -638,4 +638,3 @@ resource "azuredevops_build_definition" "twingate_cd" {
   }
   depends_on = [azuredevops_serviceendpoint_github.application, azuredevops_build_definition.twingate_ci]
 }
-*/
