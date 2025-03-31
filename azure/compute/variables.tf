@@ -56,7 +56,7 @@ variable "tenant_id" {
 }
 
 # ----------------------------------------
-# Vault
+#region Vault
 # ----------------------------------------
 variable "compute_vault_name" {
   description = "Compute Vault Name"
