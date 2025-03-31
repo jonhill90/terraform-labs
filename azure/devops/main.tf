@@ -1,7 +1,7 @@
-terraform {
+/*terraform {
   backend "azurerm" {}
 }
-
+*/
 
 # ----------------------------------------
 #region Repositories
@@ -290,7 +290,7 @@ resource "azuredevops_build_definition" "networking_ci" {
   }
   depends_on = [azuredevops_serviceendpoint_github.networking]
 }
-/*
+
 resource "azuredevops_build_definition" "compute_ci" {
   project_id = module.compute_project.devops_project_id
   name       = "Compute-CI"
@@ -300,7 +300,7 @@ resource "azuredevops_build_definition" "compute_ci" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/compute-ci.yml"
+    yml_path              = "pipelines/infrastructure/compute-ci.yml"
     service_connection_id = azuredevops_serviceendpoint_github.compute.id
   }
 
@@ -309,7 +309,7 @@ resource "azuredevops_build_definition" "compute_ci" {
   }
   depends_on = [azuredevops_serviceendpoint_github.compute]
 }
-
+/*
 resource "azuredevops_build_definition" "database_ci" {
   project_id = module.database_project.devops_project_id
   name       = "Database-CI"
@@ -486,7 +486,7 @@ resource "azuredevops_build_definition" "networking_cd" {
   }
   depends_on = [azuredevops_serviceendpoint_github.networking, azuredevops_build_definition.networking_ci]
 }
-/*
+
 resource "azuredevops_build_definition" "compute_cd" {
   project_id = module.compute_project.devops_project_id
   name       = "Compute-CD"
@@ -496,7 +496,7 @@ resource "azuredevops_build_definition" "compute_cd" {
     repo_type             = "GitHub"
     repo_id               = var.github_repo_id
     branch_name           = "main"
-    yml_path              = "pipelines/compute-cd.yml"
+    yml_path              = "pipelines/infrastructure/compute-cd.yml"
     service_connection_id = azuredevops_serviceendpoint_github.compute.id
   }
 
@@ -505,7 +505,7 @@ resource "azuredevops_build_definition" "compute_cd" {
   }
   depends_on = [azuredevops_serviceendpoint_github.compute, azuredevops_build_definition.compute_ci]
 }
-
+/*
 resource "azuredevops_build_definition" "database_cd" {
   project_id = module.database_project.devops_project_id
   name       = "Database-CD"
