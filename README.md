@@ -7,8 +7,8 @@
 - [🚀 Future-Proofing Infrastructure for AI with Azure + Terraform](https://github.com/jonhill90/terraform-labs/blob/main/docs/Furure-Proofing%20Infrastructure%20for%20AI%20with%20Azure%20%2B%20Terraform.md)
 - [🧠 AI Ops System](https://github.com/jonhill90/terraform-labs/blob/main/docs/AI%20Ops.md)
 - [🌐 Networking Landing Zone Best Practice](https://github.com/jonhill90/terraform-labs/blob/main/docs/Azure%20Landing%20Zone%20Networking%20with%20Terraform.md)
-- [🖥 Server Build](https://github.com/jonhill90/terraform-labs/blob/main/azure-lab/server-build/README.md)
-- [📦 Packer Image Bakery](https://github.com/jonhill90/terraform-labs/blob/main/azure-lab/image-bakery/README.md)
+- [🖥 Server Build](https://github.com/jonhill90/terraform-labs/blob/main/azure/server-build/README.md)
+- [📦 Packer Image Bakery](https://github.com/jonhill90/terraform-labs/blob/main/azure/image-bakery/README.md)
 ---
 ### Infrastructure Pipelines:
 | Team | Plan | Apply |
