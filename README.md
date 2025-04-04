@@ -10,7 +10,7 @@
 - [🖥 Server Build](https://github.com/jonhill90/terraform-labs/blob/main/azure/server-build/README.md)
 - [📦 Packer Image Bakery](https://github.com/jonhill90/terraform-labs/blob/main/azure/image-bakery/README.md)
 - [🖨️ Universal Print](https://github.com/jonhill90/terraform-labs/blob/main/azure/print/README.md)
-- [🌎 Terraform MCP Workflow]()
+- [🌎 Terraform MCP Workflow](https://github.com/jonhill90/terraform-labs/blob/main/docs/Terraform%20MCP%20Workflow.md)
 ---
 ### Infrastructure Pipelines:
 | Team | Plan | Apply |
