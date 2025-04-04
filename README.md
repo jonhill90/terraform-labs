@@ -9,6 +9,8 @@
 - [🌐 Networking Landing Zone Best Practice](https://github.com/jonhill90/terraform-labs/blob/main/docs/Azure%20Landing%20Zone%20Networking%20with%20Terraform.md)
 - [🖥 Server Build](https://github.com/jonhill90/terraform-labs/blob/main/azure/server-build/README.md)
 - [📦 Packer Image Bakery](https://github.com/jonhill90/terraform-labs/blob/main/azure/image-bakery/README.md)
+- [🖨️ Universal Print](https://github.com/jonhill90/terraform-labs/blob/main/azure/print/README.md)
+- [🌎 Terraform MCP Workflow]()
 ---
 ### Infrastructure Pipelines:
 | Team | Plan | Apply |
