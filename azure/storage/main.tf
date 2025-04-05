@@ -93,4 +93,6 @@ resource "azurerm_storage_container" "datafactory" {
   storage_account_name  = azurerm_storage_account.datafactory.name
   container_access_type = "private"
   provider              = azurerm.lzp1
+
+  depends_on = [azurerm_storage_account.datafactory]
 }
