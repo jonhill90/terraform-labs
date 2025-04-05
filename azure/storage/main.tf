@@ -37,3 +37,20 @@ module "storage_vault" {
 
   depends_on = [azurerm_resource_group.rg_storage_lzp1]
 }
+
+# ----------------------------------------
+#region Storage Account (sa)
+# ----------------------------------------
+resource "azurerm_storage_account" "lotr" {
+  name                     = "lotrscraperstore"
+  resource_group_name      = azurerm_resource_group.rg_storage_lzp1.name
+  location                 = azurerm_resource_group.rg_storage_lzp1.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+}
+
+resource "azurerm_storage_container" "lotr_data" {
+  name                  = "lotr-data"
+  storage_account_id    = azurerm_storage_account.lotr.id
+  container_access_type = "private"
+}
