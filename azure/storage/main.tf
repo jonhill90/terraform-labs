@@ -47,10 +47,12 @@ resource "azurerm_storage_account" "lotr" {
   location                 = azurerm_resource_group.rg_storage_lzp1.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
+  provider                 = azurerm.lzp1
 }
 
 resource "azurerm_storage_container" "lotr_data" {
   name                  = "lotr-data"
   storage_account_name  = azurerm_storage_account.lotr.name
   container_access_type = "private"
+  provider              = azurerm.lzp1
 }
