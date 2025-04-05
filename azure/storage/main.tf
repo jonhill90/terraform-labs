@@ -51,6 +51,6 @@ resource "azurerm_storage_account" "lotr" {
 
 resource "azurerm_storage_container" "lotr_data" {
   name                  = "lotr-data"
-  storage_account_id    = azurerm_storage_account.lotr.id
+  storage_account_name  = azurerm_storage_account.lotr.name
   container_access_type = "private"
 }
