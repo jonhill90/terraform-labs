@@ -39,3 +39,12 @@ variable "datafactory_vault_name" {
   type        = string
   sensitive   = true
 }
+
+# ----------------------------------------
+#region Storage Accounts
+# ----------------------------------------
+variable "datafactory_storage_account_name" {
+  description = "Data Factory Storage Account Name"
+  type        = string
+  sensitive   = true
+}

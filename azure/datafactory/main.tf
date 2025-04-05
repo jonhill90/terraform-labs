@@ -37,3 +37,20 @@ resource "azurerm_data_factory" "df_lzp1" {
     project     = var.project
   }
 }
+
+# ----------------------------------------
+#region Storage Accounts (sa)
+# ----------------------------------------
+data "azurerm_storage_account" "datafactory" {
+  name                = var.datafactory_storage_account_name
+  resource_group_name = azurerm_resource_group.rg_datafactory_lzp1.name
+  provider            = azurerm.lzp1
+}
+# ----------------------------------------
+#region Storage Containers (sc)
+# ----------------------------------------
+data "azurerm_storage_container" "datafactory" {
+  name                  = "datafactory"
+  storage_account_name  = data.azurerm_storage_account.datafactory.name
+  provider             = azurerm.lzp1
+}
