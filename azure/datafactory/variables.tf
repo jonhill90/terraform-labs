@@ -32,24 +32,10 @@ variable "tenant_id" {
 }
 
 # ----------------------------------------
-#region Vault Settings
+#region Vault
 # ----------------------------------------
-variable "storage_vault_name" {
-  description = "Storage Vault Name"
-  type        = string
-}
-
-# ----------------------------------------
-#region Storage Accounts
-# ----------------------------------------
-variable "lotr_storage_account_name" {
-  description = "Storage Account Name"
-  type        = string
-  sensitive   = true
-}
-
-variable "datafactory_storage_account_name" {
-  description = "Data Factory Storage Account Name"
+variable "datafactory_vault_name" {
+  description = "Data Factory Vault Name"
   type        = string
   sensitive   = true
 }

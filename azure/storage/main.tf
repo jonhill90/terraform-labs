@@ -39,10 +39,10 @@ module "storage_vault" {
 }
 
 # ----------------------------------------
-#region Storage Account (sa)
+#region Storage Accounts (sa)
 # ----------------------------------------
 resource "azurerm_storage_account" "lotr" {
-  name                     = "lotrscraperstore"
+  name                     = var.lotr_storage_account_name
   resource_group_name      = azurerm_resource_group.rg_storage_lzp1.name
   location                 = azurerm_resource_group.rg_storage_lzp1.location
   account_tier             = "Standard"
@@ -50,9 +50,28 @@ resource "azurerm_storage_account" "lotr" {
   provider                 = azurerm.lzp1
 }
 
+resource "azurerm_storage_account" "datafactory" {
+  name                     = var.datafactory_storage_account_name
+  resource_group_name      = azurerm_resource_group.rg_storage_lzp1.name
+  location                 = azurerm_resource_group.rg_storage_lzp1.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+  provider                 = azurerm.lzp1
+}
+
+# ----------------------------------------
+#region Storage Containers (sc)
+# ----------------------------------------
 resource "azurerm_storage_container" "lotr_data" {
   name                  = "lotr-data"
   storage_account_name  = azurerm_storage_account.lotr.name
+  container_access_type = "private"
+  provider              = azurerm.lzp1
+}
+
+resource "azurerm_storage_container" "datafactory" {
+  name                  = "datafactory"
+  storage_account_name  = azurerm_storage_account.datafactory.name
   container_access_type = "private"
   provider              = azurerm.lzp1
 }
