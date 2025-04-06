@@ -295,7 +295,7 @@ module "vnet_spoke_lzp1" {
       address_prefixes = ["10.40.5.0/24"]
     }
     snet-storage-private = {
-     address_prefixes     = ["10.40.90.0/24"]
+     address_prefixes     = ["10.40.20.0/24"]
      enforce_private_link = true
      service_endpoints    = ["Microsoft.Storage"]
     }
