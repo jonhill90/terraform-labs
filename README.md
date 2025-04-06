@@ -22,6 +22,8 @@
 | 🗄️ Storage | [![Build Status](https://dev.azure.com/ImpressiveIT/Storage/_apis/build/status%2FStorage-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Storage/_build/latest?definitionId=61&branchName=main) | [![Build Status](https://dev.azure.com/ImpressiveIT/Storage/_apis/build/status%2FStorage-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Storage/_build/latest?definitionId=61&branchName=main) |
 | 🔨 DevOps | [![Build Status](https://dev.azure.com/ImpressiveIT/DevOps/_apis/build/status%2FDevOps-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/DevOps/_build/latest?definitionId=53&branchName=main) | [![Build Status](https://dev.azure.com/ImpressiveIT/DevOps/_apis/build/status%2FDevOps-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/DevOps/_build/latest?definitionId=53&branchName=main) |
 | 🖨️ Printing | In Progress | In Progress |
+| 🏭 Data Factory | In Progress | In Progress |
+| 🧱 Databricks | In Progress | In Progress |
 ---
 ### Image Bakery Pipelines:
 | OS | Validate | Build |
@@ -44,7 +46,8 @@
 |---|:-----:|:-----:|
 | AppSingle | [![Build Status](https://dev.azure.com/ImpressiveIT/Applications/_apis/build/status%2FAppSingle-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Applications/_build/latest?definitionId=63&branchName=main) | [![Build Status](https://dev.azure.com/ImpressiveIT/Applications/_apis/build/status%2FAppSingle-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Applications/_build/latest?definitionId=63&branchName=main) |
 | Twingate | [![Build Status](https://dev.azure.com/ImpressiveIT/Networking/_apis/build/status%2FTwingate-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Networking/_build/latest?definitionId=73&branchName=main) | [![Build Status](https://dev.azure.com/ImpressiveIT/Networking/_apis/build/status%2FTwingate-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Networking/_build/latest?definitionId=73&branchName=main) |
-| blackglass | In Progress | In Progress |
+| MDP-ADF | In Progress | In Progress |
+| MDP-Fabric | In Progress | In Progress |
 
 ### Staged Application Pipelines:
 | Application | Dev | Test | Prod |
