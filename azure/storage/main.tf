@@ -84,6 +84,14 @@ resource "azurerm_storage_account" "lotr" {
     project     = var.project
   }
   depends_on = [azurerm_resource_group.rg_storage_lzp1]
+
+  network_rules {
+    default_action             = "Deny"
+    bypass                    = ["AzureServices"]
+    virtual_network_subnet_ids = [
+      data.azurerm_subnet.snet_storage_private_lzp1.id
+    ]
+  }
 }
 
 resource "azurerm_storage_account" "datafactory" {
@@ -119,4 +127,24 @@ resource "azurerm_storage_container" "datafactory" {
   provider              = azurerm.lzp1
 
   depends_on = [azurerm_storage_account.datafactory]
+}
+
+# ----------------------------------------
+#region Private Endpoints (pe)
+# ----------------------------------------
+resource "azurerm_private_endpoint" "lotr_sa_pe" {
+  name                = "pe-lotr-sa"
+  location            = azurerm_resource_group.rg_storage_lzp1.location
+  resource_group_name = azurerm_resource_group.rg_storage_lzp1.name
+  subnet_id           = data.azurerm_subnet.snet_storage_private_lzp1.id
+  provider            = azurerm.lzp1
+
+  private_service_connection {
+    name                           = "psc-lotr-sa"
+    private_connection_resource_id = azurerm_storage_account.lotr.id
+    is_manual_connection           = false
+    subresource_names              = ["blob"]
+  }
+
+  depends_on = [azurerm_storage_account.lotr]
 }
