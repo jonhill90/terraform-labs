@@ -67,6 +67,16 @@ data "azurerm_subnet" "snet_storage_private_lzp1" {
 
   depends_on = [data.azurerm_virtual_network.vnet_spoke_lzp1]
 }
+
+
+data "azurerm_private_dns_zone" "blob" {
+  name                = "privatelink.blob.core.windows.net"
+  resource_group_name = "rg-networking-connectivity"
+  provider            = azurerm.connectivity
+
+  depends_on = [data.azurerm_resource_group.rg_networking_lzp1]
+}
+
 # ----------------------------------------
 #region Storage Accounts (sa)
 # ----------------------------------------
@@ -147,4 +157,16 @@ resource "azurerm_private_endpoint" "lotr_sa_pe" {
   }
 
   depends_on = [azurerm_storage_account.lotr]
+}
+
+# ----------------------------------------
+#region Private DNS Zone Groups (pdzg)
+# ----------------------------------------
+resource "azurerm_private_dns_zone_group" "lotr_blob_dns" {
+  name                 = "default"
+  private_endpoint_id  = azurerm_private_endpoint.lotr_sa_pe.id
+  private_dns_zone_ids = [data.azurerm_private_dns_zone.blob.id]
+  provider             = azurerm.lzp1
+
+  depends_on = [azurerm_private_endpoint.lotr_sa_pe]
 }
