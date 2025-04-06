@@ -156,17 +156,10 @@ resource "azurerm_private_endpoint" "lotr_sa_pe" {
     subresource_names              = ["blob"]
   }
 
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [data.azurerm_private_dns_zone.blob.id]
+  }
+
   depends_on = [azurerm_storage_account.lotr]
-}
-
-# ----------------------------------------
-#region Private DNS Zone Groups (pdzg)
-# ----------------------------------------
-resource "azurerm_private_dns_zone_group" "lotr_blob_dns" {
-  name                 = "default"
-  private_endpoint_id  = azurerm_private_endpoint.lotr_sa_pe.id
-  private_dns_zone_ids = [data.azurerm_private_dns_zone.blob.id]
-  provider             = azurerm.lzp1
-
-  depends_on = [azurerm_private_endpoint.lotr_sa_pe]
 }
