@@ -497,3 +497,34 @@ module "dns" {
   depends_on = [azurerm_resource_group.networking_connectivity]
 }
 */
+
+# Private DNS Zone for Storage Account Private Endpoints
+resource "azurerm_private_dns_zone" "blob" {
+  name                = "privatelink.blob.core.windows.net"
+  resource_group_name = azurerm_resource_group.rg_networking_connectivity.name
+  provider = azurerm.connectivity
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+  depends_on = [azurerm_resource_group.rg_networking_connectivity]
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "blob_lzp1" {
+  name                  = "blob-link-lzp1"
+  resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
+  private_dns_zone_name = azurerm_private_dns_zone.blob.name
+  virtual_network_id    = module.vnet_spoke_lzp1.vnet_id
+  registration_enabled  = false
+  provider = azurerm.connectivity
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_private_dns_zone.blob, module.vnet_spoke_lzp1]
+}
