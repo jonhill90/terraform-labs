@@ -28,3 +28,9 @@ variable "access_groups" {
   description = "List of Twingate Group IDs for access control"
   default     = []
 }
+
+variable "custom_dns" {
+  description = "Optional custom DNS settings for the Twingate Remote Network (e.g., { primary = \"168.63.129.16\", secondary = \"1.1.1.1\" })"
+  type        = map(string)
+  default     = null
+}

@@ -70,6 +70,11 @@ module "twingate_resource" {
 
   access_groups = values(module.twingate_groups.group_ids)
 
+  custom_dns = {
+    primary   = "168.63.129.16"
+    secondary = "1.1.1.1"
+  }
+
   providers = {
     twingate = twingate
   }
