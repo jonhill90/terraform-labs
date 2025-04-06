@@ -460,45 +460,6 @@ module "vnet_peering_lza2" {
 # ----------------------------------------
 #region DNS
 # ----------------------------------------
-/*
-module "dns" {
-  source = "../../modules/azurerm/network/dns"
-
-  dns_zone_name      = "impressiveit.net"
-  dns_resource_group = azurerm_resource_group.networking_connectivity.name
-  dns_location       = azurerm_resource_group.networking_connectivity.location
-
-  dns_records = {
-    a_records = {
-      "@" = { ttl = 3600, values = [] }
-    }
-    ns_records = {
-      ttl = 172800
-      values = [
-        "ns1-01.azure-dns.com.",
-        "ns2-01.azure-dns.net.",
-        "ns3-01.azure-dns.org.",
-        "ns4-01.azure-dns.info."
-      ]
-    }
-    txt_records = {}
-    cname_records = {
-      "cdnverify"      = { ttl = 3600, value = "cdnverify.impressiveitweb-fd.azureedge.net" }
-      "test"           = { ttl = 3600, value = "" }
-      "cdnverify.test" = { ttl = 3600, value = "cdnverify.impressiveit-fd.azureedge.net" }
-      "www"            = { ttl = 3600, value = "" }
-    }
-  }
-
-  providers = {
-    azurerm = azurerm.connectivity
-  }
-
-  depends_on = [azurerm_resource_group.networking_connectivity]
-}
-*/
-
-# Private DNS Zone for Storage Account Private Endpoints
 resource "azurerm_private_dns_zone" "blob" {
   name                = "privatelink.blob.core.windows.net"
   resource_group_name = azurerm_resource_group.rg_networking_connectivity.name
@@ -512,6 +473,114 @@ resource "azurerm_private_dns_zone" "blob" {
   depends_on = [azurerm_resource_group.rg_networking_connectivity]
 }
 
+# ----------------------------------------
+#region Internal DNS Zone
+# ----------------------------------------
+resource "azurerm_private_dns_zone" "internal" {
+  name                = "impressiveit.local"
+  resource_group_name = azurerm_resource_group.rg_networking_connectivity.name
+  provider            = azurerm.connectivity
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_resource_group.rg_networking_connectivity]
+}
+
+# -------------------------------------------------------------
+#region Private DNS Zone Virtual Network Links - Internal Zone
+# -------------------------------------------------------------
+resource "azurerm_private_dns_zone_virtual_network_link" "internal_hub" {
+  name                  = "internal-link-hub"
+  resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
+  private_dns_zone_name = azurerm_private_dns_zone.internal.name
+  virtual_network_id    = module.vnet_hub.vnet_id
+  registration_enabled  = false
+  provider              = azurerm.connectivity
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_private_dns_zone.internal, module.vnet_hub]
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "internal_management" {
+  name                  = "internal-link-management"
+  resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
+  private_dns_zone_name = azurerm_private_dns_zone.internal.name
+  virtual_network_id    = module.vnet_spoke_management.vnet_id
+  registration_enabled  = false
+  provider              = azurerm.connectivity
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_private_dns_zone.internal, module.vnet_spoke_management]
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "internal_identity" {
+  name                  = "internal-link-identity"
+  resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
+  private_dns_zone_name = azurerm_private_dns_zone.internal.name
+  virtual_network_id    = module.vnet_spoke_identity.vnet_id
+  registration_enabled  = false
+  provider              = azurerm.connectivity
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_private_dns_zone.internal, module.vnet_spoke_identity]
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "internal_lzp1" {
+  name                  = "internal-link-lzp1"
+  resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
+  private_dns_zone_name = azurerm_private_dns_zone.internal.name
+  virtual_network_id    = module.vnet_spoke_lzp1.vnet_id
+  registration_enabled  = false
+  provider              = azurerm.connectivity
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_private_dns_zone.internal, module.vnet_spoke_lzp1]
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "internal_lza2" {
+  name                  = "internal-link-lza2"
+  resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
+  private_dns_zone_name = azurerm_private_dns_zone.internal.name
+  virtual_network_id    = module.vnet_spoke_lza2.vnet_id
+  registration_enabled  = false
+  provider              = azurerm.connectivity
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_private_dns_zone.internal, module.vnet_spoke_lza2]
+}
+
+# --------------------------------------------------------------
+#region Private DNS Zone Virtual Network Links - Azure Services
+# --------------------------------------------------------------
 resource "azurerm_private_dns_zone_virtual_network_link" "blob_lzp1" {
   name                  = "blob-link-lzp1"
   resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
