@@ -300,7 +300,7 @@ module "vnet_spoke_lzp1" {
     snet-adf-integration = {
       address_prefixes = ["10.40.85.0/24"]
       delegation_name    = "adfDelegation"
-      delegation_service = "Microsoft.DataFactory/factories"
+      delegation_service = "Microsoft.ManagedIdentity/userAssignedIdentities"
       delegation_actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
     }
   }
@@ -335,9 +335,7 @@ module "vnet_spoke_lza2" {
     }
     snet-mdp-adf-private-endpoints = {
       address_prefixes = ["10.50.25.0/24"]
-      delegation_name    = "privateEndpointDelegation"
-      delegation_service = "Microsoft.Network/privateEndpoints"
-      delegation_actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+      private_endpoint_network_policies_enabled = false
     }
   }
 
