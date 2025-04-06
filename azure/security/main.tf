@@ -276,10 +276,9 @@ module "database_sp_role_assignment" {
 
 module "storage_sp_role_assignment" {
   source       = "../../modules/azurerm/security/role-assignment"
-  role_scope   = data.azurerm_subscription.lzp1.id
+  role_scope   = data.azurerm_management_group.mg.id
   role_name    = "Contributor"
-  principal_id = data.azuread_service_principal.storage_sp.object_id
-
+  principal_id = data.azuread_service_principal.compute_sp.object_id
   providers = {
     azurerm = azurerm.lzp1
   }
