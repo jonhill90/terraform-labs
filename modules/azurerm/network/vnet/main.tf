@@ -19,6 +19,8 @@ resource "azurerm_subnet" "subnets" {
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = each.value.address_prefixes
 
+  enforce_private_link_endpoint_network_policies = lookup(each.value, "enforce_private_link", false)
+
   dynamic "delegation" {
     for_each = (each.value.delegation_name != null && each.value.delegation_service != null) ? [1] : []
     content {

@@ -19,12 +19,12 @@ variable "vnet_address_space" {
 }
 
 variable "subnets" {
-  description = "A map of subnets to create inside the Virtual Network"
   type = map(object({
-    address_prefixes     = list(string)
-    delegation_name      = optional(string)
-    delegation_service   = optional(string)
-    delegation_actions   = optional(list(string), [])
+    address_prefixes   = list(string)
+    delegation_name    = optional(string)
+    delegation_service = optional(string)
+    delegation_actions = optional(list(string))
+    enforce_private_link = optional(bool)
   }))
 }
 
