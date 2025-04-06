@@ -237,6 +237,11 @@ module "vnet_spoke_management" {
     snet-default = {
       address_prefixes = ["10.20.1.0/24"]
     }
+    snet-storage-private = {
+      address_prefixes     = ["10.20.20.0/24"]
+      enforce_private_link = true
+      service_endpoints    = ["Microsoft.Storage"]
+    }
   }
 
   providers = {
