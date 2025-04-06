@@ -1,16 +1,6 @@
 # Create the Remote Network in Twingate
 resource "twingate_remote_network" "remote_network" {
   name = var.remote_network_name
-
-  dynamic "dns" {
-    for_each = var.custom_dns != null ? [var.custom_dns] : []
-    content {
-      nameservers = compact([
-        lookup(dns.value, "primary", null),
-        lookup(dns.value, "secondary", null)
-      ])
-    }
-  }
 }
 
 # Create a single Twingate Connector inside the Remote Network
