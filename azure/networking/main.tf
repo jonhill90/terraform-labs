@@ -458,7 +458,7 @@ module "vnet_peering_lza2" {
   depends_on = [module.vnet_hub, module.vnet_spoke_lza2]
 }
 # ----------------------------------------
-#region DNS
+#region Azure Private DNS Zones
 # ----------------------------------------
 resource "azurerm_private_dns_zone" "blob" {
   name                = "privatelink.blob.core.windows.net"
@@ -488,6 +488,26 @@ resource "azurerm_private_dns_zone" "internal" {
   }
 
   depends_on = [azurerm_resource_group.rg_networking_connectivity]
+}
+
+# ----------------------------------------
+#region Internal DNS CNAME Records
+# ----------------------------------------
+resource "azurerm_private_dns_cname_record" "lotr_alias" {
+  name                = "lotrstore"
+  zone_name           = azurerm_private_dns_zone.internal.name
+  resource_group_name = azurerm_resource_group.rg_networking_connectivity.name
+  ttl                 = 300
+  record              = "lotrscraperstore.blob.core.windows.net"
+  provider            = azurerm.connectivity
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+  
+  depends_on          = [azurerm_private_dns_zone.internal]
 }
 
 # -------------------------------------------------------------
