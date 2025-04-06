@@ -96,8 +96,8 @@ resource "azurerm_storage_account" "lotr" {
   depends_on = [azurerm_resource_group.rg_storage_lzp1]
 
   network_rules {
-    default_action             = "Deny"
-    bypass                    = ["AzureServices"]
+    default_action = "Deny"
+    bypass         = ["AzureServices"]
     virtual_network_subnet_ids = [
       data.azurerm_subnet.snet_storage_private_lzp1.id
     ]
