@@ -20,6 +20,7 @@ resource "azurerm_subnet" "subnets" {
   address_prefixes     = each.value.address_prefixes
 
   enforce_private_link_endpoint_network_policies = lookup(each.value, "enforce_private_link", false)
+  service_endpoints                              = lookup(each.value, "service_endpoints", null)
 
   dynamic "delegation" {
     for_each = (each.value.delegation_name != null && each.value.delegation_service != null) ? [1] : []
