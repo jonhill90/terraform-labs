@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "azurerm" {
-  alias           = "lzp1"
-  subscription_id = var.lzp1_subscription_id
+  alias           = "lza2"
+  subscription_id = var.lza2_subscription_id
   features {}
 }

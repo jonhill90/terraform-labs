@@ -19,8 +19,8 @@ variable "project" {
 # ----------------------------------------
 #region Azure Settings
 # ----------------------------------------
-variable "lzp1_subscription_id" {
-  description = "Landing zone P1 Azure Subscription ID"
+variable "lza2_subscription_id" {
+  description = "Landing zone A2 Azure Subscription ID"
   type        = string
   sensitive   = true
 }
