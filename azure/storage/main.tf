@@ -17,6 +17,11 @@ resource "azurerm_resource_group" "rg_storage_lzp1" {
   }
 }
 
+data "azurerm_resource_group" "rg_networking_lzp1" {
+  name     = "rg-networking-lzp1"
+  provider = azurerm.lzp1
+}
+
 data "azurerm_resource_group" "rg_datafactory_lzp1" {
   name     = "rg-datafactory-lzp1"
   provider = azurerm.lzp1
@@ -43,6 +48,25 @@ module "storage_vault" {
   depends_on = [azurerm_resource_group.rg_storage_lzp1]
 }
 
+# ----------------------------------------
+#region Networking
+# ----------------------------------------
+data "azurerm_virtual_network" "vnet_spoke_lzp1" {
+  name                = "vnet-spoke-lzp1"
+  resource_group_name = data.azurerm_resource_group.rg_networking_lzp1.name
+  provider            = azurerm.lzp1
+
+  depends_on = [data.azurerm_resource_group.rg_networking_lzp1]
+}
+
+data "azurerm_subnet" "snet_storage_private_lzp1" {
+  name                 = "snet-storage-private"
+  virtual_network_name = data.azurerm_virtual_network.vnet_spoke_lzp1.name
+  resource_group_name  = data.azurerm_resource_group.rg_networking_lzp1.name
+  provider             = azurerm.lzp1
+
+  depends_on = [data.azurerm_virtual_network.vnet_spoke_lzp1]
+}
 # ----------------------------------------
 #region Storage Accounts (sa)
 # ----------------------------------------
