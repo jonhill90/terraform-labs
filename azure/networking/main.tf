@@ -300,7 +300,7 @@ module "vnet_spoke_lzp1" {
     snet-adf-integration = {
       address_prefixes = ["10.40.85.0/24"]
       delegation_name    = "adfDelegation"
-      delegation_service = "Microsoft.ManagedIdentity/userAssignedIdentities"
+      delegation_service = "Microsoft.DataFactory/factories"
       delegation_actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
     }
   }
