@@ -7,7 +7,7 @@
 #region Resource Groups (rg)
 # ----------------------------------------
 resource "azurerm_resource_group" "rg_mdp_lza2" {
-  name     = "rg-mdp-lab"
+  name     = "rg-mdp-adf-lab"
   location = "eastus"
   provider = azurerm.lza2
 

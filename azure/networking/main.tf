@@ -226,7 +226,7 @@ module "vnet_hub" {
 #region vNet Spokes (vnet)
 # ----------------------------------------
 module "vnet_spoke_management" {
-  source = "../../modules/azurerm/network/vnet"
+  source              = "../../modules/azurerm/network/vnet"
   vnet_name           = "vnet-spoke-management"
   vnet_location       = azurerm_resource_group.rg_networking_management.location
   vnet_resource_group = azurerm_resource_group.rg_networking_management.name
@@ -253,12 +253,12 @@ module "vnet_spoke_management" {
 }
 
 module "vnet_spoke_identity" {
-  source = "../../modules/azurerm/network/vnet"
-  vnet_name = "vnet-spoke-identity"
-  vnet_location = azurerm_resource_group.rg_networking_identity.location
+  source              = "../../modules/azurerm/network/vnet"
+  vnet_name           = "vnet-spoke-identity"
+  vnet_location       = azurerm_resource_group.rg_networking_identity.location
   vnet_resource_group = azurerm_resource_group.rg_networking_identity.name
   vnet_address_space  = ["10.30.0.0/16"]
-  dns_servers = []
+  dns_servers         = []
 
   subnets = {
     snet-default = {
@@ -280,12 +280,12 @@ module "vnet_spoke_identity" {
 }
 
 module "vnet_spoke_lzp1" {
-  source = "../../modules/azurerm/network/vnet"
-  vnet_name = "vnet-spoke-lzp1"
-  vnet_location = azurerm_resource_group.rg_networking_lzp1.location
+  source              = "../../modules/azurerm/network/vnet"
+  vnet_name           = "vnet-spoke-lzp1"
+  vnet_location       = azurerm_resource_group.rg_networking_lzp1.location
   vnet_resource_group = azurerm_resource_group.rg_networking_lzp1.name
-  vnet_address_space = ["10.40.0.0/16"]
-  dns_servers = []
+  vnet_address_space  = ["10.40.0.0/16"]
+  dns_servers         = []
 
   subnets = {
     snet-default = {
@@ -293,6 +293,15 @@ module "vnet_spoke_lzp1" {
     }
     snet-compute = {
       address_prefixes = ["10.40.5.0/24"]
+    }
+    snet-adf-data = {
+      address_prefixes = ["10.40.80.0/24"]
+    }
+    snet-adf-integration = {
+      address_prefixes = ["10.40.85.0/24"]
+      delegation_name    = "adfDelegation"
+      delegation_service = "Microsoft.DataFactory/factories"
+      delegation_actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
     }
   }
 
@@ -310,16 +319,25 @@ module "vnet_spoke_lzp1" {
 }
 
 module "vnet_spoke_lza2" {
-  source = "../../modules/azurerm/network/vnet"
-  vnet_name = "vnet-spoke-lza2"
-  vnet_location = azurerm_resource_group.rg_networking_lza2.location
+  source              = "../../modules/azurerm/network/vnet"
+  vnet_name           = "vnet-spoke-lza2"
+  vnet_location       = azurerm_resource_group.rg_networking_lza2.location
   vnet_resource_group = azurerm_resource_group.rg_networking_lza2.name
-  vnet_address_space = ["10.50.0.0/16"]
-  dns_servers = []
+  vnet_address_space  = ["10.50.0.0/16"]
+  dns_servers         = []
 
   subnets = {
     snet-default = {
       address_prefixes = ["10.50.1.0/24"]
+    }
+    snet-mdp-adf = {
+      address_prefixes   = ["10.50.20.0/24"]
+    }
+    snet-mdp-adf-private-endpoints = {
+      address_prefixes = ["10.50.25.0/24"]
+      delegation_name    = "privateEndpointDelegation"
+      delegation_service = "Microsoft.Network/privateEndpoints"
+      delegation_actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
     }
   }
 

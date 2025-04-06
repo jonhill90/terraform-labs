@@ -64,7 +64,7 @@ resource "azurerm_data_factory_linked_service_azure_blob_storage" "blob_ls" {
   connection_string   = data.azurerm_storage_account.datafactory.primary_connection_string
   provider            = azurerm.lzp1
 }
-
+/*
 # ----------------------------------------
 #region Datasets (ds)
 # ----------------------------------------
@@ -81,3 +81,4 @@ resource "azurerm_data_factory_dataset_binary" "json_scraper_data" {
     filename  = "tolkien_events.json"
   }
 }
+*/
