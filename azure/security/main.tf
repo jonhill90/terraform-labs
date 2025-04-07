@@ -2,6 +2,7 @@ terraform {
   backend "azurerm" {}
 }
 
+
 # --------------------------------------------------
 #region Management Group (mg)
 # --------------------------------------------------
@@ -86,7 +87,6 @@ data "azuredevops_project" "application" {
 # --------------------------------------------------
 #region Azure DevOps Service Endpoints (devops)
 # --------------------------------------------------
-
 resource "azuredevops_serviceendpoint_azurerm" "security" {
   project_id                             = module.security_project.devops_project_id
   service_endpoint_name                  = "Security-SC"
@@ -384,6 +384,11 @@ data "azurerm_resource_group" "rg_networking_connectivity" {
   provider = azurerm.connectivity
 }
 
+data "azurerm_resource_group" "rg_networking_management" {
+  name     = "rg-networking-management"
+  provider = azurerm.management
+}
+
 data "azurerm_resource_group" "rg_compute_lzp1" {
   name     = "rg-compute-lzp1"
   provider = azurerm.lzp1
@@ -410,6 +415,34 @@ data "azurerm_resource_group" "rg_appmulti_shared" {
 }
 
 # ----------------------------------------
+#region Networking
+# ----------------------------------------
+data "azurerm_virtual_network" "vnet_spoke_management" {
+  name                = "vnet-spoke-management"
+  resource_group_name = data.azurerm_resource_group.rg_networking_management.name
+  provider            = azurerm.management
+
+  depends_on = [data.azurerm_resource_group.rg_networking_management]
+}
+
+data "azurerm_subnet" "snet_storage_private_management" {
+  name                 = "snet-storage-private"
+  virtual_network_name = data.azurerm_virtual_network.vnet_spoke_management.name
+  resource_group_name  = data.azurerm_resource_group.rg_networking_management.name
+  provider             = azurerm.management
+
+  depends_on = [data.azurerm_virtual_network.vnet_spoke_management]
+}
+
+data "azurerm_private_dns_zone" "blob" {
+  name                = "privatelink.blob.core.windows.net"
+  resource_group_name = "rg-networking-connectivity"
+  provider            = azurerm.connectivity
+
+  depends_on = [data.azurerm_resource_group.rg_networking_connectivity]
+}
+
+# ----------------------------------------
 #region Storage Accounts (sa)
 # ----------------------------------------
 resource "azurerm_storage_account" "tfstate" {
@@ -419,6 +452,14 @@ resource "azurerm_storage_account" "tfstate" {
   provider                 = azurerm.management
   account_tier             = "Standard"
   account_replication_type = "LRS"
+
+  network_rules {
+    default_action = "Deny"
+    bypass         = ["AzureServices"]
+    virtual_network_subnet_ids = [
+      data.azurerm_subnet.snet_storage_private_management.id
+    ]
+  }
 
   tags = {
     environment = var.environment
@@ -504,6 +545,30 @@ data "azurerm_key_vault" "appmulti" {
   provider            = azurerm.lza2
 }
 
+# ----------------------------------------
+#region Private Endpoints (pe)
+# ----------------------------------------
+resource "azurerm_private_endpoint" "tfstate_pe" {
+  name                = "pe-tfstate"
+  location            = azurerm_resource_group.rg_security_management.location
+  resource_group_name = azurerm_resource_group.rg_security_management.name
+  subnet_id           = data.azurerm_subnet.snet_storage_private_management.id
+  provider            = azurerm.management
+
+  private_service_connection {
+    name                           = "psc-tfstate"
+    private_connection_resource_id = azurerm_storage_account.tfstate.id
+    is_manual_connection           = false
+    subresource_names              = ["blob"]
+  }
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [data.azurerm_private_dns_zone.blob.id]
+  }
+
+  depends_on = [azurerm_storage_account.tfstate]
+}
 
 # --------------------------------------------------
 #region Azure Entra Users (ad)
