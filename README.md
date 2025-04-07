@@ -1,7 +1,7 @@
 ## **Terraform Sandbox**
 ---
 ### Documentation:
-- [🧭 Architecture Overview](https://github.com/jonhill90/terraform-labs/blob/main/docs/Architecture%20Overview.md)
+- [🧭 Architecture Overview](Architecture_Overview.md)
 - [🏖️ Terraform-Sandbox Overview](https://github.com/jonhill90/terraform-labs/blob/main/docs/Terraform-Sandbox%20Overview.md)
 - [🧰 VS Code Workflow Setup](https://github.com/jonhill90/terraform-labs/blob/main/docs/VS%20Code%20Workflow%20Setup.md)
 - [🚀 Future-Proofing Infrastructure for AI with Azure + Terraform](https://github.com/jonhill90/terraform-labs/blob/main/docs/Furure-Proofing%20Infrastructure%20for%20AI%20with%20Azure%20%2B%20Terraform.md)
@@ -12,7 +12,7 @@
 - [🖨️ Universal Print](https://github.com/jonhill90/terraform-labs/blob/main/azure/print/README.md)
 - [🌎 Terraform MCP Workflow](https://github.com/jonhill90/terraform-labs/blob/main/docs/Terraform%20MCP%20Workflow.md)
 ---
-### Infrastructure Pipelines:
+### Platform Pipelines:
 | Team | Plan | Apply |
 |---|:-----:|:-----:|
 | 🖥️ Compute | [![Build Status](https://dev.azure.com/ImpressiveIT/Compute/_apis/build/status%2FCompute-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Compute/_build/latest?definitionId=57&branchName=main) | [![Build Status](https://dev.azure.com/ImpressiveIT/Compute/_apis/build/status%2FCompute-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Compute/_build/latest?definitionId=57&branchName=main) |
@@ -24,6 +24,8 @@
 | 🖨️ Printing | In Progress | In Progress |
 | 🏭 Data Factory | In Progress | In Progress |
 | 🧱 Databricks | In Progress | In Progress |
+| 🧵 Fabric | In Progress | In Progress |
+| 🧠 Synapse | In Progress | In Progress |
 ---
 ### Image Bakery Pipelines:
 | OS | Validate | Build |
