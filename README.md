@@ -2,15 +2,15 @@
 ---
 ### Documentation:
 - [🧭 Architecture Overview](docs/Architecture_Overview.md)
-- [🏖️ Terraform-Sandbox Overview](https://github.com/jonhill90/terraform-labs/blob/main/docs/Terraform-Sandbox%20Overview.md)
-- [🧰 VS Code Workflow Setup](https://github.com/jonhill90/terraform-labs/blob/main/docs/VS%20Code%20Workflow%20Setup.md)
-- [🚀 Future-Proofing Infrastructure for AI with Azure + Terraform](https://github.com/jonhill90/terraform-labs/blob/main/docs/Furure-Proofing%20Infrastructure%20for%20AI%20with%20Azure%20%2B%20Terraform.md)
-- [🧠 AI Ops System](https://github.com/jonhill90/terraform-labs/blob/main/docs/AI%20Ops.md)
-- [🌐 Networking Landing Zone Best Practice](https://github.com/jonhill90/terraform-labs/blob/main/docs/Azure%20Landing%20Zone%20Networking%20with%20Terraform.md)
-- [🖥 Server Build](https://github.com/jonhill90/terraform-labs/blob/main/azure/server-build/README.md)
-- [📦 Packer Image Bakery](https://github.com/jonhill90/terraform-labs/blob/main/azure/image-bakery/README.md)
-- [🖨️ Universal Print](https://github.com/jonhill90/terraform-labs/blob/main/azure/print/README.md)
-- [🌎 Terraform MCP Workflow](https://github.com/jonhill90/terraform-labs/blob/main/docs/Terraform%20MCP%20Workflow.md)
+- [🏖️ Terraform-Sandbox Overview](docs/Terraform-Sandbox_Overview.md)
+- [🧰 VS Code Workflow Setup](docs/VS_Code_Workflow_Setup.md)
+- [🚀 Future-Proofing Infrastructure for AI with Azure + Terraform](docs/Furure-Proofing_Infrastructure_for_AI_with_Azure_+_Terraform.md)
+- [🧠 AI Ops System](docs/AI_Ops.md)
+- [🌐 Networking](docs/Azure_Landing_Zone_Networking_with_Terraform.md)
+- [🖥 Server Build](/azure/server-build/README.md)
+- [📦 Packer Image Bakery](/azure/image-bakery/README.md)
+- [🖨️ Universal Print](azure/print/README.md)
+- [🌎 Terraform MCP Workflow](docs/Terraform_MCP_Workflow.md)
 ---
 ### Platform Pipelines:
 | Team | Plan | Apply |
