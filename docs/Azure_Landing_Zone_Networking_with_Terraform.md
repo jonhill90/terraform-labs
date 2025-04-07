@@ -3,6 +3,17 @@
 ## Overview
 This guide explains how to set up networking in an **Azure Landing Zone** using Terraform and Microsoft’s recommended **hub-and-spoke** network topology.
 
+For more details, refer to:
+- [Azure Landing Zone Design Areas](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/design-areas)
+- [Hub-spoke network topology in Azure](https://learn.microsoft.com/en-us/azure/architecture/networking/architecture/hub-spoke)
+- [Azure DNS Private Resolver](https://learn.microsoft.com/en-us/azure/architecture/networking/architecture/azure-dns-private-resolver)
+
+<p align="left">
+  <a href="https://learn.microsoft.com/en-us/azure/architecture/networking/architecture/hub-spoke" target="_blank">
+    <img src="https://learn.microsoft.com/en-us/azure/architecture/networking/architecture/_images/hub-spoke.png" width="50%" alt="Hub-spoke network topology in Azure">
+  </a>
+</p>
+
 The networking configuration includes:
 - A **VNet Hub** deployed into the `Connectivity` subscription.
 - **Spoke VNets** deployed into individual **Landing Zone** subscriptions (e.g., `Landing Zone P1`, `Landing Zone A2`).
