@@ -1,7 +1,7 @@
 ## **Terraform Sandbox**
 ---
 ### Documentation:
-- [🧭 Architecture Overview](Architecture_Overview.md)
+- [🧭 Architecture Overview](docs/Architecture_Overview.md)
 - [🏖️ Terraform-Sandbox Overview](https://github.com/jonhill90/terraform-labs/blob/main/docs/Terraform-Sandbox%20Overview.md)
 - [🧰 VS Code Workflow Setup](https://github.com/jonhill90/terraform-labs/blob/main/docs/VS%20Code%20Workflow%20Setup.md)
 - [🚀 Future-Proofing Infrastructure for AI with Azure + Terraform](https://github.com/jonhill90/terraform-labs/blob/main/docs/Furure-Proofing%20Infrastructure%20for%20AI%20with%20Azure%20%2B%20Terraform.md)
