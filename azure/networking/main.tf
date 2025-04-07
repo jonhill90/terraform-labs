@@ -2,6 +2,7 @@ terraform {
   backend "azurerm" {}
 }
 
+
 # ----------------------------------------
 #region Resource Groups (rg)
 # ----------------------------------------
@@ -63,6 +64,31 @@ resource "azurerm_resource_group" "rg_networking_lza2" {
     owner       = var.owner
     project     = var.project
   }
+}
+
+module "vnet_peering_lzp1_to_management" { # Temporary peering for LZP1 to Management
+  source = "../../modules/azurerm/network/peering"
+
+  hub_to_spoke_peering_name = "lzp1-to-management-peering"
+  hub_vnet_name             = module.vnet_spoke_lzp1.vnet_name
+  hub_vnet_resource_group   = azurerm_resource_group.rg_networking_lzp1.name
+  hub_vnet_id               = module.vnet_spoke_lzp1.vnet_id
+
+  spoke_to_hub_peering_name = "management-to-lzp1-peering"
+  spoke_vnet_name           = module.vnet_spoke_management.vnet_name
+  spoke_vnet_resource_group = azurerm_resource_group.rg_networking_management.name
+  spoke_vnet_id             = module.vnet_spoke_management.vnet_id
+
+  allow_forwarded_traffic = true
+  allow_gateway_transit   = false
+  use_remote_gateways     = false
+
+  providers = {
+    azurerm.hub   = azurerm.lzp1
+    azurerm.spoke = azurerm.management
+  }
+
+  depends_on = [module.vnet_spoke_lzp1, module.vnet_spoke_management]
 }
 
 # ----------------------------------------
@@ -462,6 +488,9 @@ module "vnet_peering_lza2" {
 
   depends_on = [module.vnet_hub, module.vnet_spoke_lza2]
 }
+
+
+
 # ----------------------------------------
 #region Azure Private DNS Zones
 # ----------------------------------------
@@ -606,6 +635,23 @@ resource "azurerm_private_dns_zone_virtual_network_link" "internal_lza2" {
 # --------------------------------------------------------------
 #region Private DNS Zone Virtual Network Links - Azure Services
 # --------------------------------------------------------------
+resource "azurerm_private_dns_zone_virtual_network_link" "blob_management" {
+  name                  = "blob-link-management"
+  resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
+  private_dns_zone_name = azurerm_private_dns_zone.blob.name
+  virtual_network_id    = module.vnet_spoke_management.vnet_id
+  registration_enabled  = false
+  provider              = azurerm.connectivity
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_private_dns_zone.blob, module.vnet_spoke_management]
+}
+
 resource "azurerm_private_dns_zone_virtual_network_link" "blob_lzp1" {
   name                  = "blob-link-lzp1"
   resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
