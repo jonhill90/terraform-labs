@@ -63,5 +63,9 @@ __pycache__/
 .vscode/
 .DS_Store
 
+# Claude Memory
+**/CLAUDE.local.md
+
 # Scratch Files
 .scratch
+
