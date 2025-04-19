@@ -306,17 +306,7 @@ module "vnet_spoke_lzp1" {
      enforce_private_link = true
      service_endpoints    = ["Microsoft.Storage"]
     }
-    snet-adf-ir = {
-      address_prefixes     = ["10.40.30.0/24"]
-      enforce_private_link = true
-      service_endpoints    = ["Microsoft.Storage"]
-    }
-    snet-synapse = {
-      address_prefixes     = ["10.40.40.0/24"]
-      enforce_private_link = true
-      service_endpoints    = ["Microsoft.Sql", "Microsoft.Storage"]
-    }
-    snet-synapse-pe = {
+    snet-data = {
       address_prefixes     = ["10.40.50.0/24"]
       enforce_private_link = true
       service_endpoints    = ["Microsoft.Sql", "Microsoft.Storage"]
