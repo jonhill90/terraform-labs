@@ -473,6 +473,25 @@ resource "azuredevops_build_definition" "twingate_ci" {
   depends_on = [azuredevops_serviceendpoint_github.application]
 }
 
+resource "azuredevops_build_definition" "datahub_ci" {
+  project_id = module.datahub_project.devops_project_id
+  name       = "DataHub-CI"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/application/datahub-ci.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.datahub.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.datahub]
+}
+
 # Add Agent Pool to the Build Pipeline via DevOps Portal
 # Approve Pipeline to use the Agent Pool vis DevOps Portal
 
@@ -667,4 +686,23 @@ resource "azuredevops_build_definition" "twingate_cd" {
     use_yaml = true
   }
   depends_on = [azuredevops_serviceendpoint_github.networking, azuredevops_build_definition.twingate_ci]
+}
+
+resource "azuredevops_build_definition" "datahub_cd" {
+  project_id = module.datahub_project.devops_project_id
+  name       = "DataHub-CD"
+  path       = "\\"
+
+  repository {
+    repo_type             = "GitHub"
+    repo_id               = var.github_repo_id
+    branch_name           = "main"
+    yml_path              = "pipelines/application/datahub-cd.yml"
+    service_connection_id = azuredevops_serviceendpoint_github.datahub.id
+  }
+
+  ci_trigger {
+    use_yaml = true
+  }
+  depends_on = [azuredevops_serviceendpoint_github.datahub, azuredevops_build_definition.datahub_ci]
 }

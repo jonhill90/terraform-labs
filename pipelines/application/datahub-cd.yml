@@ -1,0 +1,41 @@
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: DataHub-CI
+      source: DataHub-CI
+      trigger:
+        branches:
+          - main
+
+pool:
+  name: 'Lab'
+
+stages:
+  - template: templates/template-terraform-plan.yml
+    parameters:
+      team: "datahub"
+      artifactName: "datahub-artifacts"
+      variableGroup: "DataHub"
+      backendServiceArm: "DataHub-SC"
+      environmentName: "lab"
+      stageName: "labplan"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/DataHub-CI/datahub-artifacts/apps/datahub"
+      agentPool: "Lab"
+      pipeline: "DataHub-CI"
+      dependsOn: []  # Explicitly set to an empty list for independent execution
+
+  - template: templates/template-terraform-cd.yml
+    parameters:
+      team: "datahub"
+      artifactName: "datahub-artifacts"
+      variableGroup: "DataHub"
+      backendServiceArm: "DataHub-SC"
+      environmentName: "lab"
+      stageName: "lab"
+      stageDisplayName: "Development"
+      workingDirectory: "$(Pipeline.Workspace)/DataHub-CI/datahub-artifacts/apps/datahub"
+      agentPool: "Lab"
+      pipeline: "DataHub-CI"
+      dependsOn: [labplan]  # Explicitly set to an empty list for independent execution
