@@ -143,6 +143,10 @@ resource "azurerm_data_factory" "df_datahub" {
   resource_group_name = azurerm_resource_group.rg_datahub_lzp1.name
   provider            = azurerm.lzp1
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   tags = {
     environment = var.environment
     owner       = var.owner
@@ -294,4 +298,37 @@ resource "azurerm_private_endpoint" "pe_datahub_synapse_dev" {
   }
 
   depends_on = [azurerm_synapse_workspace.synapse_datahub, data.azurerm_private_dns_zone.dns_synapse_dev]
+}
+
+# ----------------------------------------
+#region Linked Services (ls)
+# ----------------------------------------
+# ADF Linked Service for ADLS Gen2
+resource "azurerm_data_factory_linked_service_data_lake_storage_gen2" "ls_adls" {
+  name                = "ls_datahub_adls"
+  data_factory_id     = azurerm_data_factory.df_datahub.id
+  provider            = azurerm.lzp1
+  url                 = "https://${azurerm_storage_account.sa_datahub.name}.dfs.core.windows.net"
+  storage_account_key = azurerm_storage_account.sa_datahub.primary_access_key
+
+  depends_on = [azurerm_data_factory.df_datahub, azurerm_storage_account.sa_datahub]
+}
+
+# Synapse Linked Service for ADLS Gen2
+resource "azurerm_synapse_linked_service" "ls_synapse_adls" {
+  name                 = "ls_synapse_adls"
+  synapse_workspace_id = azurerm_synapse_workspace.synapse_datahub.id
+  provider             = azurerm.lzp1
+  type                 = "AzureBlobFS"
+  type_properties_json = <<JSON
+{
+  "url": "https://${azurerm_storage_account.sa_datahub.name}.dfs.core.windows.net",
+  "accountKey": {
+    "type": "SecureString",
+    "value": "${azurerm_storage_account.sa_datahub.primary_access_key}"
+  }
+}
+JSON
+
+  depends_on = [azurerm_synapse_workspace.synapse_datahub, azurerm_storage_account.sa_datahub]
 }
