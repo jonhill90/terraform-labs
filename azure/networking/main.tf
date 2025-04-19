@@ -299,6 +299,7 @@ module "vnet_spoke_lzp1" {
     }
     snet-compute = {
       address_prefixes = ["10.40.5.0/24"]
+      service_endpoints = ["Microsoft.Storage"]
     }
     snet-storage-private = {
      address_prefixes     = ["10.40.20.0/24"]

@@ -1,6 +1,7 @@
-terraform {
+/*terraform {
   backend "azurerm" {}
 }
+*/
 
 # ----------------------------------------
 #region Resource Groups
@@ -61,6 +62,13 @@ data "azurerm_virtual_network" "vnet_lzp1" {
 }
 
 # Subnets
+data "azurerm_subnet" "snet_compute" {
+  name                 = "snet-compute"
+  virtual_network_name = data.azurerm_virtual_network.vnet_lzp1.name
+  resource_group_name  = data.azurerm_resource_group.rg_networking_lzp1.name
+  provider             = azurerm.lzp1
+}
+
 data "azurerm_subnet" "snet_adf_ir" {
   name                 = "snet-adf-ir"
   virtual_network_name = data.azurerm_virtual_network.vnet_lzp1.name
@@ -122,6 +130,7 @@ resource "azurerm_storage_account" "sa_datahub" {
   network_rules {
     default_action = "Deny"
     virtual_network_subnet_ids = [
+      data.azurerm_subnet.snet_compute.id,
       data.azurerm_subnet.snet_adf_ir.id,
       data.azurerm_subnet.snet_synapse.id
     ]
