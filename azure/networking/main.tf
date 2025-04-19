@@ -66,31 +66,6 @@ resource "azurerm_resource_group" "rg_networking_lza2" {
   }
 }
 
-module "vnet_peering_lzp1_to_management" { # Temporary peering for LZP1 to Management
-  source = "../../modules/azurerm/network/peering"
-
-  hub_to_spoke_peering_name = "lzp1-to-management-peering"
-  hub_vnet_name             = module.vnet_spoke_lzp1.vnet_name
-  hub_vnet_resource_group   = azurerm_resource_group.rg_networking_lzp1.name
-  hub_vnet_id               = module.vnet_spoke_lzp1.vnet_id
-
-  spoke_to_hub_peering_name = "management-to-lzp1-peering"
-  spoke_vnet_name           = module.vnet_spoke_management.vnet_name
-  spoke_vnet_resource_group = azurerm_resource_group.rg_networking_management.name
-  spoke_vnet_id             = module.vnet_spoke_management.vnet_id
-
-  allow_forwarded_traffic = true
-  allow_gateway_transit   = false
-  use_remote_gateways     = false
-
-  providers = {
-    azurerm.hub   = azurerm.lzp1
-    azurerm.spoke = azurerm.management
-  }
-
-  depends_on = [module.vnet_spoke_lzp1, module.vnet_spoke_management]
-}
-
 # ----------------------------------------
 #region Key Vaults (kv)
 # ----------------------------------------
@@ -330,13 +305,6 @@ module "vnet_spoke_lzp1" {
      enforce_private_link = true
      service_endpoints    = ["Microsoft.Storage"]
     }
-    snet-adf-data = {
-      address_prefixes = ["10.40.80.0/24"]
-    }
-    snet-adf-integration = {
-      address_prefixes     = ["10.40.85.0/24"]
-      enforce_private_link = true
-    }
   }
 
   providers = {
@@ -489,7 +457,30 @@ module "vnet_peering_lza2" {
   depends_on = [module.vnet_hub, module.vnet_spoke_lza2]
 }
 
+module "vnet_peering_lzp1_to_management" {
+  source = "../../modules/azurerm/network/peering"
 
+  hub_to_spoke_peering_name = "lzp1-to-management-peering"
+  hub_vnet_name             = module.vnet_spoke_lzp1.vnet_name
+  hub_vnet_resource_group   = azurerm_resource_group.rg_networking_lzp1.name
+  hub_vnet_id               = module.vnet_spoke_lzp1.vnet_id
+
+  spoke_to_hub_peering_name = "management-to-lzp1-peering"
+  spoke_vnet_name           = module.vnet_spoke_management.vnet_name
+  spoke_vnet_resource_group = azurerm_resource_group.rg_networking_management.name
+  spoke_vnet_id             = module.vnet_spoke_management.vnet_id
+
+  allow_forwarded_traffic = true
+  allow_gateway_transit   = false
+  use_remote_gateways     = false
+
+  providers = {
+    azurerm.hub   = azurerm.lzp1
+    azurerm.spoke = azurerm.management
+  }
+
+  depends_on = [module.vnet_spoke_lzp1, module.vnet_spoke_management]
+}
 
 # ----------------------------------------
 #region Azure Private DNS Zones
@@ -527,6 +518,7 @@ resource "azurerm_private_dns_zone" "internal" {
 # ----------------------------------------
 #region Internal DNS CNAME Records
 # ----------------------------------------
+/*
 resource "azurerm_private_dns_cname_record" "lotr_alias" {
   name                = "lotrstore"
   zone_name           = azurerm_private_dns_zone.internal.name
@@ -543,6 +535,7 @@ resource "azurerm_private_dns_cname_record" "lotr_alias" {
   
   depends_on          = [azurerm_private_dns_zone.internal]
 }
+*/
 
 # -------------------------------------------------------------
 #region Private DNS Zone Virtual Network Links - Internal Zone
