@@ -131,6 +131,24 @@ module "application_project" {
   }
 }
 
+module "datahub_project" {
+  source = "../../modules/azure-devops/project"
+
+  devops_org_name     = var.devops_org_name
+  devops_project_name = "DataHub"
+  description         = "DataHub Managed by Terraform"
+  visibility          = "private"
+  devops_pat          = var.devops_pat
+
+  features = {
+    repositories = "disabled"
+    testplans    = "disabled"
+    artifacts    = "enabled"
+    pipelines    = "enabled"
+    boards       = "disabled"
+  }
+}
+
 # ----------------------------------------
 #region Resource Groups
 # ----------------------------------------
@@ -225,6 +243,19 @@ resource "azuredevops_serviceendpoint_github" "application" {
   }
 
   depends_on = [module.application_project]
+}
+
+resource "azuredevops_serviceendpoint_github" "datahub" {
+  project_id            = module.datahub_project.devops_project_id
+  service_endpoint_name = "GitHub Connection"
+  description           = "GitHub service connection for Terraform Labs"
+
+  auth_personal {
+    # Use a GitHub PAT for authentication
+    personal_access_token = var.github_token
+  }
+
+  depends_on = [module.datahub_project]
 }
 
 # --------------------------------------------------

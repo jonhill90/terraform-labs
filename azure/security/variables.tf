@@ -139,6 +139,12 @@ variable "appmulti_vault_name" {
   sensitive   = true
 }
 
+variable "datahub_vault_name" {
+  description = "DataHub Vault Name"
+  type        = string
+  sensitive   = true
+}
+
 # ----------------------------------------
 #region Azure DevOps Settings
 # ----------------------------------------

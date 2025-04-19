@@ -2,7 +2,6 @@ terraform {
   backend "azurerm" {}
 }
 
-
 # --------------------------------------------------
 #region Management Group (mg)
 # --------------------------------------------------
@@ -82,6 +81,10 @@ data "azuredevops_project" "storage" {
 
 data "azuredevops_project" "application" {
   name = "Applications"
+}
+
+data "azuredevops_project" "datahub" {
+  name = "DataHub"
 }
 
 # --------------------------------------------------
@@ -206,6 +209,23 @@ data "azuread_service_principal" "application_sp" {
   depends_on = [azuredevops_serviceendpoint_azurerm.application]
 }
 
+resource "azuredevops_serviceendpoint_azurerm" "datahub" {
+  project_id                             = data.azuredevops_project.datahub.id
+  service_endpoint_name                  = "DataHub-SC"
+  service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
+  azurerm_spn_tenantid                   = var.tenant_id
+  azurerm_subscription_id                = var.management_subscription_id
+  azurerm_subscription_name              = "Management"
+
+  depends_on = [data.azuredevops_project.datahub]
+}
+
+data "azuread_service_principal" "datahub_sp" {
+  client_id = azuredevops_serviceendpoint_azurerm.datahub.service_principal_id
+  provider  = azuread.impressiveit
+  depends_on = [azuredevops_serviceendpoint_azurerm.datahub]
+}
+
 # --------------------------------------------------
 #region Service Principal Role Assignments (rc)
 # --------------------------------------------------
@@ -297,6 +317,19 @@ module "application_sp_role_assignment" {
   }
 
   depends_on = [data.azuread_service_principal.application_sp]
+}
+
+module "datahub_sp_role_assignment" {
+  source       = "../../modules/azurerm/security/role-assignment"
+  role_scope   = data.azurerm_subscription.lzp1.id
+  role_name    = "Contributor"
+  principal_id = data.azuread_service_principal.datahub_sp.object_id
+
+  providers = {
+    azurerm = azurerm.lzp1
+  }
+
+  depends_on = [data.azuread_service_principal.datahub_sp]
 }
 
 # --------------------------------------------------
@@ -412,6 +445,11 @@ data "azurerm_resource_group" "rg_appsingle_lab" {
 data "azurerm_resource_group" "rg_appmulti_shared" {
   name     = "rg-appmulti-shared"
   provider = azurerm.lza2
+}
+
+data "azurerm_resource_group" "rg_datahub_lzp1" {
+  name     = "rg-datahub-lzp1"
+  provider = azurerm.lzp1
 }
 
 # ----------------------------------------
@@ -545,6 +583,12 @@ data "azurerm_key_vault" "appmulti" {
   provider            = azurerm.lza2
 }
 
+data "azurerm_key_vault" "datahub" {
+  name                = var.datahub_vault_name
+  resource_group_name = data.azurerm_resource_group.rg_datahub_lzp1.name
+  provider            = azurerm.lzp1
+}
+
 # ----------------------------------------
 #region Private Endpoints (pe)
 # ----------------------------------------
@@ -602,6 +646,10 @@ data "azuread_users" "appsingle_admins" {
 }
 
 data "azuread_users" "appmulti_admins" {
+  object_ids = [var.admin_object_id]
+}
+
+data "azuread_users" "datahub_admins" {
   object_ids = [var.admin_object_id]
 }
 
@@ -710,6 +758,19 @@ resource "azuread_group" "appmulti_admins" {
   members = data.azuread_users.appmulti_admins.object_ids
 
   depends_on = [data.azuread_users.appmulti_admins]
+}
+
+resource "azuread_group" "datahub_admins" {
+  display_name     = "DataHub Admins"
+  mail_enabled     = true
+  mail_nickname    = "DataHubAdmins"
+  security_enabled = true
+  types            = ["Unified"]
+
+  owners  = data.azuread_users.datahub_admins.object_ids
+  members = data.azuread_users.datahub_admins.object_ids
+
+  depends_on = [data.azuread_users.datahub_admins]
 }
 
 # --------------------------------------------------
@@ -880,6 +941,27 @@ module "appmulti_vault_access" {
   }
 
   depends_on = [data.azurerm_key_vault.appmulti, resource.azuread_group.appmulti_admins]
+}
+
+module "datahub_vault_access" {
+  source       = "../../modules/azurerm/security/vault-access"
+  key_vault_id = data.azurerm_key_vault.datahub.id
+
+  access_policies = [
+    {
+      tenant_id               = var.tenant_id
+      object_id               = resource.azuread_group.datahub_admins.object_id
+      key_permissions         = ["Get", "List"]
+      secret_permissions      = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
+      certificate_permissions = ["Get", "List"]
+    }
+  ]
+
+  providers = {
+    azurerm = azurerm.lzp1
+  }
+
+  depends_on = [data.azurerm_key_vault.datahub, resource.azuread_group.datahub_admins]
 }
 
 # --------------------------------------------------
