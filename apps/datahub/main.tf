@@ -129,9 +129,7 @@ resource "azurerm_storage_account" "sa_datahub" {
   network_rules {
     default_action = "Deny"
     virtual_network_subnet_ids = [
-      data.azurerm_subnet.snet_compute.id,
-      data.azurerm_subnet.snet_adf_ir.id,
-      data.azurerm_subnet.snet_synapse.id
+      data.azurerm_subnet.snet_compute.id
     ]
     bypass = ["AzureServices"]
   }
@@ -148,7 +146,7 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "sc_files" {
   storage_account_id = azurerm_storage_account.sa_datahub.id
   provider           = azurerm.lzp1
 }
-
+/*
 # ----------------------------------------
 #region Data Factory (df)
 # ----------------------------------------
@@ -310,3 +308,4 @@ resource "azurerm_private_endpoint" "pe_datahub_synapse_dev" {
 
   depends_on = [azurerm_synapse_workspace.synapse_datahub, data.azurerm_private_dns_zone.dns_synapse_dev]
 }
+*/
