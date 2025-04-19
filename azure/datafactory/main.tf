@@ -17,7 +17,7 @@ resource "azurerm_resource_group" "rg_datafactory_lzp1" {
     project     = var.project
   }
 }
-
+/*
 # ----------------------------------------
 #region Data Factory (df)
 # ----------------------------------------
