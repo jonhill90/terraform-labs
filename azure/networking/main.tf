@@ -305,6 +305,22 @@ module "vnet_spoke_lzp1" {
      enforce_private_link = true
      service_endpoints    = ["Microsoft.Storage"]
     }
+    snet-adf-ir = {
+      address_prefixes   = ["10.40.30.0/24"]
+      delegation_name    = "adfIntegrationRuntimeDelegation"
+      delegation_service = "Microsoft.DataFactory/factories"
+      delegation_actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
+    snet-synapse = {
+      address_prefixes     = ["10.40.40.0/24"]
+      enforce_private_link = true
+      service_endpoints    = ["Microsoft.Sql", "Microsoft.Storage"]
+    }
+    snet-synapse-pe = {
+      address_prefixes     = ["10.40.50.0/24"]
+      enforce_private_link = true
+      service_endpoints    = ["Microsoft.Sql", "Microsoft.Storage"]
+    }
   }
 
   providers = {
@@ -491,6 +507,39 @@ resource "azurerm_private_dns_zone" "blob" {
   depends_on = [azurerm_resource_group.rg_networking_connectivity]
 }
 
+resource "azurerm_private_dns_zone" "adf" {
+  name                = "privatelink.adf.azure.com"
+  resource_group_name = azurerm_resource_group.rg_networking_connectivity.name
+  provider            = azurerm.connectivity
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
+resource "azurerm_private_dns_zone" "synapse_dev" {
+  name                = "privatelink.dev.azuresynapse.net"
+  resource_group_name = azurerm_resource_group.rg_networking_connectivity.name
+  provider            = azurerm.connectivity
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
+resource "azurerm_private_dns_zone" "synapse_sql" {
+  name                = "privatelink.sql.azuresynapse.net"
+  resource_group_name = azurerm_resource_group.rg_networking_connectivity.name
+  provider            = azurerm.connectivity
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
 # ----------------------------------------
 #region Internal DNS Zone
 # ----------------------------------------
@@ -653,4 +702,46 @@ resource "azurerm_private_dns_zone_virtual_network_link" "blob_lzp1" {
   }
 
   depends_on = [azurerm_private_dns_zone.blob, module.vnet_spoke_lzp1]
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "adf_lzp1" {
+  name                  = "adf-link-lzp1"
+  resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
+  private_dns_zone_name = azurerm_private_dns_zone.adf.name
+  virtual_network_id    = module.vnet_spoke_lzp1.vnet_id
+  registration_enabled  = false
+  provider              = azurerm.connectivity
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "synapse_dev_lzp1" {
+  name                  = "synapse-dev-link-lzp1"
+  resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
+  private_dns_zone_name = azurerm_private_dns_zone.synapse_dev.name
+  virtual_network_id    = module.vnet_spoke_lzp1.vnet_id
+  registration_enabled  = false
+  provider              = azurerm.connectivity
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "synapse_sql_lzp1" {
+  name                  = "synapse-sql-link-lzp1"
+  resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
+  private_dns_zone_name = azurerm_private_dns_zone.synapse_sql.name
+  virtual_network_id    = module.vnet_spoke_lzp1.vnet_id
+  registration_enabled  = false
+  provider              = azurerm.connectivity
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
 }
