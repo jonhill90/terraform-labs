@@ -332,13 +332,6 @@ module "vnet_spoke_lza2" {
     snet-default = {
       address_prefixes = ["10.50.1.0/24"]
     }
-    snet-mdp-adf = {
-      address_prefixes = ["10.50.20.0/24"]
-    }
-    snet-mdp-adf-private-endpoints = {
-      address_prefixes                          = ["10.50.25.0/24"]
-      private_endpoint_network_policies_enabled = false
-    }
   }
 
   providers = {
