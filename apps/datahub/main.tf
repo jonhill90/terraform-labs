@@ -183,6 +183,7 @@ resource "azurerm_synapse_workspace" "synapse_datahub" {
 # ----------------------------------------
 #region Private Endpoints (pe)
 # ----------------------------------------
+# ADLS Private Endpoint
 resource "azurerm_private_endpoint" "pe_datahub_blob" {
   name                = "pe-datahub-blob"
   location            = azurerm_resource_group.rg_datahub_lzp1.location
@@ -209,4 +210,91 @@ resource "azurerm_private_endpoint" "pe_datahub_blob" {
   }
 
   depends_on = [azurerm_storage_account.sa_datahub, data.azurerm_private_dns_zone.dns_blob]
+}
+
+# Data Factory Private Endpoint
+resource "azurerm_private_endpoint" "pe_datahub_df" {
+  name                = "pe-datahub-df"
+  location            = azurerm_resource_group.rg_datahub_lzp1.location
+  resource_group_name = azurerm_resource_group.rg_datahub_lzp1.name
+  subnet_id           = data.azurerm_subnet.snet_synapse_pe.id
+  provider            = azurerm.lzp1
+
+  private_service_connection {
+    name                           = "psc-datahub-df"
+    private_connection_resource_id = azurerm_data_factory.df_datahub.id
+    subresource_names              = ["dataFactory"]
+    is_manual_connection           = false
+  }
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [data.azurerm_private_dns_zone.dns_adf.id]
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_data_factory.df_datahub, data.azurerm_private_dns_zone.dns_adf]
+}
+
+# Synapse SQL Private Endpoint
+resource "azurerm_private_endpoint" "pe_datahub_synapse_sql" {
+  name                = "pe-datahub-synapse-sql"
+  location            = azurerm_resource_group.rg_datahub_lzp1.location
+  resource_group_name = azurerm_resource_group.rg_datahub_lzp1.name
+  subnet_id           = data.azurerm_subnet.snet_synapse_pe.id
+  provider            = azurerm.lzp1
+
+  private_service_connection {
+    name                           = "psc-datahub-synapse-sql"
+    private_connection_resource_id = azurerm_synapse_workspace.synapse_datahub.id
+    subresource_names              = ["Sql"]
+    is_manual_connection           = false
+  }
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [data.azurerm_private_dns_zone.dns_synapse_sql.id]
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_synapse_workspace.synapse_datahub, data.azurerm_private_dns_zone.dns_synapse_sql]
+}
+
+# Synapse Dev Private Endpoint
+resource "azurerm_private_endpoint" "pe_datahub_synapse_dev" {
+  name                = "pe-datahub-synapse-dev"
+  location            = azurerm_resource_group.rg_datahub_lzp1.location
+  resource_group_name = azurerm_resource_group.rg_datahub_lzp1.name
+  subnet_id           = data.azurerm_subnet.snet_synapse_pe.id
+  provider            = azurerm.lzp1
+
+  private_service_connection {
+    name                           = "psc-datahub-synapse-dev"
+    private_connection_resource_id = azurerm_synapse_workspace.synapse_datahub.id
+    subresource_names              = ["Dev"]
+    is_manual_connection           = false
+  }
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [data.azurerm_private_dns_zone.dns_synapse_dev.id]
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_synapse_workspace.synapse_datahub, data.azurerm_private_dns_zone.dns_synapse_dev]
 }
