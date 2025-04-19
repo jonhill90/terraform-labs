@@ -68,22 +68,8 @@ data "azurerm_subnet" "snet_compute" {
   provider             = azurerm.lzp1
 }
 
-data "azurerm_subnet" "snet_adf_ir" {
-  name                 = "snet-adf-ir"
-  virtual_network_name = data.azurerm_virtual_network.vnet_lzp1.name
-  resource_group_name  = data.azurerm_resource_group.rg_networking_lzp1.name
-  provider             = azurerm.lzp1
-}
-
-data "azurerm_subnet" "snet_synapse" {
-  name                 = "snet-synapse"
-  virtual_network_name = data.azurerm_virtual_network.vnet_lzp1.name
-  resource_group_name  = data.azurerm_resource_group.rg_networking_lzp1.name
-  provider             = azurerm.lzp1
-}
-
-data "azurerm_subnet" "snet_synapse_pe" {
-  name                 = "snet-synapse-pe"
+data "azurerm_subnet" "snet_data" {
+  name                 = "snet-data"
   virtual_network_name = data.azurerm_virtual_network.vnet_lzp1.name
   resource_group_name  = data.azurerm_resource_group.rg_networking_lzp1.name
   provider             = azurerm.lzp1
@@ -129,7 +115,8 @@ resource "azurerm_storage_account" "sa_datahub" {
   network_rules {
     default_action = "Deny"
     virtual_network_subnet_ids = [
-      data.azurerm_subnet.snet_compute.id
+      data.azurerm_subnet.snet_compute.id,
+      data.azurerm_subnet.snet_data.id
     ]
     bypass = ["AzureServices"]
   }
@@ -146,7 +133,7 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "sc_files" {
   storage_account_id = azurerm_storage_account.sa_datahub.id
   provider           = azurerm.lzp1
 }
-/*
+
 # ----------------------------------------
 #region Data Factory (df)
 # ----------------------------------------
@@ -198,7 +185,7 @@ resource "azurerm_private_endpoint" "pe_datahub_blob" {
   name                = "pe-datahub-blob"
   location            = azurerm_resource_group.rg_datahub_lzp1.location
   resource_group_name = azurerm_resource_group.rg_datahub_lzp1.name
-  subnet_id           = data.azurerm_subnet.snet_synapse_pe.id
+  subnet_id           = data.azurerm_subnet.snet_data.id
   provider            = azurerm.lzp1
 
   private_service_connection {
@@ -227,7 +214,7 @@ resource "azurerm_private_endpoint" "pe_datahub_df" {
   name                = "pe-datahub-df"
   location            = azurerm_resource_group.rg_datahub_lzp1.location
   resource_group_name = azurerm_resource_group.rg_datahub_lzp1.name
-  subnet_id           = data.azurerm_subnet.snet_synapse_pe.id
+  subnet_id           = data.azurerm_subnet.snet_data.id
   provider            = azurerm.lzp1
 
   private_service_connection {
@@ -256,7 +243,7 @@ resource "azurerm_private_endpoint" "pe_datahub_synapse_sql" {
   name                = "pe-datahub-synapse-sql"
   location            = azurerm_resource_group.rg_datahub_lzp1.location
   resource_group_name = azurerm_resource_group.rg_datahub_lzp1.name
-  subnet_id           = data.azurerm_subnet.snet_synapse_pe.id
+  subnet_id           = data.azurerm_subnet.snet_data.id
   provider            = azurerm.lzp1
 
   private_service_connection {
@@ -285,7 +272,7 @@ resource "azurerm_private_endpoint" "pe_datahub_synapse_dev" {
   name                = "pe-datahub-synapse-dev"
   location            = azurerm_resource_group.rg_datahub_lzp1.location
   resource_group_name = azurerm_resource_group.rg_datahub_lzp1.name
-  subnet_id           = data.azurerm_subnet.snet_synapse_pe.id
+  subnet_id           = data.azurerm_subnet.snet_data.id
   provider            = azurerm.lzp1
 
   private_service_connection {
@@ -308,4 +295,3 @@ resource "azurerm_private_endpoint" "pe_datahub_synapse_dev" {
 
   depends_on = [azurerm_synapse_workspace.synapse_datahub, data.azurerm_private_dns_zone.dns_synapse_dev]
 }
-*/
