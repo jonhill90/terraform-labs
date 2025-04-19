@@ -306,10 +306,9 @@ module "vnet_spoke_lzp1" {
      service_endpoints    = ["Microsoft.Storage"]
     }
     snet-adf-ir = {
-      address_prefixes   = ["10.40.30.0/24"]
-      delegation_name    = "adfIntegrationRuntimeDelegation"
-      delegation_service = "Microsoft.DataFactory/factories"
-      delegation_actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+      address_prefixes     = ["10.40.30.0/24"]
+      enforce_private_link = true
+      service_endpoints    = ["Microsoft.Storage"]
     }
     snet-synapse = {
       address_prefixes     = ["10.40.40.0/24"]
