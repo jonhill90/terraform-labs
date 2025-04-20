@@ -17,3 +17,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Dependencies**: Use explicit depends_on for resource dependencies
 - **Environment Separation**: Store environment-specific variables in env/[environment].tfvars files
 - **Tags**: Apply consistent tags (environment, owner, project) across resources
+
+## Shared Knowledge Framework
+This workspace uses the shared memory framework for AI agents. Reference the framework for detailed knowledge about the Azure DataHub implementation.
+
+### Knowledge Reference Format
+Reference these contexts in the shared memory system:
+- DataHub Architecture: `[[AI/Memory/Contexts/Shared/AzureDataHub]]`
+- Data Services Integration: `[[AI/Memory/Contexts/Shared/AzureDataServices]]`
+- Data Platform Development: `[[AI/Memory/System_Prompts/Shared/AzureDataPlatform]]`
+
+### DataHub Overview
+This workspace implements a modern data platform with:
+- Azure Data Lake Storage Gen2 with hierarchical namespace
+- Azure Data Factory for data orchestration and movement
+- Azure Synapse Analytics for data warehousing
+- Private endpoints for secure connectivity
+- Integration with the landing zone VNet through snet-data subnet
