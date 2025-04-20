@@ -6,6 +6,7 @@
 - [🧰 VS Code Workflow Setup](docs/VS_Code_Workflow_Setup.md)
 - [🚀 Future-Proofing Infrastructure for AI with Azure + Terraform](docs/Furure-Proofing_Infrastructure_for_AI_with_Azure_+_Terraform.md)
 - [🧠 AI Ops System](docs/AI_Ops.md)
+- [🔄 Shared Memory Framework](docs/Shared_Memory_Framework.md)
 - [🌐 Networking](docs/Azure_Landing_Zone_Networking_with_Terraform.md)
 - [🖥 Server Build](/azure/server-build/README.md)
 - [📦 Packer Image Bakery](/azure/image-bakery/README.md)
