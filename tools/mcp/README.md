@@ -6,21 +6,26 @@ This directory contains tools for connecting AI systems to external knowledge so
 
 ```bash
 # Start the Shared Memory Framework
-./manage-mcp.sh start
+python ./manage-mcp.py start
 
 # Check server status
-./manage-mcp.sh status
+python ./manage-mcp.py status
 
 # Configure your knowledge sources
-./manage-mcp.sh configure
+python ./manage-mcp.py configure
 
 # Interact with the knowledge base (using SMF CLI)
-python ./tools/mcp/smf.py search "terraform"  # Search for content (cross-platform)
-python ./tools/mcp/smf.py read "path/to/file.md"  # Read content
-python ./tools/mcp/smf.py write "path/to/file.md" "content"  # Write content
+python ./smf.py search "terraform"  # Search for content (cross-platform)
+python ./smf.py read "path/to/file.md"  # Read content
+python ./smf.py write "path/to/file.md" "content"  # Write content
+python ./smf.py recent  # List recent conversations sorted by date/time
+python ./smf.py conversation "Claude" "Topic" --content "Conversation summary"  # Log a conversation
+
+# Repair MCP connectivity issues
+python ./manage-mcp.py repair
 
 # Stop the server when done
-./manage-mcp.sh stop
+python ./manage-mcp.py stop
 ```
 
 ## Available Knowledge Connectors
@@ -31,25 +36,36 @@ The Shared Memory Framework Server provides a universal REST API that connects a
 
 The server provides endpoints for searching, reading, and writing to your knowledge base. For complete documentation, see the [Obsidian MCP README](obsidian/README.md).
 
-## Setting Up Claude Code with MCP
+## Using the Framework with Claude
+
+Claude interacts with the knowledge framework through Python commands, making it more platform-agnostic and flexible:
 
 1. **Start the MCP server**:
    ```bash
-   ./manage-mcp.sh start
+   python ./manage-mcp.py start
    ```
 
-2. **Register Claude Code with the MCP server**:
+2. **Verify the server is running**:
    ```bash
-   claude mcp add obsidian -- python ./tools/mcp/obsidian/adapters/universal_client.py
+   python ./manage-mcp.py status
    ```
 
-3. **Verify the connection**:
+3. **Claude uses the Python SMF CLI directly**:
    ```bash
-   ./manage-mcp.sh status
+   # Search for knowledge
+   python ./smf.py search "terraform"
+   
+   # Read specific contexts
+   python ./smf.py read "AI/Memory/Contexts/Shared/TerraformBestPractices.md"
+   
+   # List recent conversations (sorted by date/time)
+   python ./smf.py recent --limit 5
+   
+   # Create new memory entries
+   python ./smf.py conversation "Claude" "Topic" --content "Conversation summary"
    ```
-   Or in Claude Code, use the `/mcp` command
 
-4. **Reference knowledge in conversations with Claude**:
+4. **Reference knowledge in conversations using wikilinks**:
    ```
    Please use the knowledge from [[AI/Memory/Contexts/Shared/TerraformBestPractices]]
    ```
@@ -64,19 +80,34 @@ The Python version works on Windows, macOS, and Linux, making it the preferred c
 
 ```bash
 # Search for notes
-python ./tools/mcp/smf.py search "terraform"
+python ./smf.py search "terraform"
 
 # Read a specific note
-python ./tools/mcp/smf.py read "AI/Memory/Contexts/Shared/TerraformBestPractices.md"
+python ./smf.py read "AI/Memory/Contexts/Shared/TerraformBestPractices.md"
+
+# List recent conversations (sorted by date/time)
+python ./smf.py recent --limit 10
 
 # Write a new note or update an existing one
-python ./tools/mcp/smf.py write "AI/Memory/Conversations/Claude/YYYYMMDD-Topic.md" "Content here"
+python ./smf.py write "AI/Memory/Conversations/Claude/YYYYMMDD-Topic.md" "Content here"
+
+# Create a conversation log with timestamp
+python ./smf.py conversation "Claude" "Topic" --content "Conversation summary"
+
+# Create a context file
+python ./smf.py context "Shared" "ContextName" --content "Reusable knowledge"
+
+# Create a system prompt
+python ./smf.py prompt "Shared" "PromptName" --content "System instructions"
 
 # Check server status
-python ./tools/mcp/smf.py status
+python ./smf.py status
+
+# Test JSON-RPC connectivity 
+python ./smf.py test-jsonrpc
 
 # View help information
-python ./tools/mcp/smf.py --help
+python ./smf.py --help
 ```
 
 Prerequisites:
@@ -84,52 +115,35 @@ Prerequisites:
 - Requests library (`pip install requests`)
 - SMF CLI automatically tries to handle dependency issues by trying multiple Python interpreters
 
-### Shell Script Version (Unix/Mac Only)
-
-The shell script version is only compatible with Unix-based systems like macOS and Linux.
-
-```bash
-# Search for notes
-./tools/mcp/smf.sh search "terraform"
-
-# Read a specific note
-./tools/mcp/smf.sh read "AI/Memory/Contexts/Shared/TerraformBestPractices.md"
-
-# Write a new note or update an existing one
-./tools/mcp/smf.sh write "AI/Memory/Conversations/Claude/YYYYMMDD-Topic.md" "Content here"
-
-# Check server status
-./tools/mcp/smf.sh status
-
-# View help information
-./tools/mcp/smf.sh help
-```
-
 ### Benefits of SMF CLI
 
 - Cross-platform compatibility with the Python version
 - Shorter, more intuitive commands than using the universal client directly
 - Consistent interface for all operations
+- Time-aware conversation continuity for chronological sorting
+- Enhanced content creation with templates for various knowledge types
 - Helpful error messages and built-in documentation
 - Intelligent Python interpreter detection for handling dependencies
 
 ## Using the Universal Client Directly
 
-The universal client provides the underlying functionality for the SMF CLI and can be used directly:
+The universal client provides the underlying functionality for the SMF CLI and can be used directly if needed:
 
 ```bash
 # Search for notes
-python ./tools/mcp/obsidian/adapters/universal_client.py search "terraform"
+python ./obsidian/adapters/universal_client.py search "terraform"
 
 # Read a specific note
-python ./tools/mcp/obsidian/adapters/universal_client.py read "AI/Memory/Contexts/Shared/TerraformBestPractices.md"
+python ./obsidian/adapters/universal_client.py read "AI/Memory/Contexts/Shared/TerraformBestPractices.md"
 
 # Write a new note or update an existing one
-python ./tools/mcp/obsidian/adapters/universal_client.py write "AI/Memory/Conversations/Claude/YYYYMMDD-Topic.md" "Content here"
+python ./obsidian/adapters/universal_client.py write "AI/Memory/Conversations/Claude/YYYYMMDD-Topic.md" "Content here"
 
-# Write using content from a file (new method)
-python ./tools/mcp/obsidian/adapters/universal_client.py write "AI/Memory/Conversations/Claude/YYYYMMDD-Topic.md" "" --file path_to_content.md
+# Write using content from a file
+python ./obsidian/adapters/universal_client.py write "AI/Memory/Conversations/Claude/YYYYMMDD-Topic.md" "" --file path_to_content.md
 ```
+
+However, the SMF CLI is recommended as it offers additional features like time-aware conversation sorting, templated content creation, and a more user-friendly interface.
 
 ## Future Integrations
 
@@ -157,24 +171,26 @@ To set up the Shared Memory Framework with your Obsidian vault:
 
 1. **Configure the server** with your vault path:
    ```bash
-   ./manage-mcp.sh configure
+   python ./manage-mcp.py configure
    ```
 
 2. **Start the server**:
    ```bash
-   ./manage-mcp.sh start
+   python ./manage-mcp.py start
    ```
 
-3. **Register Claude Code** with the MCP server:
-   ```bash
-   claude mcp add obsidian -- python ./tools/mcp/obsidian/adapters/universal_client.py
-   ```
-
-4. **Add instructions to CLAUDE.md and CLAUDE.local.md**:
-   - Add MCP documentation to instruct Claude how to use the framework
+3. **Add instructions to CLAUDE.md and CLAUDE.local.md**:
+   - Add SMF documentation to instruct Claude how to use the framework
    - Include examples of referencing and creating knowledge
+   - Specify the time-aware conversation continuity format
 
-5. **Verify everything is working**:
+4. **Verify everything is working**:
    ```bash
-   ./manage-mcp.sh status
+   python ./manage-mcp.py status
+   python ./smf.py test-jsonrpc
+   ```
+
+5. **Troubleshoot if needed**:
+   ```bash
+   python ./manage-mcp.py repair
    ```

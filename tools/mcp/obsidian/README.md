@@ -1,4 +1,4 @@
-# Shared Memory Framework Server
+# Obsidian-Based Shared Memory Framework Server
 
 A universal, tool-agnostic server that provides a unified interface for all AI tools to access and manipulate knowledge stored in your Obsidian-based Shared Memory Framework.
 
@@ -8,29 +8,34 @@ A universal, tool-agnostic server that provides a unified interface for all AI t
 - Search notes by query
 - Read note contents
 - Write new notes or update existing ones
+- Time-aware conversation sorting and organization
+- Templated knowledge creation for conversations, contexts, and prompts
 - Compatible with any AI system that can make HTTP requests
-- Seamless integration with Claude Code and other AI tools
+- Seamless integration with all AI tools through Python
 
 ## Setup
 
-1. **Use the management script** (recommended):
+1. **Use the Python management script** (recommended):
 
    ```bash
    # From the top-level mcp directory
-   ../manage-mcp.sh configure
-   ../manage-mcp.sh start
+   python ../manage-mcp.py configure
+   python ../manage-mcp.py start
    ```
 
    The server will run on port 5678 by default.
 
-2. **Or use the individual scripts** (alternative):
+2. **Check server status and troubleshoot if needed**:
 
    ```bash
-   # Initialize configuration
-   ./configure.sh
+   # Check status
+   python ../manage-mcp.py status
    
-   # Start the server
-   ./start-server.sh
+   # Test the server connectivity
+   python ../smf.py test-jsonrpc
+   
+   # Repair if issues are found
+   python ../manage-mcp.py repair
    ```
 
 ## API Endpoints
@@ -51,45 +56,53 @@ This server can be used with any AI tool that can make HTTP requests:
 
 - **Large Language Models**: Any LLM with web access or function calling capabilities can use this API
 - **IDE Assistants**: Tools like GitHub Copilot, Cody, or Cursor can connect through VS Code extensions
-- **Chat Interfaces**: ChatGPT, Claude, Bard, etc. can use this with browser extensions or API connections
+- **Chat Interfaces**: ChatGPT, Claude, Bard, etc. can access knowledge through Python commands
 - **Custom AI Tools**: Any custom AI tool can connect directly to the API
 
-## Universal Client
+## SMF CLI (Recommended Interface)
 
-A command-line client is provided for interacting with your knowledge base:
+The recommended way to interact with the Shared Memory Framework is through the SMF CLI:
+
+```bash
+# List recent conversations (time-sorted)
+python ../smf.py recent --limit 10
+
+# Search for notes
+python ../smf.py search "terraform"
+
+# Read a note
+python ../smf.py read "AI/Memory/Contexts/Shared/TerraformBestPractices.md"
+
+# Create a conversation log with timestamp
+python ../smf.py conversation "Claude" "Topic" --content "Conversation summary"
+
+# Create a context file
+python ../smf.py context "Shared" "ContextName" --content "Reusable knowledge" 
+
+# Create a system prompt
+python ../smf.py prompt "Shared" "PromptName" --content "System instructions"
+```
+
+## Universal Client (Lower-Level Access)
+
+For direct access to the API without templates and additional features, the universal client is available:
 
 ```bash
 # Check server status
-python adapters/universal_client.py status
+python ./adapters/universal_client.py status
 
 # Search for notes
-python adapters/universal_client.py search "terraform"
+python ./adapters/universal_client.py search "terraform"
 
 # Read a note
-python adapters/universal_client.py read "AI/Memory/Contexts/Shared/TerraformBestPractices.md"
+python ./adapters/universal_client.py read "AI/Memory/Contexts/Shared/TerraformBestPractices.md"
 
 # Write a note with direct content
-python adapters/universal_client.py write "AI/Memory/Contexts/Test/NewNote.md" "# Test Note\n\nThis is a test."
+python ./adapters/universal_client.py write "AI/Memory/Contexts/Test/NewNote.md" "# Test Note\n\nThis is a test."
 
 # Write a note using content from a file
-python adapters/universal_client.py write "AI/Memory/Contexts/Test/NewNote.md" "" --file /path/to/content.md
+python ./adapters/universal_client.py write "AI/Memory/Contexts/Test/NewNote.md" "" --file /path/to/content.md
 ```
-
-### Claude Code Integration
-
-To connect Claude Code to your Shared Memory Framework:
-
-1. **Register the client with Claude Code**:
-   ```bash
-   claude mcp add obsidian -- python /full/path/to/tools/mcp/obsidian/adapters/universal_client.py
-   ```
-
-2. **Reference knowledge in conversations**:
-   ```
-   Please use the knowledge from [[AI/Memory/Contexts/Shared/TerraformBestPractices]]
-   ```
-
-3. **Use the `/mcp` command in Claude Code to check connection status**
 
 ## Why Use This Server?
 
