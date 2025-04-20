@@ -45,6 +45,7 @@ id_dsa*
 .env
 *.secrets
 secrets.yml
+.venv
 
 # Logs & temporary files
 *.retry
@@ -65,8 +66,6 @@ __pycache__/
 
 # AI Memory Files
 **/CLAUDE.local.md
-**/CLINE.local.md
-**/CODEX.local.md
 
 # Scratch Files
 .scratch

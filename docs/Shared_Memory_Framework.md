@@ -162,6 +162,77 @@ Please apply the system prompt from [[AI/Memory/System_Prompts/Shared/TerraformR
 Continue from our previous conversation: [[AI/Memory/Conversations/Agent/20250419-Topic]]
 ```
 
+## Framework Access Tools
+
+### SMF CLI (Simplified Command-Line Interface)
+
+The SMF CLI provides a user-friendly cross-platform interface for interacting with the Shared Memory Framework.
+
+```bash
+# Search for notes
+python ./tools/mcp/smf.py search "query"
+
+# Read a specific note
+python ./tools/mcp/smf.py read "AI/Memory/Contexts/Shared/TerraformBestPractices.md"
+
+# Write a new note or update an existing one
+python ./tools/mcp/smf.py write "AI/Memory/Conversations/Claude/YYYYMMDD-Topic.md" "Content here"
+
+# Check server status
+python ./tools/mcp/smf.py status
+
+# Create a conversation log
+python ./tools/mcp/smf.py conversation "Claude" "Topic" --content "Conversation content"
+
+# Create a context file
+python ./tools/mcp/smf.py context "Shared" "ContextName" --content "Context information"
+
+# Create a system prompt
+python ./tools/mcp/smf.py prompt "Shared" "PromptName" --content "System prompt content"
+
+# View help information
+python ./tools/mcp/smf.py --help
+```
+
+### Universal Client (Direct API Access)
+
+For more advanced operations, the underlying universal client can be used directly:
+
+```bash
+# Search for notes
+python ./tools/mcp/obsidian/adapters/universal_client.py search "query"
+
+# Read specific note content
+python ./tools/mcp/obsidian/adapters/universal_client.py read "AI/Memory/Contexts/Shared/TerraformBestPractices.md"
+
+# Write new content
+python ./tools/mcp/obsidian/adapters/universal_client.py write "AI/Memory/Contexts/Claude/NewContext.md" "Content here"
+
+# Write using content from a file
+python ./tools/mcp/obsidian/adapters/universal_client.py write "path/to/file.md" "" --file path_to_content.md
+```
+
+### Server Management
+
+The MCP server is managed using the Python-based manage-mcp.py tool:
+
+```bash
+# Start the server
+python ./tools/mcp/manage-mcp.py start
+
+# Check server status
+python ./tools/mcp/manage-mcp.py status
+
+# Configure server settings
+python ./tools/mcp/manage-mcp.py configure
+
+# Stop the server
+python ./tools/mcp/manage-mcp.py stop
+
+# View help information
+python ./tools/mcp/manage-mcp.py help
+```
+
 ## Auto-Logging
 
 AI assistants are configured to automatically log significant conversations to the shared memory framework without user prompting. This ensures continuous knowledge capture and accumulation.
