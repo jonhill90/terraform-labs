@@ -67,6 +67,7 @@ __pycache__/
 # AI Memory Files
 **/CLAUDE.local.md
 **/CODEX.local.md
+**/COPILOT.local.md
 
 # Scratch Files
 .scratch

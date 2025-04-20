@@ -2,6 +2,7 @@
 """
 Shared Memory Framework Management Tool
 A cross-platform tool for managing the Shared Memory Framework
+Supports both web server and stdio-based MCP communication
 """
 
 import os
@@ -10,6 +11,7 @@ import subprocess
 import json
 import argparse
 import platform
+import shutil
 from pathlib import Path
 try:
     from dotenv import load_dotenv, set_key
@@ -62,12 +64,14 @@ SERVER_DIR = OBSIDIAN_DIR / "server"
 CONFIG_FILE = SERVER_DIR / "config.json"
 VENV_DIR = OBSIDIAN_DIR / ".venv"
 UNIVERSAL_CLIENT = OBSIDIAN_DIR / "adapters" / "universal_client.py"
+STDIO_WRAPPER = SERVER_DIR / "stdio_wrapper.py"
 
 # Load environment variables
 load_dotenv(ENV_FILE)
 SERVER_LOG_FILE = os.getenv("MCP_LOG_FILE", OBSIDIAN_DIR / "server.log")
 MCP_PORT = int(os.getenv("MCP_PORT", 5678))
 MCP_HOST = os.getenv("MCP_HOST", "0.0.0.0")
+MCP_MODE = os.getenv("MCP_MODE", "sse") # Can be 'sse', 'stdio', or 'both'
 
 # Terminal colors
 class Colors:
@@ -223,7 +227,7 @@ def configure_server():
         colored_print(f"Error saving configuration: {e}", Colors.RED)
 
 def start_server():
-    """Start the Shared Memory Framework Server"""
+    """Start the Shared Memory Framework Server in SSE mode"""
     if is_server_running():
         colored_print("Shared Memory Framework Server is already running.", Colors.YELLOW)
         return
@@ -246,11 +250,15 @@ def start_server():
         python_path = VENV_DIR / "bin" / "python"
     
     # Start the server
-    colored_print("Starting Shared Memory Framework Server on port 5678...", Colors.BLUE)
+    colored_print(f"Starting Shared Memory Framework Server in SSE mode on port {MCP_PORT}...", Colors.BLUE)
     
     try:
         # Change to server directory
         os.chdir(SERVER_DIR)
+        
+        # Set environment variable to indicate SSE mode
+        env = os.environ.copy()
+        env["MCP_MODE"] = "sse"
         
         # Start server as a background process
         if platform.system() == 'Windows':
@@ -260,7 +268,8 @@ def start_server():
                 [str(python_path), "app.py"],
                 creationflags=CREATE_NEW_CONSOLE,
                 stdout=open(SERVER_LOG_FILE, 'w'),
-                stderr=subprocess.STDOUT
+                stderr=subprocess.STDOUT,
+                env=env
             )
         else:
             # Unix-like systems
@@ -268,7 +277,8 @@ def start_server():
                 [str(python_path), "app.py"],
                 stdout=open(SERVER_LOG_FILE, 'w'),
                 stderr=subprocess.STDOUT,
-                start_new_session=True  # Equivalent to nohup
+                start_new_session=True,  # Equivalent to nohup
+                env=env
             )
         
         # Save PID to env file
@@ -282,9 +292,9 @@ def start_server():
         try:
             # Import requests inside try block to ensure it's available
             import requests
-            response = requests.get("http://localhost:5678/health", timeout=5)
+            response = requests.get(f"http://localhost:{MCP_PORT}/health", timeout=5)
             if response.status_code == 200:
-                colored_print("Server started successfully! Available at http://localhost:5678", Colors.GREEN)
+                colored_print(f"Server started successfully! Available at http://localhost:{MCP_PORT}", Colors.GREEN)
                 colored_print(f"Server logs available at: {SERVER_LOG_FILE}", Colors.BLUE)
             else:
                 colored_print(f"Server started but returned status code {response.status_code}", Colors.YELLOW)
@@ -362,47 +372,13 @@ def check_status():
     
     print()
     
-    # Check Claude MCP integration
-    colored_print(f"{Colors.BOLD}Claude MCP Integration:{Colors.NC}")
-    
-    # Check if claude CLI is installed
-    claude_installed = False
-    try:
-        subprocess.run(["claude", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-        claude_installed = True
-    except (subprocess.SubprocessError, FileNotFoundError):
-        pass
-    
-    if claude_installed:
-        # Check if MCP is registered
-        try:
-            result = subprocess.run(["claude", "mcp", "list"], 
-                                 capture_output=True, text=True, check=False)
-            if "obsidian" in result.stdout:
-                colored_print("  Status: Registered", Colors.GREEN)
-            else:
-                colored_print("  Status: Not registered", Colors.YELLOW)
-                client_path = SCRIPT_DIR / "obsidian" / "adapters" / "universal_client.py"
-                colored_print(f"  Note: Run '{Colors.BOLD}claude mcp add obsidian -- python {client_path}{Colors.NC}' to register")
-        except subprocess.SubprocessError:
-            colored_print("  Status: Error checking MCP registration", Colors.RED)
-    else:
-        colored_print("  Status: Claude CLI not installed", Colors.YELLOW)
+    # Server information only
+    print()
 
 def repair_mcp():
     """Check and repair MCP connectivity issues"""
-    colored_print(f"{Colors.BOLD}MCP Connectivity Repair{Colors.NC}")
+    colored_print(f"{Colors.BOLD}MCP Server Repair{Colors.NC}")
     print()
-    
-    # First, check if Claude CLI is installed
-    claude_installed = False
-    try:
-        subprocess.run(["claude", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-        claude_installed = True
-    except (subprocess.SubprocessError, FileNotFoundError):
-        colored_print("❌ Claude CLI not installed. You need to install the Claude CLI first.", Colors.RED)
-        print("Visit https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview for installation instructions.")
-        return
     
     # Check if server is running
     server_running = is_server_running()
@@ -416,35 +392,6 @@ def repair_mcp():
     else:
         colored_print("❌ Failed to start server", Colors.RED)
         return
-    
-    # Check MCP registration
-    mcp_registered = False
-    try:
-        result = subprocess.run(["claude", "mcp", "list"], 
-                             capture_output=True, text=True, check=False)
-        mcp_registered = "obsidian" in result.stdout
-    except subprocess.SubprocessError:
-        pass
-    
-    if not mcp_registered:
-        colored_print("❌ MCP not registered with Claude. Attempting to register...", Colors.YELLOW)
-        client_path = SCRIPT_DIR / "obsidian" / "adapters" / "universal_client.py"
-        
-        try:
-            result = subprocess.run(
-                ["claude", "mcp", "add", "obsidian", "--", sys.executable, str(client_path), "--jsonrpc"],
-                capture_output=True, text=True, check=False
-            )
-            
-            if "successfully" in result.stdout.lower():
-                colored_print("✅ MCP registered successfully", Colors.GREEN)
-            else:
-                colored_print(f"❌ Failed to register MCP: {result.stdout}", Colors.RED)
-                colored_print(f"Error: {result.stderr}", Colors.RED)
-        except subprocess.SubprocessError as e:
-            colored_print(f"❌ Error registering MCP: {e}", Colors.RED)
-    else:
-        colored_print("✅ MCP already registered", Colors.GREEN)
     
     # Test JSON-RPC functionality
     colored_print("\nTesting JSON-RPC functionality...", Colors.BLUE)
@@ -460,9 +407,9 @@ def repair_mcp():
             print(result.stdout)
             
             if "Test passed" in result.stdout:
-                colored_print("\n✅ JSON-RPC test passed. MCP should be working correctly.", Colors.GREEN)
+                colored_print("\n✅ JSON-RPC test passed. MCP server should be working correctly.", Colors.GREEN)
             else:
-                colored_print("\n❌ JSON-RPC test failed. MCP might not work correctly.", Colors.RED)
+                colored_print("\n❌ JSON-RPC test failed. MCP server might not work correctly.", Colors.RED)
                 if "Server not configured" in result.stdout:
                     colored_print("The server is not configured. Please run 'python manage-mcp.py configure'", Colors.YELLOW)
         else:
@@ -472,16 +419,156 @@ def repair_mcp():
     
     print()
     colored_print(f"{Colors.BOLD}Next steps:{Colors.NC}")
-    print("1. Restart your terminal or Claude Code session")
-    print("2. Use the '/mcp' command in Claude Code to verify connectivity")
-    print("3. If issues persist, try 'claude mcp remove obsidian' and then run repair again")
+    print("1. Make sure the server is properly configured")
+    print("2. Restart the server if needed with 'python ./tools/mcp/manage-mcp.py start'")
+
+def start_stdio_server():
+    """Start the MCP server in stdio mode (for VS Code direct integration)"""
+    colored_print("Starting Shared Memory Framework Server in stdio mode...", Colors.BLUE)
+    
+    # Create virtual environment and install dependencies
+    create_virtual_env()
+    
+    # Check if config exists
+    if not CONFIG_FILE.exists():
+        colored_print("Server not configured yet.", Colors.YELLOW)
+        configure_server()
+        if not CONFIG_FILE.exists():
+            colored_print("Server configuration is required before starting.", Colors.RED)
+            return
+    
+    # Determine python path based on platform
+    if platform.system() == 'Windows':
+        python_path = VENV_DIR / "Scripts" / "python"
+    else:
+        python_path = VENV_DIR / "bin" / "python"
+    
+    # Set environment variable to indicate stdio mode
+    env = os.environ.copy()
+    env["MCP_MODE"] = "stdio"
+    
+    # Execute the app.py script directly with stdio mode environment variable
+    # The script will take over stdin/stdout for JSON-RPC communication
+    os.chdir(SERVER_DIR)  # Change to server directory
+    os.execve(str(python_path), [str(python_path), "app.py"], env)
+
+def generate_vscode_config():
+    """Generate VS Code configuration files for MCP integration"""
+    colored_print("Generating VS Code configuration for MCP...", Colors.BLUE)
+    
+    # Create .vscode directory if it doesn't exist
+    vscode_dir = Path(os.getcwd()) / ".vscode"
+    os.makedirs(vscode_dir, exist_ok=True)
+    
+    # Create mcp.json configuration with both SSE and stdio options
+    # Determine Python path based on platform
+    if platform.system() == 'Windows':
+        python_path = str(VENV_DIR / "Scripts" / "python")
+    else:
+        python_path = str(VENV_DIR / "bin" / "python")
+    
+    mcp_config = {
+        "servers": {
+            "SMF Knowledge Server (SSE)": {
+                "type": "sse",
+                "url": f"http://localhost:{MCP_PORT}/sse"
+            }
+        }
+    }
+    
+    with open(vscode_dir / "mcp.json", 'w') as f:
+        json.dump(mcp_config, f, indent=2)
+    
+    colored_print(f"VS Code MCP configuration created at {vscode_dir / 'mcp.json'}", Colors.GREEN)
+    
+    # Create stdio-specific config
+    stdio_config = {
+        "servers": {
+            "SMF Knowledge Server (stdio)": {
+                "type": "stdio",
+                "command": python_path,
+                "args": [str(SERVER_DIR / "app.py")],
+                "env": {
+                    "MCP_MODE": "stdio"
+                }
+            }
+        }
+    }
+    
+    with open(vscode_dir / "mcp-stdio.json", 'w') as f:
+        json.dump(stdio_config, f, indent=2)
+    
+    colored_print(f"VS Code stdio configuration created at {vscode_dir / 'mcp-stdio.json'}", Colors.GREEN)
+    
+    # Create combined config with both options
+    combined_config = {
+        "servers": {
+            "SMF Knowledge Server (SSE)": {
+                "type": "sse",
+                "url": f"http://localhost:{MCP_PORT}/sse"
+            },
+            "SMF Knowledge Server (stdio)": {
+                "type": "stdio",
+                "command": python_path,
+                "args": [str(SERVER_DIR / "app.py")],
+                "env": {
+                    "MCP_MODE": "stdio"
+                }
+            }
+        }
+    }
+    
+    with open(vscode_dir / "mcp-combined.json", 'w') as f:
+        json.dump(combined_config, f, indent=2)
+    
+    colored_print(f"VS Code combined configuration created at {vscode_dir / 'mcp-combined.json'}", Colors.GREEN)
+    colored_print("You can choose which configuration to use by copying the desired file to mcp.json", Colors.BLUE)
+
+def config_copilot():
+    """Generate a GitHub Copilot-specific VS Code configuration"""
+    colored_print("Generating GitHub Copilot configuration for VS Code...", Colors.BLUE)
+    
+    # Create .vscode directory if it doesn't exist
+    vscode_dir = Path(os.getcwd()) / ".vscode"
+    os.makedirs(vscode_dir, exist_ok=True)
+    
+    # Determine Python path based on platform
+    if platform.system() == 'Windows':
+        python_path = str(VENV_DIR / "Scripts" / "python")
+    else:
+        python_path = str(VENV_DIR / "bin" / "python")
+    
+    # Create GitHub Copilot optimized configuration
+    copilot_config = {
+        "servers": {
+            "SMF Knowledge Server": {
+                "type": "stdio",
+                "command": python_path,
+                "args": [str(SERVER_DIR / "app.py")],
+                "env": {
+                    "MCP_MODE": "stdio",
+                    "PYTHONUNBUFFERED": "1"
+                }
+            }
+        }
+    }
+    
+    # Write the GitHub Copilot configuration
+    with open(vscode_dir / "mcp-copilot.json", 'w') as f:
+        json.dump(copilot_config, f, indent=2)
+    
+    colored_print(f"GitHub Copilot configuration created at {vscode_dir / 'mcp-copilot.json'}", Colors.GREEN)
+    colored_print("To use this configuration, copy it to mcp.json:", Colors.BLUE)
+    colored_print(f"  cp {vscode_dir / 'mcp-copilot.json'} {vscode_dir / 'mcp.json'}", Colors.NC)
 
 def main():
     """Main function"""
     parser = argparse.ArgumentParser(
         description="Shared Memory Framework Management Tool"
     )
-    parser.add_argument("command", nargs="?", choices=["start", "stop", "status", "configure", "repair", "help"],
+    parser.add_argument("command", nargs="?", 
+                      choices=["start", "stop", "status", "configure", "repair", "stdio", 
+                               "config-vscode", "config-copilot", "help"],
                       default="help", help="Command to run")
     
     args = parser.parse_args()
@@ -496,12 +583,21 @@ def main():
         configure_server()
     elif args.command == "repair":
         repair_mcp()
+    elif args.command == "stdio":
+        start_stdio_server()
+    elif args.command == "config-vscode":
+        generate_vscode_config()
+    elif args.command == "config-copilot":
+        config_copilot()
     else:  # help
         parser.print_help()
         print("\nExamples:")
-        print("  manage-mcp.py start    # Start the Shared Memory Framework Server")
-        print("  manage-mcp.py status   # Check status of running servers")
-        print("  manage-mcp.py repair   # Check and repair MCP connectivity issues")
+        print("  manage-mcp.py start         # Start the Shared Memory Framework Server (HTTP/SSE)")
+        print("  manage-mcp.py stdio         # Start the server in stdio mode (for VS Code)")
+        print("  manage-mcp.py config-vscode # Generate VS Code configuration files")
+        print("  manage-mcp.py config-copilot # Generate GitHub Copilot configuration for VS Code")
+        print("  manage-mcp.py status        # Check status of running servers")
+        print("  manage-mcp.py repair        # Check and repair MCP connectivity issues")
 
 if __name__ == "__main__":
     main()
