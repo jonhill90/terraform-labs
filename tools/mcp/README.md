@@ -36,11 +36,7 @@ The Shared Memory Framework Server provides a universal REST API that connects a
 
 The server provides endpoints for searching, reading, and writing to your knowledge base. For complete documentation, see the [Obsidian MCP README](obsidian/README.md).
 
-## Using the Framework with Claude and GitHub Copilot
-
-The knowledge framework works with multiple AI assistants:
-
-### Claude Integration
+## Using the Framework with Claude
 
 Claude interacts with the knowledge framework through Python commands, making it more platform-agnostic and flexible:
 
@@ -73,41 +69,6 @@ Claude interacts with the knowledge framework through Python commands, making it
    ```
    Please use the knowledge from [[AI/Memory/Contexts/Shared/TerraformBestPractices]]
    ```
-
-### GitHub Copilot Integration
-
-GitHub Copilot can access the knowledge framework through the VS Code MCP extension:
-
-1. **Generate the VS Code configuration**:
-   ```bash
-   python ./manage-mcp.py config-vscode
-   ```
-
-2. **Use the stdio mode configuration for best compatibility**:
-   - Copy `.vscode/mcp-copilot.json` to `.vscode/mcp.json`
-   
-   This configuration uses stdio mode which is more reliable for Copilot integration.
-
-3. **Start the stdio server manually if needed**:
-   ```bash
-   python ./tools/mcp/start-stdio.py
-   ```
-
-4. **Troubleshoot GitHub Copilot integration**:
-   ```bash
-   # Check server logs
-   tail -f ./tools/mcp/obsidian/server.log
-   
-   # Repair MCP connections
-   python ./manage-mcp.py repair
-   ```
-
-5. **Available tools for GitHub Copilot**:
-   - Search: Find notes containing specific text
-   - Create Note: Create a new note in the knowledge base
-   - Context Search: Search for specific contexts
-   - Conversation Search: Search for conversations
-   - Knowledge Summary: Get a summary of available knowledge
 
 ## Using the SMF CLI (Simplified Interface)
 

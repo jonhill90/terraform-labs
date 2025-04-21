@@ -2,7 +2,6 @@ terraform {
   backend "azurerm" {}
 }
 
-
 # ----------------------------------------
 #region Resource Groups (rg)
 # ----------------------------------------
@@ -242,6 +241,11 @@ module "vnet_spoke_management" {
       address_prefixes     = ["10.20.20.0/24"]
       enforce_private_link = true
       service_endpoints    = ["Microsoft.Storage"]
+    }
+    snet-vault = {
+      address_prefixes     = ["10.20.30.0/24"]
+      enforce_private_link = true
+      service_endpoints    = ["Microsoft.KeyVault"]
     }
   }
 
@@ -497,6 +501,20 @@ resource "azurerm_private_dns_zone" "blob" {
   depends_on = [azurerm_resource_group.rg_networking_connectivity]
 }
 
+resource "azurerm_private_dns_zone" "vault" {
+  name                = "privatelink.vaultcore.azure.net"
+  resource_group_name = azurerm_resource_group.rg_networking_connectivity.name
+  provider            = azurerm.connectivity
+  
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+  
+  depends_on = [azurerm_resource_group.rg_networking_connectivity]
+}
+
 resource "azurerm_private_dns_zone" "adf" {
   name                = "privatelink.adf.azure.com"
   resource_group_name = azurerm_resource_group.rg_networking_connectivity.name
@@ -734,4 +752,39 @@ resource "azurerm_private_dns_zone_virtual_network_link" "synapse_sql_lzp1" {
     owner       = var.owner
     project     = var.project
   }
+}
+
+# Vault Private DNS Zone Links
+resource "azurerm_private_dns_zone_virtual_network_link" "vault_management" {
+  name                  = "vault-link-management"
+  resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
+  private_dns_zone_name = azurerm_private_dns_zone.vault.name
+  virtual_network_id    = module.vnet_spoke_management.vnet_id
+  registration_enabled  = false
+  provider              = azurerm.connectivity
+  
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+  
+  depends_on = [azurerm_private_dns_zone.vault, module.vnet_spoke_management]
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "vault_lzp1" {
+  name                  = "vault-link-lzp1"
+  resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
+  private_dns_zone_name = azurerm_private_dns_zone.vault.name
+  virtual_network_id    = module.vnet_spoke_lzp1.vnet_id
+  registration_enabled  = false
+  provider              = azurerm.connectivity
+  
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+  
+  depends_on = [azurerm_private_dns_zone.vault, module.vnet_spoke_lzp1]
 }
