@@ -232,7 +232,7 @@ data "azuread_service_principal" "datahub_sp" {
 module "security_sp_role_assignment" {
   source       = "../../modules/azurerm/security/role-assignment"
   role_scope   = data.azurerm_management_group.mg.id
-  role_name    = "Contributor"
+  role_name    = "Owner"
   principal_id = data.azuread_service_principal.security_sp.object_id
 
   providers = {
