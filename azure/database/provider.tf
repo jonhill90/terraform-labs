@@ -12,3 +12,15 @@ provider "azurerm" {
   subscription_id = var.lzp1_subscription_id
   features {}
 }
+
+provider "azurerm" {
+  alias           = "management"
+  subscription_id = var.management_subscription_id
+  features {}
+}
+
+provider "azurerm" {
+  alias           = "connectivity"
+  subscription_id = var.connectivity_subscription_id
+  features {}
+}

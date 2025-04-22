@@ -1,5 +1,6 @@
 lzp1_subscription_id             = "__lzp1subscriptionid__"
 connectivity_subscription_id     = "__connectivitysubscriptionid__"
+management_subscription_id       = "__managementsubscriptionid__"
 tenant_id                        = "__tenantid__"
 environment                      = "Lab"
 owner                            = "datahub"

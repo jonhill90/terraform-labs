@@ -1,4 +1,6 @@
 lzp1_subscription_id         = "__lzp1subscriptionid__"
+management_subscription_id   = "__managementsubscriptionid__"
+connectivity_subscription_id = "__connectivitysubscriptionid__"
 tenant_id                    = "__tenantid__"
 environment                  = "Lab"
 owner                        = "database"

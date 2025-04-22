@@ -78,6 +78,13 @@ module "networking_vault" {
   soft_delete_retention_days = 90
 
   tenant_id = var.tenant_id
+  
+  # Network ACLs configuration
+  network_acls_enabled = true
+  virtual_network_subnet_ids = [
+    module.vnet_spoke_management.subnet_ids["snet-vault"],
+    module.vnet_spoke_lzp1.subnet_ids["snet-compute"]
+  ]
 
   providers = {
     azurerm = azurerm.connectivity
@@ -303,7 +310,7 @@ module "vnet_spoke_lzp1" {
     }
     snet-compute = {
       address_prefixes = ["10.40.5.0/24"]
-      service_endpoints = ["Microsoft.Storage"]
+      service_endpoints = ["Microsoft.Storage", "Microsoft.KeyVault"]
     }
     snet-storage-private = {
      address_prefixes     = ["10.40.20.0/24"]
@@ -314,6 +321,11 @@ module "vnet_spoke_lzp1" {
       address_prefixes     = ["10.40.50.0/24"]
       enforce_private_link = true
       service_endpoints    = ["Microsoft.Sql", "Microsoft.Storage"]
+    }
+    snet-vault = {
+      address_prefixes     = ["10.40.30.0/24"]
+      enforce_private_link = true
+      service_endpoints    = ["Microsoft.KeyVault"]
     }
   }
 
@@ -341,6 +353,11 @@ module "vnet_spoke_lza2" {
   subnets = {
     snet-default = {
       address_prefixes = ["10.50.1.0/24"]
+    }
+    snet-vault = {
+      address_prefixes     = ["10.50.30.0/24"]
+      enforce_private_link = true
+      service_endpoints    = ["Microsoft.KeyVault"]
     }
   }
 
@@ -787,4 +804,21 @@ resource "azurerm_private_dns_zone_virtual_network_link" "vault_lzp1" {
   }
   
   depends_on = [azurerm_private_dns_zone.vault, module.vnet_spoke_lzp1]
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "vault_lza2" {
+  name                  = "vault-link-lza2"
+  resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
+  private_dns_zone_name = azurerm_private_dns_zone.vault.name
+  virtual_network_id    = module.vnet_spoke_lza2.vnet_id
+  registration_enabled  = false
+  provider              = azurerm.connectivity
+  
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+  
+  depends_on = [azurerm_private_dns_zone.vault, module.vnet_spoke_lza2]
 }

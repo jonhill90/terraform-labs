@@ -31,6 +31,12 @@ variable "connectivity_subscription_id" {
   sensitive   = true
 }
 
+variable "management_subscription_id" {
+  description = "Management Azure Subscription ID"
+  type        = string
+  sensitive   = true
+}
+
 variable "tenant_id" {
   description = "Azure AD Tenant ID"
   type        = string

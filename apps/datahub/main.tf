@@ -42,6 +42,13 @@ module "datahub_vault" {
   soft_delete_retention_days = 90
 
   tenant_id = var.tenant_id
+  
+  # Network ACLs configuration
+  network_acls_enabled = true
+  virtual_network_subnet_ids = [
+    data.azurerm_subnet.snet_vault.id,
+    data.azurerm_subnet.snet_compute.id
+  ]
 
   providers = {
     azurerm = azurerm.lzp1
@@ -98,6 +105,19 @@ data "azurerm_private_dns_zone" "dns_blob" {
   name                = "privatelink.blob.core.windows.net"
   resource_group_name = data.azurerm_resource_group.rg_networking_connectivity.name
   provider            = azurerm.connectivity
+}
+
+data "azurerm_private_dns_zone" "dns_vault" {
+  name                = "privatelink.vaultcore.azure.net"
+  resource_group_name = data.azurerm_resource_group.rg_networking_connectivity.name
+  provider            = azurerm.connectivity
+}
+
+data "azurerm_subnet" "snet_vault" {
+  name                 = "snet-vault"
+  virtual_network_name = data.azurerm_virtual_network.vnet_lzp1.name
+  resource_group_name  = data.azurerm_resource_group.rg_networking_lzp1.name
+  provider             = azurerm.lzp1
 }
 
 # ----------------------------------------
@@ -298,6 +318,35 @@ resource "azurerm_private_endpoint" "pe_datahub_synapse_dev" {
   }
 
   depends_on = [azurerm_synapse_workspace.synapse_datahub, data.azurerm_private_dns_zone.dns_synapse_dev]
+}
+
+# Key Vault Private Endpoint
+resource "azurerm_private_endpoint" "pe_datahub_vault" {
+  name                = "pe-${var.datahub_vault_name}"
+  location            = azurerm_resource_group.rg_datahub_lzp1.location
+  resource_group_name = azurerm_resource_group.rg_datahub_lzp1.name
+  subnet_id           = data.azurerm_subnet.snet_vault.id
+  provider            = azurerm.lzp1
+
+  private_service_connection {
+    name                           = "psc-${var.datahub_vault_name}"
+    private_connection_resource_id = module.datahub_vault.key_vault_id
+    is_manual_connection           = false
+    subresource_names              = ["vault"]
+  }
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [data.azurerm_private_dns_zone.dns_vault.id]
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [module.datahub_vault, data.azurerm_private_dns_zone.dns_vault]
 }
 
 # ----------------------------------------

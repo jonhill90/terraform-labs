@@ -36,3 +36,21 @@ variable "tenant_id" {
   type        = string
   sensitive   = true
 }
+
+variable "virtual_network_subnet_ids" {
+  description = "List of virtual network subnet IDs"
+  type        = list(string)
+  default     = []
+}
+
+variable "ip_rules" {
+  description = "List of IP Addresses to allow access"
+  type        = list(string)
+  default     = []
+}
+
+variable "network_acls_enabled" {
+  description = "Enable network ACLs"
+  type        = bool
+  default     = false
+}

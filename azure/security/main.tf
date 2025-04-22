@@ -422,6 +422,11 @@ data "azurerm_resource_group" "rg_networking_management" {
   provider = azurerm.management
 }
 
+data "azurerm_resource_group" "rg_networking_lzp1" {
+  name     = "rg-networking-lzp1"
+  provider = azurerm.lzp1
+}
+
 data "azurerm_resource_group" "rg_compute_lzp1" {
   name     = "rg-compute-lzp1"
   provider = azurerm.lzp1
@@ -472,9 +477,43 @@ data "azurerm_subnet" "snet_storage_private_management" {
   depends_on = [data.azurerm_virtual_network.vnet_spoke_management]
 }
 
+data "azurerm_subnet" "snet_vault" {
+  name                 = "snet-vault"
+  virtual_network_name = data.azurerm_virtual_network.vnet_spoke_management.name
+  resource_group_name  = data.azurerm_resource_group.rg_networking_management.name
+  provider             = azurerm.management
+
+  depends_on = [data.azurerm_virtual_network.vnet_spoke_management]
+}
+
+data "azurerm_virtual_network" "vnet_spoke_lzp1" {
+  name                = "vnet-spoke-lzp1"
+  resource_group_name = data.azurerm_resource_group.rg_networking_lzp1.name
+  provider            = azurerm.lzp1
+
+  depends_on = [data.azurerm_resource_group.rg_networking_lzp1]
+}
+
+data "azurerm_subnet" "snet_compute" {
+  name                 = "snet-compute"
+  virtual_network_name = data.azurerm_virtual_network.vnet_spoke_lzp1.name
+  resource_group_name  = data.azurerm_resource_group.rg_networking_lzp1.name
+  provider             = azurerm.lzp1
+
+  depends_on = [data.azurerm_virtual_network.vnet_spoke_lzp1]
+}
+
 data "azurerm_private_dns_zone" "blob" {
   name                = "privatelink.blob.core.windows.net"
   resource_group_name = "rg-networking-connectivity"
+  provider            = azurerm.connectivity
+
+  depends_on = [data.azurerm_resource_group.rg_networking_connectivity]
+}
+
+data "azurerm_private_dns_zone" "vault" {
+  name                = "privatelink.vaultcore.azure.net"
+  resource_group_name = data.azurerm_resource_group.rg_networking_connectivity.name
   provider            = azurerm.connectivity
 
   depends_on = [data.azurerm_resource_group.rg_networking_connectivity]
@@ -533,6 +572,13 @@ module "security_vault" {
   soft_delete_retention_days = 90
 
   tenant_id = var.tenant_id
+  
+  # Network ACLs configuration
+  network_acls_enabled = true
+  virtual_network_subnet_ids = [
+    data.azurerm_subnet.snet_vault.id,
+    data.azurerm_subnet.snet_compute.id
+  ]
 
   providers = {
     azurerm = azurerm.management
@@ -612,6 +658,34 @@ resource "azurerm_private_endpoint" "tfstate_pe" {
   }
 
   depends_on = [azurerm_storage_account.tfstate]
+}
+
+resource "azurerm_private_endpoint" "pe_security_vault" {
+  name                = "pe-${var.security_vault_name}"
+  location            = azurerm_resource_group.rg_security_management.location
+  resource_group_name = azurerm_resource_group.rg_security_management.name
+  subnet_id           = data.azurerm_subnet.snet_vault.id
+  provider            = azurerm.management
+
+  private_service_connection {
+    name                           = "psc-${var.security_vault_name}"
+    private_connection_resource_id = module.security_vault.key_vault_id
+    is_manual_connection           = false
+    subresource_names              = ["vault"]
+  }
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [data.azurerm_private_dns_zone.vault.id]
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [module.security_vault]
 }
 
 # --------------------------------------------------
