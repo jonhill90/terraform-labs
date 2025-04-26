@@ -214,7 +214,7 @@ resource "azurerm_synapse_spark_pool" "spark_datahub" {
   # Very cost-effective configuration with minimal nodes
   auto_scale {
     max_node_count = 3
-    min_node_count = 2
+    min_node_count = 3
   }
 
   # Set to pause after 15 minutes of inactivity to minimize costs
