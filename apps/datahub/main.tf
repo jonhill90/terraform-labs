@@ -225,23 +225,6 @@ resource "azurerm_synapse_spark_pool" "spark_datahub" {
   dynamic_executor_allocation_enabled = true
   session_level_packages_enabled      = true
 
-  spark_config {
-    content = jsonencode({
-      "spark.dynamicAllocation.enabled" = "true",
-      "spark.dynamicAllocation.minExecutors" = "1",
-      "spark.dynamicAllocation.maxExecutors" = "4"
-    })
-  }
-
-  library_requirement {
-    content = <<REQUIREMENTS
-pandas==1.3.5
-scikit-learn==1.0.2
-matplotlib==3.5.1
-seaborn==0.11.2
-REQUIREMENTS
-  }
-
   tags = {
     environment = var.environment
     owner       = var.owner
