@@ -242,6 +242,7 @@ resource "azurerm_synapse_sql_pool" "sql_datahub" {
   sku_name              = "DW100c"
   create_mode           = "Default"
   storage_account_type  = "LRS"  # Locally redundant storage for lab environment
+  geo_backup_policy_enabled = false  # Must be false when using LRS storage
 
   tags = {
     environment = var.environment
