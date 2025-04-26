@@ -201,6 +201,59 @@ resource "azurerm_synapse_workspace" "synapse_datahub" {
   depends_on = [azurerm_storage_account.sa_datahub, azurerm_storage_data_lake_gen2_filesystem.sc_files]
 }
 
+# Spark Pool for lab and development purposes (cost-optimized)
+resource "azurerm_synapse_spark_pool" "spark_datahub" {
+  name                 = "labspark"
+  synapse_workspace_id = azurerm_synapse_workspace.synapse_datahub.id
+  provider             = azurerm.lzp1
+  node_size_family     = "MemoryOptimized"
+  node_size            = "Small"
+  cache_size           = 0
+  spark_version        = "3.3"
+
+  # Very cost-effective configuration with minimal nodes
+  auto_scale {
+    max_node_count = 3
+    min_node_count = 2
+  }
+
+  # Set to pause after 15 minutes of inactivity to minimize costs
+  auto_pause {
+    delay_in_minutes = 15
+  }
+
+  dynamic_executor_allocation_enabled = true
+  session_level_packages_enabled      = true
+
+  spark_config {
+    content = <<JSON
+{
+  "spark.dynamicAllocation.enabled": "true",
+  "spark.dynamicAllocation.minExecutors": "1",
+  "spark.dynamicAllocation.maxExecutors": "4"
+}
+JSON
+  }
+
+  library_requirements {
+    content = <<REQUIREMENTS
+pandas==1.3.5
+scikit-learn==1.0.2
+matplotlib==3.5.1
+seaborn==0.11.2
+REQUIREMENTS
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+    purpose     = "lab"
+  }
+
+  depends_on = [azurerm_synapse_workspace.synapse_datahub]
+}
+
 # ----------------------------------------
 #region Private Endpoints (pe)
 # ----------------------------------------
