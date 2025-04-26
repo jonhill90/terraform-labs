@@ -222,8 +222,7 @@ resource "azurerm_synapse_spark_pool" "spark_datahub" {
     delay_in_minutes = 15
   }
 
-  dynamic_executor_allocation_enabled = true
-  session_level_packages_enabled      = true
+  session_level_packages_enabled = true
 
   tags = {
     environment = var.environment
