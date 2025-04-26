@@ -234,19 +234,27 @@ resource "azurerm_synapse_spark_pool" "spark_datahub" {
   depends_on = [azurerm_synapse_workspace.synapse_datahub]
 }
 
-# Grant Synapse workspace MSI access to ADLS Gen2 for Spark pool
-resource "azurerm_role_assignment" "ra_spark_storage_contributor" {
-  scope                = azurerm_storage_account.sa_datahub.id
-  role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azurerm_synapse_workspace.synapse_datahub.identity[0].principal_id
-  provider             = azurerm.lzp1
-
-  depends_on = [azurerm_synapse_workspace.synapse_datahub, azurerm_storage_account.sa_datahub]
-}
+# Note: We already have a role assignment for Synapse workspace MSI
+# via the ra_synapse_storage_contributor resource above
 
 # ----------------------------------------
 #region Private Endpoints (pe)
 # ----------------------------------------
+# Synapse Managed Private Endpoint for DFS (Spark pool access)
+resource "azurerm_synapse_managed_private_endpoint" "mpe_spark_storage" {
+  name                 = "mpe-synapse-storage-dfs"
+  synapse_workspace_id = azurerm_synapse_workspace.synapse_datahub.id
+  target_resource_id   = azurerm_storage_account.sa_datahub.id
+  subresource_name     = "dfs"
+  provider             = azurerm.lzp1
+
+  depends_on = [
+    azurerm_synapse_workspace.synapse_datahub,
+    azurerm_storage_account.sa_datahub,
+    azurerm_synapse_spark_pool.spark_datahub
+  ]
+}
+
 # ADLS Private Endpoint
 resource "azurerm_private_endpoint" "pe_datahub_blob" {
   name                = "pe-datahub-blob"
