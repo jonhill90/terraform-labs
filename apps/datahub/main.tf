@@ -350,6 +350,29 @@ resource "azurerm_private_endpoint" "pe_datahub_vault" {
 }
 
 # ----------------------------------------
+#region RBAC Role Assignments
+# ----------------------------------------
+# Grant Data Factory MSI access to ADLS Gen2
+resource "azurerm_role_assignment" "ra_df_storage_contributor" {
+  scope                = azurerm_storage_account.sa_datahub.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_data_factory.df_datahub.identity[0].principal_id
+  provider             = azurerm.lzp1
+
+  depends_on = [azurerm_data_factory.df_datahub, azurerm_storage_account.sa_datahub]
+}
+
+# Grant Synapse MSI access to ADLS Gen2
+resource "azurerm_role_assignment" "ra_synapse_storage_contributor" {
+  scope                = azurerm_storage_account.sa_datahub.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_synapse_workspace.synapse_datahub.identity[0].principal_id
+  provider             = azurerm.lzp1
+
+  depends_on = [azurerm_synapse_workspace.synapse_datahub, azurerm_storage_account.sa_datahub]
+}
+
+# ----------------------------------------
 #region Linked Services (ls)
 # ----------------------------------------
 # ADF Linked Service for ADLS Gen2
@@ -358,7 +381,7 @@ resource "azurerm_data_factory_linked_service_data_lake_storage_gen2" "ls_adls" 
   data_factory_id     = azurerm_data_factory.df_datahub.id
   provider            = azurerm.lzp1
   url                 = "https://${azurerm_storage_account.sa_datahub.name}.dfs.core.windows.net"
-  storage_account_key = azurerm_storage_account.sa_datahub.primary_access_key
+  use_managed_identity = true
 
   depends_on = [azurerm_data_factory.df_datahub, azurerm_storage_account.sa_datahub]
 }
@@ -372,9 +395,8 @@ resource "azurerm_synapse_linked_service" "ls_synapse_adls" {
   type_properties_json = <<JSON
 {
   "url": "https://${azurerm_storage_account.sa_datahub.name}.dfs.core.windows.net",
-  "accountKey": {
-    "type": "SecureString",
-    "value": "${azurerm_storage_account.sa_datahub.primary_access_key}"
+  "credential": {
+    "type": "ManagedServiceIdentity"
   }
 }
 JSON
