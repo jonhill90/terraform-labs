@@ -23,10 +23,6 @@
 | 🗄️ Storage | [![Build Status](https://dev.azure.com/ImpressiveIT/Storage/_apis/build/status%2FStorage-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Storage/_build/latest?definitionId=61&branchName=main) | [![Build Status](https://dev.azure.com/ImpressiveIT/Storage/_apis/build/status%2FStorage-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Storage/_build/latest?definitionId=61&branchName=main) |
 | 🔨 DevOps | [![Build Status](https://dev.azure.com/ImpressiveIT/DevOps/_apis/build/status%2FDevOps-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/DevOps/_build/latest?definitionId=53&branchName=main) | [![Build Status](https://dev.azure.com/ImpressiveIT/DevOps/_apis/build/status%2FDevOps-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/DevOps/_build/latest?definitionId=53&branchName=main) |
 | 🖨️ Printing | In Progress | In Progress |
-| 🏭 Data Factory | In Progress | In Progress |
-| 🧱 Databricks | In Progress | In Progress |
-| 🧵 Fabric | In Progress | In Progress |
-| 🧠 Synapse | In Progress | In Progress |
 ---
 ### Image Bakery Pipelines:
 | OS | Validate | Build |

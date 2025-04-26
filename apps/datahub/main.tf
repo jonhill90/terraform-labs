@@ -234,6 +234,29 @@ resource "azurerm_synapse_spark_pool" "spark_datahub" {
   depends_on = [azurerm_synapse_workspace.synapse_datahub]
 }
 
+# SQL Pool (Dedicated SQL Pool) - Small size for lab purposes
+resource "azurerm_synapse_sql_pool" "sql_datahub" {
+  name                 = "labsql"
+  synapse_workspace_id = azurerm_synapse_workspace.synapse_datahub.id
+  provider             = azurerm.lzp1
+  sku_name             = "DW100c"
+  create_mode          = "Default"
+  
+  # Auto-pause after 15 minutes of inactivity to minimize costs
+  auto_pause {
+    delay_in_minutes = 15
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+    purpose     = "lab"
+  }
+
+  depends_on = [azurerm_synapse_workspace.synapse_datahub]
+}
+
 # Note: We already have a role assignment for Synapse workspace MSI
 # via the ra_synapse_storage_contributor resource above
 
