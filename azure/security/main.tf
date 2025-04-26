@@ -332,6 +332,20 @@ module "datahub_sp_role_assignment" {
   depends_on = [data.azuread_service_principal.datahub_sp]
 }
 
+# Add User Access Administrator role for DataHub SP at the resource group level
+module "datahub_sp_rg_access_admin" {
+  source       = "../../modules/azurerm/security/role-assignment"
+  role_scope   = data.azurerm_resource_group.rg_datahub_lzp1.id
+  role_name    = "User Access Administrator"
+  principal_id = data.azuread_service_principal.datahub_sp.object_id
+  
+  providers = {
+    azurerm = azurerm.lzp1
+  }
+  
+  depends_on = [data.azurerm_resource_group.rg_datahub_lzp1, data.azuread_service_principal.datahub_sp]
+}
+
 # --------------------------------------------------
 #region Azure DevOps Service Endpoint (github)
 # --------------------------------------------------
