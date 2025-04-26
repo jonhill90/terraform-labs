@@ -395,9 +395,13 @@ resource "azurerm_synapse_linked_service" "ls_synapse_adls" {
   type_properties_json = <<JSON
 {
   "url": "https://${azurerm_storage_account.sa_datahub.name}.dfs.core.windows.net",
-  "credential": {
-    "type": "ManagedServiceIdentity"
-  }
+  "connectVia": {
+    "referenceName": "AutoResolveIntegrationRuntime",
+    "type": "IntegrationRuntimeReference"
+  },
+  "servicePrincipalId": null,
+  "authenticationType": "ManagedServiceIdentity",
+  "tenant": null
 }
 JSON
 
