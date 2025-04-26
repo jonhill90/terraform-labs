@@ -236,16 +236,12 @@ resource "azurerm_synapse_spark_pool" "spark_datahub" {
 
 # SQL Pool (Dedicated SQL Pool) - Small size for lab purposes
 resource "azurerm_synapse_sql_pool" "sql_datahub" {
-  name                 = "labsql"
-  synapse_workspace_id = azurerm_synapse_workspace.synapse_datahub.id
-  provider             = azurerm.lzp1
-  sku_name             = "DW100c"
-  create_mode          = "Default"
-  
-  # Auto-pause after 15 minutes of inactivity to minimize costs
-  auto_pause {
-    delay_in_minutes = 15
-  }
+  name                  = "labsql"
+  synapse_workspace_id  = azurerm_synapse_workspace.synapse_datahub.id
+  provider              = azurerm.lzp1
+  sku_name              = "DW100c"
+  create_mode           = "Default"
+  storage_account_type  = "LRS"  # Locally redundant storage for lab environment
 
   tags = {
     environment = var.environment
