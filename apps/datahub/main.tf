@@ -226,16 +226,14 @@ resource "azurerm_synapse_spark_pool" "spark_datahub" {
   session_level_packages_enabled      = true
 
   spark_config {
-    content = <<JSON
-{
-  "spark.dynamicAllocation.enabled": "true",
-  "spark.dynamicAllocation.minExecutors": "1",
-  "spark.dynamicAllocation.maxExecutors": "4"
-}
-JSON
+    content = jsonencode({
+      "spark.dynamicAllocation.enabled" = "true",
+      "spark.dynamicAllocation.minExecutors" = "1",
+      "spark.dynamicAllocation.maxExecutors" = "4"
+    })
   }
 
-  library_requirements {
+  library_requirement {
     content = <<REQUIREMENTS
 pandas==1.3.5
 scikit-learn==1.0.2
