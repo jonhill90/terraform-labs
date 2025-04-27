@@ -4,7 +4,7 @@ trigger:
       - main  
   paths:
     include:
-      - apps/datahub/**  
+      - apps/datahub/main.tf
 
 pool:
   name: 'Lab'  
