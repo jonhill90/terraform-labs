@@ -148,8 +148,20 @@ resource "azurerm_storage_account" "sa_datahub" {
   }
 }
 
-resource "azurerm_storage_data_lake_gen2_filesystem" "sc_files" {
-  name               = "files"
+resource "azurerm_storage_data_lake_gen2_filesystem" "adls_bronze" {
+  name               = "bronze"
+  storage_account_id = azurerm_storage_account.sa_datahub.id
+  provider           = azurerm.lzp1
+}
+
+resource "azurerm_storage_data_lake_gen2_filesystem" "adls_silver" {
+  name               = "silver"
+  storage_account_id = azurerm_storage_account.sa_datahub.id
+  provider           = azurerm.lzp1
+}
+
+resource "azurerm_storage_data_lake_gen2_filesystem" "adls_gold" {
+  name               = "gold"
   storage_account_id = azurerm_storage_account.sa_datahub.id
   provider           = azurerm.lzp1
 }
@@ -186,7 +198,7 @@ resource "azurerm_synapse_workspace" "synapse_datahub" {
   sql_administrator_login              = var.sql_administrator_login
   sql_administrator_login_password     = var.sql_administrator_login_password
   managed_virtual_network_enabled      = true
-  managed_resource_group_name          = "synapse-datahub-managed-rg"
+  managed_resource_group_name          = "rg-datahub-lzp1-syn-managed"
 
   identity {
     type = "SystemAssigned"
