@@ -212,7 +212,7 @@ resource "azurerm_synapse_workspace" "synapse_datahub" {
 
   depends_on = [azurerm_storage_account.sa_datahub, azurerm_storage_data_lake_gen2_filesystem.adls_bronze]
 }
-/*
+
 # Spark Pool for lab and development purposes (cost-optimized)
 resource "azurerm_synapse_spark_pool" "spark_datahub" {
   name                 = "labspark"
@@ -490,4 +490,3 @@ JSON
 
   depends_on = [azurerm_synapse_workspace.synapse_datahub, azurerm_storage_account.sa_datahub]
 }
-*/
