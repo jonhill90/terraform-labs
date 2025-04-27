@@ -82,6 +82,13 @@ data "azurerm_subnet" "snet_data" {
   provider             = azurerm.lzp1
 }
 
+data "azurerm_subnet" "snet_vault" {
+  name                 = "snet-vault"
+  virtual_network_name = data.azurerm_virtual_network.vnet_lzp1.name
+  resource_group_name  = data.azurerm_resource_group.rg_networking_lzp1.name
+  provider             = azurerm.lzp1
+}
+
 # Private DNS Zones
 data "azurerm_private_dns_zone" "dns_adf" {
   name                = "privatelink.adf.azure.com"
@@ -111,13 +118,6 @@ data "azurerm_private_dns_zone" "dns_vault" {
   name                = "privatelink.vaultcore.azure.net"
   resource_group_name = data.azurerm_resource_group.rg_networking_connectivity.name
   provider            = azurerm.connectivity
-}
-
-data "azurerm_subnet" "snet_vault" {
-  name                 = "snet-vault"
-  virtual_network_name = data.azurerm_virtual_network.vnet_lzp1.name
-  resource_group_name  = data.azurerm_resource_group.rg_networking_lzp1.name
-  provider             = azurerm.lzp1
 }
 
 # ----------------------------------------
