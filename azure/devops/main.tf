@@ -141,7 +141,7 @@ module "datahub_project" {
   devops_pat          = var.devops_pat
 
   features = {
-    repositories = "disabled"
+    repositories = "enabled"
     testplans    = "disabled"
     artifacts    = "enabled"
     pipelines    = "enabled"
