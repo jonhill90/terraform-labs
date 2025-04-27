@@ -153,7 +153,7 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "sc_files" {
   storage_account_id = azurerm_storage_account.sa_datahub.id
   provider           = azurerm.lzp1
 }
-
+/*
 # ----------------------------------------
 #region Data Factory (df)
 # ----------------------------------------
@@ -478,3 +478,4 @@ JSON
 
   depends_on = [azurerm_synapse_workspace.synapse_datahub, azurerm_storage_account.sa_datahub]
 }
+*/

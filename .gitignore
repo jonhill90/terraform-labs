@@ -54,6 +54,7 @@ secrets.yml
 *.swp
 *.swo
 *.tmp
+.data
 
 # Ansible cache & collections
 ~/.ansible/
