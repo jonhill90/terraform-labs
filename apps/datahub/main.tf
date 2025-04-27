@@ -165,7 +165,7 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "adls_gold" {
   storage_account_id = azurerm_storage_account.sa_datahub.id
   provider           = azurerm.lzp1
 }
-/*
+
 # ----------------------------------------
 #region Data Factory (df)
 # ----------------------------------------
@@ -194,7 +194,7 @@ resource "azurerm_synapse_workspace" "synapse_datahub" {
   location                             = azurerm_resource_group.rg_datahub_lzp1.location
   resource_group_name                  = azurerm_resource_group.rg_datahub_lzp1.name
   provider                             = azurerm.lzp1
-  storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.sc_files.id
+  storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.adls_bronze.id
   sql_administrator_login              = var.sql_administrator_login
   sql_administrator_login_password     = var.sql_administrator_login_password
   managed_virtual_network_enabled      = true
@@ -210,7 +210,7 @@ resource "azurerm_synapse_workspace" "synapse_datahub" {
     project     = var.project
   }
 
-  depends_on = [azurerm_storage_account.sa_datahub, azurerm_storage_data_lake_gen2_filesystem.sc_files]
+  depends_on = [azurerm_storage_account.sa_datahub, azurerm_storage_data_lake_gen2_filesystem.adls_bronze]
 }
 
 # Spark Pool for lab and development purposes (cost-optimized)
@@ -490,4 +490,3 @@ JSON
 
   depends_on = [azurerm_synapse_workspace.synapse_datahub, azurerm_storage_account.sa_datahub]
 }
-*/
