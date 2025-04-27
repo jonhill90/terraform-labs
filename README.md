@@ -46,8 +46,6 @@
 | AppSingle | [![Build Status](https://dev.azure.com/ImpressiveIT/Applications/_apis/build/status%2FAppSingle-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Applications/_build/latest?definitionId=63&branchName=main) | [![Build Status](https://dev.azure.com/ImpressiveIT/Applications/_apis/build/status%2FAppSingle-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Applications/_build/latest?definitionId=63&branchName=main) |
 | Twingate | [![Build Status](https://dev.azure.com/ImpressiveIT/Networking/_apis/build/status%2FTwingate-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Networking/_build/latest?definitionId=73&branchName=main) | [![Build Status](https://dev.azure.com/ImpressiveIT/Networking/_apis/build/status%2FTwingate-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/Networking/_build/latest?definitionId=73&branchName=main) |
 | DataHub | [![Build Status](https://dev.azure.com/ImpressiveIT/DataHub/_apis/build/status%2FDataHub-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/DataHub/_build/latest?definitionId=75&branchName=main) | [![Build Status](https://dev.azure.com/ImpressiveIT/DataHub/_apis/build/status%2FDataHub-CD?branchName=main)](https://dev.azure.com/ImpressiveIT/DataHub/_build/latest?definitionId=75&branchName=main) |
-| MDP-ADF | In Progress | In Progress |
-| MDP-Fabric | In Progress | In Progress |
 
 ### Staged Application Pipelines:
 | Application | Dev | Test | Prod |

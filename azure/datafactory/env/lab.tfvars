@@ -1,6 +1,0 @@
-lzp1_subscription_id         = "__lzp1subscriptionid__"
-tenant_id                    = "__tenantid__"
-environment                  = "Lab"
-owner                        = "datafactory"
-project                      = "DataFactory"
-database_vault_name          = "__vaultname__"
