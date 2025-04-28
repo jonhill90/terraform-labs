@@ -320,7 +320,7 @@ module "vnet_spoke_lzp1" {
     snet-data = {
       address_prefixes     = ["10.40.50.0/24"]
       enforce_private_link = true
-      service_endpoints    = ["Microsoft.Sql", "Microsoft.Storage"]
+      service_endpoints    = ["Microsoft.Sql", "Microsoft.Storage", "Microsoft.AzureCosmosDB"]
     }
     snet-vault = {
       address_prefixes     = ["10.40.30.0/24"]
@@ -565,6 +565,17 @@ resource "azurerm_private_dns_zone" "synapse_sql" {
   }
 }
 
+resource "azurerm_private_dns_zone" "cosmos_db" {
+  name                = "privatelink.documents.azure.com"
+  resource_group_name = azurerm_resource_group.rg_networking_connectivity.name
+  provider            = azurerm.connectivity
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
 # ----------------------------------------
 #region Internal DNS Zone
 # ----------------------------------------
@@ -761,6 +772,20 @@ resource "azurerm_private_dns_zone_virtual_network_link" "synapse_sql_lzp1" {
   name                  = "synapse-sql-link-lzp1"
   resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
   private_dns_zone_name = azurerm_private_dns_zone.synapse_sql.name
+  virtual_network_id    = module.vnet_spoke_lzp1.vnet_id
+  registration_enabled  = false
+  provider              = azurerm.connectivity
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "cosmos_db_lzp1" {
+  name                  = "cosmos-db-link-lzp1"
+  resource_group_name   = azurerm_resource_group.rg_networking_connectivity.name
+  private_dns_zone_name = azurerm_private_dns_zone.cosmos_db.name
   virtual_network_id    = module.vnet_spoke_lzp1.vnet_id
   registration_enabled  = false
   provider              = azurerm.connectivity
