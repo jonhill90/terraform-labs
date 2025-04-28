@@ -120,6 +120,12 @@ data "azurerm_private_dns_zone" "dns_vault" {
   provider            = azurerm.connectivity
 }
 
+data "azurerm_private_dns_zone" "dns_cosmos_db" {
+  name                = "privatelink.documents.azure.com"
+  resource_group_name = data.azurerm_resource_group.rg_networking_connectivity.name
+  provider            = azurerm.connectivity
+}
+
 # ----------------------------------------
 #region Storage Accounts (sa)
 # ----------------------------------------
@@ -270,6 +276,92 @@ resource "azurerm_synapse_sql_pool" "sql_datahub" {
 # via the ra_synapse_storage_contributor resource above
 
 # ----------------------------------------
+#region Cosmos DB Resources (cosmosdb)
+# ----------------------------------------
+resource "azurerm_cosmosdb_account" "cosmos_datahub" {
+  name                = "cosmos-datahub-lzp1"
+  location            = azurerm_resource_group.rg_datahub_lzp1.location
+  resource_group_name = azurerm_resource_group.rg_datahub_lzp1.name
+  provider            = azurerm.lzp1
+  offer_type          = "Standard"
+  kind                = "GlobalDocumentDB"
+
+  enable_automatic_failover = false
+  
+  # Enable analytical storage (required for Synapse Link)
+  analytical_storage_enabled = true
+
+  consistency_policy {
+    consistency_level       = "Session"
+    max_interval_in_seconds = 5
+    max_staleness_prefix    = 100
+  }
+
+  geo_location {
+    location          = azurerm_resource_group.rg_datahub_lzp1.location
+    failover_priority = 0
+  }
+  
+  # Disable public network access and use private endpoints
+  public_network_access_enabled = false
+  
+  # Configure network rules to allow data subnet
+  virtual_network_rule {
+    id                                   = data.azurerm_subnet.snet_data.id
+    ignore_missing_vnet_service_endpoint = false
+  }
+
+  capabilities {
+    name = "EnableServerless"
+  }
+  
+  capabilities {
+    name = "EnableAnalyticalStorage"
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+    purpose     = "lab"
+  }
+}
+
+# Create database
+resource "azurerm_cosmosdb_sql_database" "cosmos_db_lab" {
+  name                = "LabDB"
+  resource_group_name = azurerm_resource_group.rg_datahub_lzp1.name
+  account_name        = azurerm_cosmosdb_account.cosmos_datahub.name
+  provider            = azurerm.lzp1
+}
+
+# Create container with analytical store enabled (for Synapse Link)
+resource "azurerm_cosmosdb_sql_container" "cosmos_container_lab" {
+  name                = "LabContainer"
+  resource_group_name = azurerm_resource_group.rg_datahub_lzp1.name
+  account_name        = azurerm_cosmosdb_account.cosmos_datahub.name
+  database_name       = azurerm_cosmosdb_sql_database.cosmos_db_lab.name
+  partition_key_path  = "/id"
+  provider            = azurerm.lzp1
+  
+  # Enable analytical store for Synapse Link
+  analytical_storage_ttl = -1  # Infinite retention
+  
+  # Default indexing policy
+  indexing_policy {
+    indexing_mode = "consistent"
+    
+    included_path {
+      path = "/*"
+    }
+    
+    excluded_path {
+      path = "/\"_etag\"/?"
+    }
+  }
+}
+
+# ----------------------------------------
 #region Private Endpoints (pe)
 # ----------------------------------------
 # Synapse Managed Private Endpoint for DFS (Spark pool access)
@@ -283,6 +375,21 @@ resource "azurerm_synapse_managed_private_endpoint" "mpe_spark_storage" {
   depends_on = [
     azurerm_synapse_workspace.synapse_datahub,
     azurerm_storage_account.sa_datahub,
+    azurerm_synapse_spark_pool.spark_datahub
+  ]
+}
+
+# Synapse Managed Private Endpoint for Cosmos DB SQL API
+resource "azurerm_synapse_managed_private_endpoint" "mpe_synapse_cosmos" {
+  name                 = "mpe-synapse-cosmos-sql"
+  synapse_workspace_id = azurerm_synapse_workspace.synapse_datahub.id
+  target_resource_id   = azurerm_cosmosdb_account.cosmos_datahub.id
+  subresource_name     = "Sql"
+  provider             = azurerm.lzp1
+
+  depends_on = [
+    azurerm_synapse_workspace.synapse_datahub,
+    azurerm_cosmosdb_account.cosmos_datahub,
     azurerm_synapse_spark_pool.spark_datahub
   ]
 }
@@ -432,6 +539,35 @@ resource "azurerm_private_endpoint" "pe_datahub_vault" {
   depends_on = [module.datahub_vault, data.azurerm_private_dns_zone.dns_vault]
 }
 
+# Cosmos DB Private Endpoint
+resource "azurerm_private_endpoint" "pe_datahub_cosmos" {
+  name                = "pe-cosmos-datahub"
+  location            = azurerm_resource_group.rg_datahub_lzp1.location
+  resource_group_name = azurerm_resource_group.rg_datahub_lzp1.name
+  subnet_id           = data.azurerm_subnet.snet_data.id
+  provider            = azurerm.lzp1
+
+  private_service_connection {
+    name                           = "psc-cosmos-datahub"
+    private_connection_resource_id = azurerm_cosmosdb_account.cosmos_datahub.id
+    is_manual_connection           = false
+    subresource_names              = ["Sql"]
+  }
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [data.azurerm_private_dns_zone.dns_cosmos_db.id]
+  }
+
+  tags = {
+    environment = var.environment
+    owner       = var.owner
+    project     = var.project
+  }
+
+  depends_on = [azurerm_cosmosdb_account.cosmos_datahub, data.azurerm_private_dns_zone.dns_cosmos_db]
+}
+
 # ----------------------------------------
 #region RBAC Role Assignments
 # ----------------------------------------
@@ -453,6 +589,18 @@ resource "azurerm_role_assignment" "ra_synapse_storage_contributor" {
   provider             = azurerm.lzp1
 
   depends_on = [azurerm_synapse_workspace.synapse_datahub, azurerm_storage_account.sa_datahub]
+}
+
+# Grant Synapse MSI access to Cosmos DB (for Synapse Link)
+resource "azurerm_cosmosdb_sql_role_assignment" "ra_synapse_cosmos_contributor" {
+  resource_group_name = azurerm_resource_group.rg_datahub_lzp1.name
+  account_name        = azurerm_cosmosdb_account.cosmos_datahub.name
+  role_definition_id  = "${azurerm_cosmosdb_account.cosmos_datahub.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002" # Built-in Cosmos DB Contributor
+  principal_id        = azurerm_synapse_workspace.synapse_datahub.identity[0].principal_id
+  scope               = azurerm_cosmosdb_account.cosmos_datahub.id
+  provider            = azurerm.lzp1
+
+  depends_on = [azurerm_synapse_workspace.synapse_datahub, azurerm_cosmosdb_account.cosmos_datahub]
 }
 
 # ----------------------------------------
@@ -489,4 +637,30 @@ resource "azurerm_synapse_linked_service" "ls_synapse_adls" {
 JSON
 
   depends_on = [azurerm_synapse_workspace.synapse_datahub, azurerm_storage_account.sa_datahub]
+}
+
+# Synapse Linked Service for Cosmos DB
+resource "azurerm_synapse_linked_service" "ls_synapse_cosmos" {
+  name                 = "ls_synapse_cosmos"
+  synapse_workspace_id = azurerm_synapse_workspace.synapse_datahub.id
+  provider             = azurerm.lzp1
+  type                 = "CosmosDb"
+  type_properties_json = <<JSON
+{
+  "accountEndpoint": "${azurerm_cosmosdb_account.cosmos_datahub.endpoint}",
+  "database": "${azurerm_cosmosdb_sql_database.cosmos_db_lab.name}",
+  "connectVia": {
+    "referenceName": "AutoResolveIntegrationRuntime",
+    "type": "IntegrationRuntimeReference"
+  },
+  "authenticationType": "ManagedServiceIdentity"
+}
+JSON
+
+  depends_on = [
+    azurerm_synapse_workspace.synapse_datahub, 
+    azurerm_cosmosdb_account.cosmos_datahub, 
+    azurerm_cosmosdb_sql_database.cosmos_db_lab,
+    azurerm_synapse_managed_private_endpoint.mpe_synapse_cosmos
+  ]
 }
