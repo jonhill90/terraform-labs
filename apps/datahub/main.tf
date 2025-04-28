@@ -303,8 +303,9 @@ resource "azurerm_cosmosdb_account" "cosmos_datahub" {
     failover_priority = 0
   }
   
-  # Disable public network access and use private endpoints
+  # Network settings
   public_network_access_enabled = false
+  is_virtual_network_filter_enabled = true
   
   # Configure network rules to allow data subnet
   virtual_network_rule {
