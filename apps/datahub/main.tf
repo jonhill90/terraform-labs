@@ -285,11 +285,12 @@ resource "azurerm_cosmosdb_account" "cosmos_datahub" {
   provider            = azurerm.lzp1
   offer_type          = "Standard"
   kind                = "GlobalDocumentDB"
-
-  enable_automatic_failover = false
   
   # Enable analytical storage (required for Synapse Link)
   analytical_storage_enabled = true
+  
+  # Automatic failover setting
+  automatic_failover_enabled = false
 
   consistency_policy {
     consistency_level       = "Session"
@@ -314,10 +315,6 @@ resource "azurerm_cosmosdb_account" "cosmos_datahub" {
   capabilities {
     name = "EnableServerless"
   }
-  
-  capabilities {
-    name = "EnableAnalyticalStorage"
-  }
 
   tags = {
     environment = var.environment
@@ -341,7 +338,7 @@ resource "azurerm_cosmosdb_sql_container" "cosmos_container_lab" {
   resource_group_name = azurerm_resource_group.rg_datahub_lzp1.name
   account_name        = azurerm_cosmosdb_account.cosmos_datahub.name
   database_name       = azurerm_cosmosdb_sql_database.cosmos_db_lab.name
-  partition_key_path  = "/id"
+  partition_key_paths = ["/id"]
   provider            = azurerm.lzp1
   
   # Enable analytical store for Synapse Link
