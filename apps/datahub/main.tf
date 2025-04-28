@@ -154,18 +154,24 @@ resource "azurerm_storage_account" "sa_datahub" {
   }
 }
 
+# 🥉 Bronze Layer – Raw Data Ingestion (raw)
+# - Landing zone for unprocessed data (CSV, JSON, Parquet).
 resource "azurerm_storage_data_lake_gen2_filesystem" "adls_bronze" {
   name               = "bronze"
   storage_account_id = azurerm_storage_account.sa_datahub.id
   provider           = azurerm.lzp1
 }
 
+# 🥈 Silver Layer – Cleansed and Enriched Data (DeltaLake)
+# - Cleaned, structured data stored in Delta format for transformation and modeling.
 resource "azurerm_storage_data_lake_gen2_filesystem" "adls_silver" {
   name               = "silver"
   storage_account_id = azurerm_storage_account.sa_datahub.id
   provider           = azurerm.lzp1
 }
 
+# 🥇 Gold Layer – Curated, Business-Ready Data (DeltaLake \ Data Lakehouse)
+# - Curated Delta Tables supporting business reporting and Lakehouse architecture.
 resource "azurerm_storage_data_lake_gen2_filesystem" "adls_gold" {
   name               = "gold"
   storage_account_id = azurerm_storage_account.sa_datahub.id
