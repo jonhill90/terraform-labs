@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "SMF Knowledge Server": {
+      "type": "sse",
+      "url": "http://localhost:5679/sse"
+    }
+  }
+}

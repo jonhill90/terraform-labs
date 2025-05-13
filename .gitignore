@@ -61,8 +61,7 @@ secrets.yml
 collections/
 __pycache__/
 
-# VS Code and System files
-.vscode/
+# System files
 .DS_Store
 
 # AI Memory Files
