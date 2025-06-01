@@ -1,6 +1,0 @@
-lza2_subscription_id = "__lza2subscriptionid__"
-tenant_id            = "__tenantid__"
-environment          = "dev"
-owner                = "appmulti"
-project              = "Applications"
-appmulti_vault_name  = "__vaultname__"
